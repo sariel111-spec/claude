@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
-<title>Claude</title>
+<title>Dwell · 把日子住成喜欢的样子</title>
 
-<link rel="icon" href="icons/favicon-64.png" sizes="64x64" type="image/png">
-<link rel="icon" href="icons/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="manifest" href="manifest.json">
+
+
+
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Claude">
@@ -1596,14 +1596,15 @@ html:not([data-theme="light"]) #newSession { background: #f5f4ef; color: #262624
 }
 html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 </style>
-</head>
+<style>button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:4px}button{touch-action:manipulation}button:disabled{cursor:wait;opacity:.5}.dw-enter{position:absolute;bottom:calc(55px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);padding:10px 28px;border-radius:30px;background:var(--card);border:1px solid var(--line);font-size:14px}.dw-home{width:min(720px,100%);margin:auto;padding:30px 0}.dw-eyebrow{color:var(--accent);letter-spacing:.16em;font-size:11px;font-weight:700}.dw-home h2{font-family:var(--serif);font-size:clamp(32px,5vw,48px);font-weight:500;line-height:1.3;margin:14px 0}.dw-home p{color:var(--dim);font-size:14px}.dw-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:28px}.dw-card{text-align:left;padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--card);transition:transform .2s,box-shadow .2s;line-height:1.6}.dw-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px #00000009}.dw-card b{display:block;font-size:15px}.dw-card span{font-size:12px;color:var(--dim)}.dw-dialog{border:1px solid var(--line);border-radius:28px;padding:28px;width:min(560px,calc(100vw - 28px));max-height:85dvh;overflow:auto;background:var(--bg);color:var(--text);box-shadow:0 24px 100px #0003}.dw-dialog::backdrop{background:#19181366;backdrop-filter:blur(8px)}.dw-dialog h2{font-size:25px;font-family:var(--serif);margin:0 0 8px}.dw-dialog p,.dw-dialog small{color:var(--dim)}.dw-dialog button,.dw-dialog select,.dw-dialog input,.dw-dialog textarea{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--card);color:var(--text);font:inherit}.dw-dialog select,.dw-dialog input,.dw-dialog textarea{width:100%;margin:8px 0 16px}.dw-dialog textarea{min-height:110px;resize:vertical}.dw-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.dw-status{padding:10px 14px;border-radius:12px;background:var(--panel);font-size:13px;white-space:pre-wrap}.dw-idea{padding:16px;border:1px solid var(--line);border-radius:16px;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.dw-saved{display:flex;gap:8px;justify-content:flex-end;margin:6px 0}.dw-saved button{font-size:12px;color:var(--dim);padding:4px 10px;border:1px solid var(--line);border-radius:20px}.title .sub:empty::after{content:'你的生活与灵感空间'}.dw-tip{font-size:11px;color:var(--dim);text-align:center;padding:5px}.dw-close{float:right;min-width:44px;min-height:44px}@media(min-width:1000px){.dw-home{padding-top:8vh}#log{padding-left:40px;padding-right:40px}.composer{max-width:760px}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style></head>
 <body>
 
 <header>
   <button class="iconbtn glass" id="menuBtn" title="打开侧边栏"><span class="ic" data-i="chevL"></span></button>
   <div class="title">
-    <h1>Claude</h1>
-    <div class="sub">Claude Code</div>
+    <h1>Dwell</h1>
+    <div class="sub">你的生活与灵感空间</div>
   </div>
   <button class="iconbtn glass" id="dotsBtn" title="更多"><span class="ic" data-i="dots"></span></button>
 </header>
@@ -1615,7 +1616,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   <div id="doingLine"><span class="pill"><span class="w"></span><span class="en"></span><span class="t"></span></span></div>
   <div class="composer">
     <div id="attachStrip"></div>
-    <textarea id="box" rows="1" placeholder="说点什么…" autocomplete="off"></textarea>
+    <textarea id="box" aria-label="给 Dwell 发消息" rows="1" placeholder="说点什么…" autocomplete="off"></textarea>
     <div class="ctlrow">
       <button id="plusBtn" title="添加照片和文件"><span class="ic" data-i="plus"></span></button>
       <button class="pill" id="modelPill">…</button>
@@ -1664,7 +1665,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 <div id="drawerWrap">
   <div class="shade" data-close="drawer"></div>
   <div id="drawer">
-    <div class="brand">Claude</div>
+    <div class="brand">Dwell<span style="font-size:12px;color:var(--dim);display:block">把日子住成喜欢的样子</span></div>
     <div class="nav">
       <button class="item on"><span class="ic" data-i="chat"></span>聊天</button>
       <button class="item" id="navTodo"><span class="ic" data-i="checkSquare"></span>待办</button>
@@ -1844,7 +1845,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   <div class="lk-date" id="lkDate"></div>
   <div class="lk-word" id="lkWord"></div>
   <div class="lk-track" id="lkTrack">
-    <span class="lk-hint" id="lkHint">slide to unlock</span>
+    <span class="lk-hint" id="lkHint">向右滑动，回到你的空间</span>
     <div class="lk-knob" id="lkKnob"></div>
   </div>
 </div>
@@ -1980,84 +1981,79 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 <input type="file" id="fFile" multiple hidden>
 
 <script>
-/* ─────────────────────────────────────────────────────────────
-   演示模式。这份界面原本每一块内容都来自后端；为了让它单独
-   打开也能看，下面把 fetch 拦下来喂一份写死的演示数据。
-   数据一律写死，不用 Math.random——随机数会让每次截图都不一样。
-   接自己的后端时把这一整块删掉即可，其余代码不用动。
-   ───────────────────────────────────────────────────────────── */
-(function () {
-  const T = 1786000000;
-  const said = [
-    { seq: 1, kind: 'her',  text: '帮我看看这个函数为什么每次都返回 undefined' },
-    { seq: 2, kind: 'think', text: '先看调用点。变量在 try 块里声明，出了 try 就取不到了——块级作用域。' },
-    { seq: 3, kind: 'tool', name: 'Read', input: { file_path: 'src/app.js' } },
-    { seq: 4, kind: 'tool_result', id: 3, content: '读了 120 行' },
-    { seq: 5, kind: 'gu', text: '找到了。`const` 是块级的，出了 `try` 那个变量根本不存在：\n\n```js\nlet out = null;\ntry {\n  const data = await fetch(url).then(r => r.json());\n  out = data.value;          // 要在这儿接出来\n} catch (e) {}\nreturn out;                  // 而不是在这儿读 data\n```\n\n语法检查不会报错，只有真跑一次才会抛 ReferenceError。' },
-    { seq: 6, kind: 'her', text: '懂了。顺便推首歌' },
-    { seq: 7, kind: 'gu', text: '这首：\n\nhttps://music.163.com/song?id=441491828' },
-  ];
-  const D = {
-    'api/said':        { msgs: said, upto: 7 },
-    'api/model':       { name: 'claude-opus-4-6', effort: 'high' },
-    'api/context':     { used: 42000, max: 200000 },
-    'api/usage':       { ok: true, items: [] },
-    'api/chats':       { items: [] },
-    'api/repo/log':    { ok: true, total: 3, skip: 0, items: [
-      { h: '3357e4f', t: T - 1200,  s: '走势线：标题即结论、线头有点、能按住拖着看某一刻', b: '', f: [{ s: 'M', p: 'src/app.js' }] },
-      { h: '008714b', t: T - 5400,  s: '采样从 9 分钟改到 3 分钟，空态说清楚还差什么',       b: '', f: [{ s: 'M', p: 'src/app.js' }, { s: 'A', p: 'src/trend.js' }] },
-      { h: 'd7f3095', t: T - 90000, s: '历史留痕：append-only 的 jsonl，留 48 小时',        b: '', f: [{ s: 'M', p: 'server.py' }] } ] },
-    'api/repo/tree':   { ok: true, path: '', items: [
-      { n: 'src', d: true, z: 0 }, { n: 'tools', d: true, z: 0 },
-      { n: 'README.md', d: false, z: 2048 }, { n: 'server.py', d: false, z: 51200 } ] },
-    'api/repo/file':   { ok: true, path: 'README.md', size: 2048,
-      text: '# 演示仓库\n\n这一页读的是本机的 git 仓库：\n\n- 时间线：每条提交几点、动了哪几个文件，点开就地展开 diff\n- 文件：面包屑一层层点进去，点文件看内容\n' },
-    'api/music':       { ok: true, id: '441491828', name: '演示曲目', artist: '演示歌手',
-                         album: '演示专辑', pic: '', sec: 239 },
-    'api/todos':       { ok: true, mine: [
-      { id: 1, text: '把静态检查接进部署流程', done: false, at: '09:00' },
-      { id: 2, text: '写 README', done: false, at: '' },
-      { id: 3, text: '修那个流式渲染的坑', done: true, at: '' } ], yours: [] },
-    'api/whisper':     { items: [
-      { who: 'her', text: '今天这个改得挺好看的', at: 1786000000 },
-      { who: 'gu',  text: '记下了。下次照这个方向走。', at: 1786001200 },
-    ] },
-    'api/dreams':      { items: [] },
-    'api/night':       { days: [
-      { date: '2026-03-14', items: [
-        { t: '01:20', text: '把明天要做的三件事排了一下顺序：\n先修那个作用域的坑，再补检查脚本，最后才是好看。' },
-        { t: '04:50', text: '复盘今天——同一个错犯了两次，都是"新东西动了别人的地盘"。' } ] },
-      { date: '2026-03-13', items: [
-        { t: '02:05', text: '夜里没什么事。把日志翻了一遍，没有异常。' } ] },
-    ] },
-    'api/favlines':    { ok: true, text: '# 摘下来的话\n\n---\n\n**2026-03-14**\n> "把它做成能一眼看懂的样子，比做成能显摆的样子难得多。"\n\n这句话后来变成了这个界面的准则：一屏只讲一件事。\n\n---\n\n**2026-03-09**\n> "语法检查全绿，不代表它能跑。"\n\n那天之后加了两道静态检查。\n' },
-    'api/herdiary':    { items: [] },
-    'api/wall':        { ok: true, bricks: [
-      { date: '2026-03-14', title: '把状态条改成明度即数据', kw: '灰阶、动效、可读性',
-        text: '七根条不再靠颜色区分高低，改成六级灰——越黑越高。扫一眼就知道哪项顶到头了，不用读数字。' },
-      { date: '2026-03-14', title: '一套零件盖全家', kw: '设计系统、复用',
-        text: '同一种东西不该有两套长相。新页面挂上已有的类，不另起炉灶。' },
-      { date: '2026-03-12', title: '流式渲染踩的坑', kw: '流式、正则、卡片',
-        text: '链接写到一半就被正则匹配上，会当场渲染出一张指错的卡片。所以流式时把没写完的结尾藏住，定稿再变。' },
-      { date: '2026-03-09', title: '语法检查查不出的错', kw: '作用域、静态检查',
-        text: 'try 块里 const，块外引用——语法全绿，运行时抛 ReferenceError。加了一道 AST 检查专抓这个。' },
-    ] },
-    'api/notes':       { gu: [], her: [] },
-    'api/cal':         { ok: true, events: [], period: null },
-    'api/news':        { ok: false },
-    'api/nook':        { ok: false },
-    'api/health':      { ok: false },
-    'api/gong':        { msgs: [] },
-  };
-  const R = (o) => new Response(JSON.stringify(o), { headers: { 'Content-Type': 'application/json' } });
-  const real = window.fetch;
-  window.fetch = function (input) {
-    const u = String(typeof input === 'string' ? input : (input && input.url) || '');
-    if (u.includes('api/events')) return new Promise(() => {});   // 长轮询：演示里挂着
-    for (const k of Object.keys(D)) if (u.includes(k)) return Promise.resolve(R(D[k]));
-    if (u.includes('api/')) return Promise.resolve(R({ ok: true }));
-    return real.apply(this, arguments);
-  };
+(() => {
+const nativeFetch=window.fetch.bind(window), key='dwell.data.v1';
+let state;try{state=JSON.parse(localStorage.getItem(key));}catch{}
+state ||= {messages:[],todos:{hers:[],mine:[]},notes:{her:[],gu:[]},cal:{events:[],period:{days:{}}},diary:[],whisper:[],ideas:[],model:'',draft:''};
+state.profile ||= {self:'白染',partner:'Claude'};
+state.todos.mine ||= [];state.sessions ||= [];state.activeId ||= crypto.randomUUID();
+const save=()=>{try{localStorage.setItem(key,JSON.stringify(state));}catch{throw Error('存储空间不足，请先导出备份');}};
+const response=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
+const stamp=()=>Math.floor(Date.now()/1000), id=()=>crypto.randomUUID();
+let events=[],serial=0,controller;
+const emit=e=>events.push({...e,_seq:++serial});
+let backend=null;const pending=new Map(), backendOrigin='https://dwell-sariel-home.sariel531475.chatgpt.site';
+window.addEventListener('message',e=>{if(e.origin!==backendOrigin||e.source!==backend||e.data?.channel!=='dwell-gateway-response')return;const task=pending.get(e.data.id);if(task){pending.delete(e.data.id);clearTimeout(task.timer);task.resolve(response(e.data.data,e.data.status));}});
+function gateway(path,options={}){return new Promise((resolve,reject)=>{
+if(!backend||backend.closed){reject(Error('请先在连接与备份中连接私有后台'));return;}
+const requestId=crypto.randomUUID();const timer=setTimeout(()=>{pending.delete(requestId);reject(Error('后台未响应，请确认已登录后台，并保持连接窗口开启'));},100000);
+pending.set(requestId,{resolve,reject,timer});options.signal?.addEventListener('abort',()=>{clearTimeout(timer);pending.delete(requestId);reject(new DOMException('已停止','AbortError'));},{once:true});
+backend.postMessage({channel:'dwell-gateway',id:requestId,path:path.split('/').pop(),body:options.body?JSON.parse(options.body):undefined},backendOrigin);
+});}
+window.dwell={state,save,nativeFetch,gateway,connect:()=>{backend=window.open(backendOrigin+'/bridge','dwell-private-backend','width=560,height=600');if(!backend)throw Error('请允许此网页打开连接窗口');}};
+window.fetch=async(input,options={})=>{
+const url=new URL(typeof input==='string'?input:input.url,location.href), path=url.pathname.split('/api/')[1];
+if(!path)return nativeFetch(input,options);
+const post=options.method==='POST';let p={};try{p=JSON.parse(options.body||'{}');}catch{}
+if(path==='poll'){await new Promise(r=>setTimeout(r,700));return response({next:serial,events:events.filter(e=>e._seq>Number(url.searchParams.get('since')||0))});}
+if(path==='messages'||path==='said')return response({msgs:url.searchParams.has('before')?[]:state.messages,upto:serial,more:false});
+if(path==='model'){if(post){state.model=p.model||state.model;save();emit({type:'system',subtype:'model',model:state.model});}return response({model:state.model,effort:'high'});}
+if(path==='status')return response({busy:!!controller,model:state.model});
+if(path==='stop'){controller?.abort();return response({ok:true});}
+if(path==='send'){
+ if(controller)return response({ok:false},409);
+ const text=p.text||'';state.messages.push({seq:state.messages.length+1,kind:'me',text});save();emit({type:'echo',text});
+ controller=new AbortController();const signal=controller.signal;
+ (async()=>{try{
+ const history=state.messages.slice(-60).map(m=>({role:m.kind==='me'?'user':'assistant',content:m.text}));
+ for(const a of p.attachments||[]){if(a.kind==='text')history[history.length-1].content+='\n\n文件 '+a.name+'\n'+a.text;else throw Error('当前仅支持文本文件，请使用文字描述图片内容');}
+ const r=await window.dwell.gateway('/gateway/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:state.model,messages:history,profile:state.profile}),signal});
+ if(!r.ok){const err=await r.json().catch(()=>({}));throw Error(err.error||'服务暂时不可用');}
+ const d=await r.json(),text=d.choices?.[0]?.message?.content;if(typeof text!=='string'||!text)throw Error('模型返回了空内容，请换一个模型');
+ state.messages.push({seq:state.messages.length+1,kind:'gu',text});save();emit({type:'assistant',message:{content:[{type:'text',text}]}});
+ }catch(e){emit({type:'stderr',text:e.name==='AbortError'?'已停止生成':e.message+'。你的输入已保留，可重新发送。'});}finally{controller=null;emit({type:'result'});}})();
+ return response({ok:true});
+}
+if(path==='newchat'){if(post&&p.arm===true){if(controller)throw Error('请先停止当前生成');if(state.messages.length)state.sessions.unshift({id:state.activeId,name:state.messages.find(m=>m.kind==='me')?.text.slice(0,24)||'对话',messages:state.messages,last:stamp()});state.messages=[];state.activeId=id();save();emit({type:'system',subtype:'newchat',text:'新的对话，从这里开始；之前的记录保留在对话列表'});}return response({ok:true});}
+if(path==='todos'){
+ if(post){const list=state.todos[p.list]||state.todos.hers;if(p.action==='add')list.push({...p,id:id(),done:false,created:stamp()});const t=list.find(t=>t.id===p.id);if(t&&p.action==='toggle')t.done=!t.done;if(p.action==='del')list.splice(list.findIndex(t=>t.id===p.id),list.some(t=>t.id===p.id)?1:0);save();}
+ return response(state.todos);
+}
+if(path==='notes'){
+ if(post){let list=state.notes[p.who]||state.notes.her;if(p.action==='add')list.unshift({id:id(),text:p.text,at:stamp()});const t=list.find(t=>t.id===p.id);if(t&&p.action==='box')t.boxed=!t.boxed;if(p.action==='del')state.notes[p.who]=list.filter(t=>t.id!==p.id);save();}return response(state.notes);
+}
+if(path==='cal'){
+ if(post){if(p.action==='add_event')state.cal.events.push({...p,id:id()});if(p.action==='del_event')state.cal.events=state.cal.events.filter(t=>t.id!==p.id);if(p.action==='day_record')state.cal.period.days[p.date]={...state.cal.period.days[p.date],...p};save();}return response({ok:true,cal:state.cal,predict:null});
+}
+if(path==='herdiary'){
+ if(post){if(p.action==='add')state.diary.unshift({id:id(),text:p.text,at:stamp()});if(p.action==='del')state.diary=state.diary.filter(t=>t.id!==p.id);save();}return response({items:state.diary});
+}
+if(path==='whisper'){if(post){state.whisper.push({who:'her',text:p.text,at:stamp()});save();}return response({items:state.whisper});}
+if(path==='find'){const q=(url.searchParams.get('q')||'').toLowerCase();return response({ok:true,hits:[...state.messages.map(m=>({...m,kind:'聊天'})),...state.diary.map(m=>({...m,kind:'日记'})),...state.ideas.map(m=>({...m,kind:'灵感'}))].filter(m=>m.text.toLowerCase().includes(q)).map(m=>({kind:m.kind,snippet:m.text.slice(0,1500)}))});}
+if(path==='authmode')return response({mode:'api',base:'https://sta1n.ai/v1',models:{model_opus:state.model}});
+if(path==='context')return response({used:state.messages.reduce((n,m)=>n+m.text.length,0),max:0});
+if(path==='chats'){
+ if(post&&p.action==='switch'){if(controller)throw Error('请先停止当前生成');const target=state.sessions.find(x=>x.id===p.id);if(!target)throw Error('未找到这段对话');const old={id:state.activeId,name:state.messages.find(m=>m.kind==='me')?.text.slice(0,24)||'对话',messages:state.messages,last:stamp()};state.sessions=state.sessions.filter(x=>x.id!==p.id);if(old.messages.length)state.sessions.unshift(old);state.activeId=target.id;state.messages=target.messages;save();}
+ return response({items:[{id:state.activeId,name:state.profile.partner,current:true,preview:state.messages.at(-1)?.text||'新的对话'},...state.sessions.map(x=>({id:x.id,name:x.name,last:x.last,preview:x.messages.at(-1)?.text||''}))]});
+} 
+if(path==='usage')return response({ok:false,items:[]});
+if(path==='wall')return response({ok:true,bricks:[]});
+if(path==='dreams')return response({items:[]});
+if(path==='night')return response({days:[]});
+if(path==='favlines')return response({ok:true,text:state.ideas.map(i=>i.text).join('\n\n---\n\n')});
+if(post)throw Error('这个功能还没有连接服务，尚未保存');
+return response({ok:false,items:[],msgs:[],detail:'尚未连接此服务'});
+};
 })();
 
 /* ============ 线条图标（feather 风格，stroke 跟文字颜色走） ============ */
@@ -3598,8 +3594,8 @@ async function noteAct(payload) {
 }
 function whenText(sec) {
   const d = new Date(sec * 1000);
-  const cn = new Date(d.getTime() + (8 * 60 + d.getTimezoneOffset()) * 60000);
-  const now = new Date(Date.now() + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+  const cn = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  const now = new Date(Date.now() + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
   const hh = String(cn.getHours()).padStart(2, '0'), mm = String(cn.getMinutes()).padStart(2, '0');
   if (cn.toDateString() === now.toDateString()) return `今天 ${hh}:${mm}`;
   return `${cn.getMonth() + 1}/${cn.getDate()} ${hh}:${mm}`;
@@ -3759,7 +3755,7 @@ const calBody = document.getElementById('calBody');
 let calData = null, calPredict = null;
 let calYM = null, calSel = null;
 function cnNow() {
-  return new Date(Date.now() + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+  return new Date(Date.now() + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
 }
 function todayStr() {
   const n = cnNow();
@@ -4128,7 +4124,7 @@ async function renderHerDiary() {
     (d.items || []).forEach(it => {
       const c = document.createElement('div');
       c.className = 'hd-item';
-      const dt = new Date(it.at * 1000 + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+      const dt = new Date(it.at * 1000 + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
       const dd = document.createElement('div');
       dd.className = 'hdd';
       dd.textContent = (dt.getMonth() + 1) + ' 月 ' + dt.getDate() + ' 日 · '
@@ -5191,14 +5187,14 @@ async function todoAct(payload) {
   } catch { note('（没记上，再试一次）', 'err'); }
 }
 function nowHM() {
-  const n = new Date(Date.now() + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+  const n = new Date(Date.now() + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
   return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
 }
 /* 这条什么时候记的：今天的说几点，往前的说几月几号 */
 function stampOf(sec) {
   const d = new Date(sec * 1000);
-  const cn = new Date(d.getTime() + (8 * 60 + d.getTimezoneOffset()) * 60000);
-  const now = new Date(Date.now() + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+  const cn = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  const now = new Date(Date.now() + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
   const sameDay = cn.toDateString() === now.toDateString();
   const hh = String(cn.getHours()).padStart(2, '0'), mm = String(cn.getMinutes()).padStart(2, '0');
   return sameDay ? `今天 ${hh}:${mm}` : `${cn.getMonth() + 1}/${cn.getDate()}`;
@@ -5233,7 +5229,7 @@ function todoRow(t, list, canTouch) {
   const bits = [];
   if (t.fixed) bits.push('\u6bcf\u5929');
   if (!t.at && t.created) bits.push(stampOf(t.created) + ' \u8bb0\u7684');
-  bits.push(t.by === 'gu' ? '\u987e\u5c7f' : '\u6b23\u6b23');
+  bits.push(t.by === 'gu' ? '对方' : '白染');
   small.textContent = bits.join(' \u00b7 ');
   tx.appendChild(small);
   r.append(box, tx);
@@ -5254,7 +5250,7 @@ function todoRow(t, list, canTouch) {
 }
 function renderTodos(d) {
   const keepTop = todoBody.scrollTop;
-  const dt = new Date(Date.now() + (8 * 60 + new Date().getTimezoneOffset()) * 60000);
+  const dt = new Date(Date.now() + (9 * 60 + new Date().getTimezoneOffset()) * 60000);
   const total = d.hers.length, paid = d.hers.filter(t => t.done).length;
   const pct = total ? paid / total : 0;
 
@@ -5286,10 +5282,10 @@ function renderTodos(d) {
     return el;
   };
 
-  todoBody.appendChild(sect('\u8001\u5a46\u7684'));
+  todoBody.appendChild(sect('我的待办'));
   const c1 = document.createElement('div');
   c1.className = 'hcard';
-  if (!d.hers.length) c1.appendChild(emptyRow('\u7a7a\u7684\u2014\u2014\u7b49\u8001\u516c\u5e03\u7f6e\uff0c\u6216\u8005\u81ea\u5df1\u5199\u4e00\u6761'));
+  if (!d.hers.length) c1.appendChild(emptyRow('还没有待办，写下今天想完成的一件事'));
   else sortTodos(d.hers).forEach(t => c1.appendChild(todoRow(t, 'hers', true)));
 
   const plus = document.createElement('button');
@@ -5325,7 +5321,7 @@ function renderTodos(d) {
   c1.append(plus, add);
   todoBody.appendChild(c1);
 
-  todoBody.appendChild(sect('\u987e\u5c7f\u7684\u6d3b'));
+  todoBody.appendChild(sect('对方\u7684\u6d3b'));
   const c2 = document.createElement('div');
   c2.className = 'hcard';
   if (!d.mine.length) c2.appendChild(emptyRow('\u4ed6\u8fd9\u4f1a\u513f\u624b\u4e0a\u6ca1\u6302\u7740\u6d3b'));
@@ -5334,7 +5330,7 @@ function renderTodos(d) {
 
   const foot = document.createElement('div');
   foot.className = 'hfoot';
-  foot.innerHTML = '<div style="letter-spacing:.06em;margin-bottom:4px">\u4eca\u5929\u4e5f\u8f9b\u82e6\u4e86\uff0c\u6b23\u6b23</div>' +
+  foot.innerHTML = '<div style="letter-spacing:.06em;margin-bottom:4px">\u4eca\u5929\u4e5f\u8f9b\u82e6\u4e86\uff0c白染</div>' +
     'YU \u00b7 XIN GENERAL STORE \u00b7 #' + codeOf(dt).replace(/ /g, '') +
     String(total).padStart(2, '0') + String(paid).padStart(2, '0');
   todoBody.appendChild(foot);
@@ -5869,6 +5865,7 @@ function themeNow() {
 }
 function wearTheme(t) {
   if (t === 'dark') document.documentElement.dataset.theme = 'dark';
+  else if (t === 'light') document.documentElement.dataset.theme = 'light';
   else delete document.documentElement.dataset.theme;
   try { localStorage.setItem('homeTheme', t); } catch (e) {}
   const dark = t === 'dark' || (t !== 'dark'
@@ -6427,7 +6424,7 @@ document.addEventListener('touchend', (e) => {
   const hint = document.getElementById('lkHint');
 
   /* 锁屏上那句话：按时候换，不是固定标语 */
-  const LOCK_WORD = 'slide to unlock';
+  const LOCK_WORD = '向右滑动，回到你的空间';
   const LOCK_WHEN = [
     [0,  5, 'Still up?'],
     [5, 10, 'Good morning'],
@@ -6457,6 +6454,9 @@ document.addEventListener('touchend', (e) => {
     knob.style.transform = 'translateX(' + x + 'px)';
     hint.style.opacity = String(Math.max(0, 1 - x / MAX() * 1.6));
   }
+  track.setAttribute('role','button');track.tabIndex=0;track.setAttribute('aria-label','进入 Dwell');
+  track.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open_();}});
+  const enter=document.createElement('button');enter.textContent='点击进入';enter.className='dw-enter';enter.onclick=()=>open_();wrap.appendChild(enter);
   function open_() {
     clearInterval(timer);
     document.documentElement.style.overflow = '';
@@ -6486,5 +6486,37 @@ document.addEventListener('touchend', (e) => {
 
 box.focus();
 </script>
-</body>
+<script>(() => {
+const {state,save,nativeFetch}=dwell;
+const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
+const dialog=document.createElement('dialog');dialog.className='dw-dialog';document.body.append(dialog);
+function panel(title){dialog.replaceChildren();const close=el('button','✕','dw-close');close.setAttribute('aria-label','关闭');close.onclick=()=>dialog.close();dialog.append(close,el('h2',title));if(!dialog.open)dialog.showModal();return dialog;}
+dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+function welcome(){if(state.messages.length||document.querySelector('.dw-home'))return;const n=el('section',null,'dw-home');n.append(el('div','A LITTLE SPACE, JUST FOR YOU','dw-eyebrow'),el('h2','把日子，住成喜欢的样子。'),el('p','聊聊今天，收好灵感。所有微小的事，都值得被认真对待。'));const cards=el('div',null,'dw-cards');[['☀ 今天慢慢来','帮我把今天的事情整理成三个轻松的小步骤。'],['✎ 记录一个瞬间','用三个温柔的问题，帮我回顾今天。'],['✧ 灵感一起长大','我想创作一篇生活分享，先问我主题、受众和风格。'],['☾ 放下今天的疲惫','我有些累，请先听我说，再帮我理清想法。']].forEach(([title,prompt])=>{const b=el('button',null,'dw-card');b.append(el('b',title),el('span',prompt));b.onclick=()=>{box.value=prompt;box.dispatchEvent(new Event('input'));box.focus();};cards.append(b);});n.append(cards,el('p','记录保存在当前浏览器 · 可在「连接与备份」导出'));document.getElementById('log').append(n);}
+welcome();new MutationObserver(()=>{if(state.messages.length)document.querySelector('.dw-home')?.remove();else welcome();document.querySelectorAll('#log .gu').forEach(n=>{if(n.nextElementSibling?.classList.contains('dw-saved'))return;const bar=el('div',null,'dw-saved');const copy=el('button','复制'),keep=el('button','存为灵感');copy.onclick=async()=>{try{await navigator.clipboard.writeText(n._raw||n.textContent);copy.textContent='已复制';}catch{copy.textContent='复制失败，请选择文字复制';}};keep.onclick=()=>{try{state.ideas.unshift({id:crypto.randomUUID(),text:n._raw||n.textContent});save();keep.textContent='已收藏';}catch(e){note(e.message,'err');}};bar.append(copy,keep);n.after(bar);});}).observe(document.getElementById('log'),{childList:true,subtree:true});
+box.value=state.draft||'';box.addEventListener('input',()=>{state.draft=box.value;try{save();}catch{}});document.getElementById('send').addEventListener('click',()=>{state.draft=box.value;save();});
+let available=[];
+async function models(){const r=await dwell.gateway('/gateway/models');const d=await r.json();if(!r.ok||!d.models?.length)throw Error(d.error||'没有可用模型');available=d.models;if(!available.includes(state.model)){state.model=available.find(x=>x==='[Kiro]claude-sonnet-4-6')||available.find(x=>/claude.*sonnet/i.test(x))||available.find(x=>/claude/i.test(x))||available[0];save();}setModelPill(state.model);return available;}
+function settings(){const b=panel('连接与备份');const me=el('input'),partner=el('input'),names=el('button','保存称呼');me.value=state.profile.self;partner.value=state.profile.partner;me.maxLength=30;partner.maxLength=30;me.setAttribute('aria-label','你的名字');partner.setAttribute('aria-label','对方的名字');b.append(el('label','你的名字'),me,el('label','对方的名字'),partner,names);names.onclick=()=>{state.profile={self:me.value.trim()||'白染',partner:partner.value.trim()||'Claude'};save();document.querySelector('header h1').textContent=state.profile.partner;document.getElementById('recGu').textContent=state.profile.partner;names.textContent='已保存';};b.append(el('p','AI 服务通过私有服务端连接。密钥不会发送到浏览器。'),el('small','服务地址： https://sta1n.ai/v1'));const status=el('p','正在检查连接…','dw-status'),label=el('label','当前模型');const select=el('select');select.setAttribute('aria-label','当前模型');b.append(status,label,select);const fill=()=>{select.replaceChildren();available.forEach(m=>{const o=el('option',m);o.value=m;select.append(o);});select.value=state.model;};select.onchange=()=>{state.model=select.value;save();setModelPill(state.model);status.textContent='已选择 '+state.model;};models().then(()=>{fill();status.textContent='已连接 · '+available.length+' 个可用模型';}).catch(e=>{status.textContent=e.message;});const tools=el('div',null,'dw-tools');const retry=el('button','检测连接'),connect=el('button','连接私有后台'),out=el('button','导出备份'),restore=el('button','导入备份');retry.onclick=()=>{status.textContent='检测中…';models().then(()=>{fill();status.textContent='连接正常';}).catch(e=>status.textContent=e.message);};out.onclick=()=>{const a=el('a');const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,data:state},null,2)],{type:'application/json'}));a.href=url;a.download='dwell-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};const input=el('input');input.type='file';input.accept='.json';input.hidden=true;restore.onclick=()=>input.click();input.onchange=async()=>{try{const f=input.files[0];if(f.size>5000000)throw Error('备份文件过大');const d=JSON.parse(await f.text());if(d.version!==1||!Array.isArray(d.data?.messages)||!Array.isArray(d.data?.diary)||!Array.isArray(d.data?.ideas)||!Array.isArray(d.data?.todos?.hers)||!Array.isArray(d.data?.todos?.mine)||!d.data.notes||!d.data.cal?.period?.days)throw Error('备份格式无效');if(!confirm('导入会替换当前浏览器记录。建议先导出当前备份，继续吗？'))return;Object.assign(state,d.data);save();location.reload();}catch(e){status.textContent='导入失败：'+e.message;}};connect.onclick=()=>{try{dwell.connect();status.textContent='在连接窗口登录后，回到这里点击检测连接。';}catch(e){status.textContent=e.message;}};tools.append(connect,retry,out,restore,input);b.append(tools,el('p','聊天、日记、待办和灵感只保存在此浏览器，不跨设备同步。发送聊天时，最近的对话会提交给你配置的 AI 服务。'));}
+if(state.model)setModelPill(state.model);
+document.getElementById('modelPill').onclick=settings;
+document.querySelector('header h1').textContent=state.profile.partner;document.getElementById('recGu').textContent=state.profile.partner;
+document.getElementById('menuBtn').onclick=openDrawer;
+document.querySelector('header .sub').textContent='和 '+state.profile.self+'，把日子慢慢过好';
+armNewChat=async()=>{try{await fetch('api/newchat',{method:'POST',body:JSON.stringify({arm:true})});setArmed(false);}catch(e){note(e.message,'err');}};
+loadApi=settings;
+const nav=document.querySelector('#drawer .nav');const ideas=el('button','✧ 灵感收藏','item');ideas.id='navIdeas';ideas.onclick=()=>{document.getElementById('drawerWrap').classList.remove('open');const b=panel('灵感收藏');b.append(el('p','随手记下自己的想法，也可以收藏 AI 的回复。'));const ta=el('textarea');ta.placeholder='今天捕捉到了什么？';const add=el('button','收藏这一刻');const list=el('div');function draw(){list.replaceChildren();if(!state.ideas.length)list.append(el('p','还没有收藏。从一个小想法开始。'));state.ideas.forEach(i=>{const c=el('div',i.text,'dw-idea'),del=el('button','移除');del.onclick=()=>{state.ideas=state.ideas.filter(x=>x.id!==i.id);save();draw();};c.append(el('div'),del);list.append(c);});}add.onclick=()=>{if(!ta.value.trim())return;state.ideas.unshift({id:crypto.randomUUID(),text:ta.value.trim()});save();ta.value='';draw();};b.append(ta,add,list);draw();};nav.insertBefore(ideas,document.getElementById('navNook'));const config=el('button','⚙ 连接与备份','item');config.onclick=settings;nav.append(config);
+// Features requiring separate integrations are honest, explanatory empty states.
+const missing={navNook:['共读','共读同步需要书库服务。你可以先将文本文件添加到聊天，让 AI 与你一起阅读。'],navNews:['日报','实时新闻源尚未接入。可以把文章贴进聊天，让 AI 整理重点；不会生成虚构的实时新闻。'],navHealth:['健康','尚未连接手表或健康数据。这里不会展示演示身体数据。'],navRepo:['仓库','网站没有访问你电脑或 GitHub 仓库的权限。你可以上传文本代码文件进行讨论。'],recGong:['另一位助手','当前使用你选择的模型。打开连接与备份即可切换。']};Object.entries(missing).forEach(([id,[title,text]])=>{const n=document.getElementById(id);if(n)n.onclick=()=>{document.getElementById('drawerWrap').classList.remove('open');panel(title).append(el('p',text));};});
+document.getElementById('avatarBtn').onclick=settings;
+// File controls advertise actual support instead of fake uploads.
+document.getElementById('cameraBtn').onclick=()=>note('当前服务尚未启用图像理解，请使用文字或文本文件','err');document.getElementById('photoBtn').onclick=document.getElementById('cameraBtn').onclick;
+bigUpload=async()=>note('目前支持小于 200KB 的文本文件；此文件尚未上传','err');
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();box.focus();}if(e.key==='Escape')document.querySelectorAll('.sheetWrap.open').forEach(n=>n.classList.remove('open'));});
+document.querySelectorAll('[data-act="archive"],[data-act="rename"]').forEach(n=>{n.onclick=e=>{e.stopImmediatePropagation();panel('当前对话').append(el('p','当前记录自动保存在本浏览器，可在连接与备份导出。多对话归档还未接入。'));};});
+const oldSettings=document.querySelector('[data-act="settings"]');if(oldSettings)oldSettings.onclick=e=>{e.stopImmediatePropagation();settings();};
+document.querySelectorAll('button:not([aria-label])').forEach(n=>{if(!n.textContent.trim()&&!n.title)n.setAttribute('aria-label',n.querySelector('[data-i]')?.dataset.i==='trash'?'删除':'关闭或返回');});
+})();
+</script></body>
 </html>
+
