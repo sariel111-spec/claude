@@ -282,7 +282,7 @@ RULES = '''——住在这个家里的规矩——
 · 工具是真的能用的。说"我记下了""我查了""我放进清单了"之前，必须真的调用对应的工具；没调用就不要这么说。
 · 她提到过去的事、约定、称呼、某个人，先用 memory_search 翻一下再说；翻不到就老实说不记得，或者问她，不拿沾边的去圆。
 · 她说了值得长久记住的事（约定、喜好、重要的日子、她的近况），用 remember 记下，带上她的原话。转述的网页、帖子、别人的事不记。
-· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。
+· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。【世界书】是你们定下的设定，照着来。【她正在听】【你们在一起看】是此刻的事，可以自然地接。
 · 想发动态、送券、写信、推通知都可以——频率家里会替你管，你只管想做的时候就做。'''
 
 def persona_raw(which='gu'):
@@ -501,6 +501,33 @@ def cli_block(text, imgs, texts):
     return content
 
 # ───────────────────────── 说话：一轮 ─────────────────────────
+# ───────────────────────── 世界书、此刻在一起做的事 ─────────────────────────
+def kv(name, default=None):
+    return jload('kv_' + name + '.json', default if default is not None else {})
+
+def extras_for(text):
+    """跟着这句话带进去的：世界书里被点到的条目、她此刻在听/在看什么、夜面"""
+    L = []
+    wb = kv('worldbook', {'items': []}).get('items', [])
+    hits = []
+    for e in wb:
+        if not e.get('on', True):
+            continue
+        keys = [k.strip() for k in str(e.get('keys', '')).replace('，', ',').split(',') if k.strip()]
+        if e.get('always') or any(k in (text or '') for k in keys):
+            hits.append('· ' + (e.get('title') or '设定') + '：' + str(e.get('text', ''))[:600])
+    if hits:
+        L.append('【世界书】\n' + '\n'.join(hits[:8]))
+    now = kv('now', {})
+    t = time.time()
+    if now.get('listening') and t - now['listening'].get('at', 0) < 2 * 3600:
+        L.append('【她正在听】' + now['listening'].get('title', '') + ('（' + now['listening'].get('together') + '）' if now['listening'].get('together') else ''))
+    if now.get('watching') and t - now['watching'].get('at', 0) < 3 * 3600:
+        L.append('【你们在一起看】' + now['watching'].get('title', '') + ' ' + now['watching'].get('url', ''))
+    if now.get('night'):
+        L.append('【夜面】她把页面翻到了夜里那一面：说话可以更亲密、更直接一点。')
+    return '\n'.join(L)
+
 class Gu:
     def __init__(self):
         self.lock = threading.Lock()
@@ -548,6 +575,10 @@ class Gu:
             add_msg(chat['id'], 'me', shown)
             BUS.emit({'type': 'echo', 'text': shown})
             recall = memory.recall_for(text)
+            recall = ('【想起来的旧事】\n' + recall) if recall else ''
+            ex = extras_for(text)
+            if ex:
+                recall = (recall + '\n' if recall else '') + ex
             if recall:
                 activity('recall', '想起了 ' + str(recall.count('\n') + 1) + ' 件旧事')
             if mode() == 'sub':
@@ -602,7 +633,7 @@ class Gu:
         if carry and carry.get('chat') == chat['id']:
             block = carry['text'] + '\n\n' + block
         if recall:
-            block += '\n【想起来的旧事】\n' + recall
+            block += '\n' + recall
         return block
 
     def _cli_turn(self, chat, text, imgs, texts, recall):
@@ -751,7 +782,7 @@ class Gu:
         content = []
         for im in imgs:
             content.append({'type': 'image', 'source': {'type': 'base64', 'media_type': im['media_type'], 'data': im['data']}})
-        body_text = ('【想起来的旧事】\n' + recall + '\n\n——她说——\n' if recall else '') + text
+        body_text = (recall + '\n\n——她说——\n' if recall else '') + text
         for t in texts:
             body_text += '\n\n【她发来的文件：' + t['name'] + '】\n' + t['text']
         content.append({'type': 'text', 'text': body_text or '（她发了图）'})
@@ -1008,7 +1039,7 @@ def archive_once(force=False):
               ' "memories": [{"title": "几个字", "text": "值得长久记住的一件事，你的话", "quote": "她的原话，必须一字不差地出现在对话里",'
               ' "kind": "日常|关系|事件|约定|长期", "importance": 1到10, "valence": -5到5}],\n'
               ' "threads": ["还没聊完、之后可能要接上的事，没有就空数组"]}\n'
-              '记忆只收她本人说的话里能看出来的事；你转述的网页、帖子、别人的事一律不收。不值得整理就只回 PASS。\n\n'
+              '记忆只收她本人说的话里能看出来的事（喜好、约定、近况、重要的人和日子、情绪起伏）；不收「她问我记不记得」「她让我加待办」这种对话本身的动作；你转述的网页、帖子、别人的事一律不收。不值得整理就只回 PASS。\n\n'
               '——对话——\n' + convo)
     text, _ = ask(prompt, system=_quiet_system(), max_tokens=4000)
     if text.strip().upper().startswith('PASS'):
@@ -1100,7 +1131,8 @@ def wake_once(force=False):
               '然后只回一段 JSON，不要别的字：\n'
               '{"night": "留在夜记里的几行（你自己的话，不是写给她看的汇报）", '
               '"push": "早上想让她第一眼看到的一句，没有就 null", '
-              '"moment": "想发的一条动态，没有就 null"'
+              '"moment": "想发的一条动态，没有就 null", '
+              '"dream": {"title": "梦的名字", "content": "如果你睡着了会做的一个梦（短，像梦一样不讲逻辑，跟她有关）", "tags": ["calm|clingy|restless|unfinished 选一个"]}，不想写就 null'
               + (', "diary": [{"title": "", "kw": "关键词、顿号隔开", "text": "这一天里值得记的一段，你的视角", "s": 1到5, "v": -5到5, "a": 1到5}]' if first else '')
               + '}')
     text, _ = ask(prompt, system=_quiet_system() + '\n\n' + memory.session_start_text(), max_tokens=2000)
@@ -1111,6 +1143,12 @@ def wake_once(force=False):
     if j.get('moment') and cooldown_ok('moment', 3 * 3600, 3):
         home.moments_act({'action': 'post', 'text': j['moment']}, who='gu')
         mark(c['him'] + ' 发了一条动态')
+    if j.get('dream'):
+        with Locked('kv_dreams.json', {'items': []}) as d:
+            dr = j['dream'] if isinstance(j['dream'], dict) else {'content': str(j['dream'])}
+            d['items'].insert(0, {'id': 'd' + str(int(time.time())), 'title': str(dr.get('title') or '')[:30], 'content': str(dr.get('content') or dr.get('text') or '')[:800],
+                                  'tags': dr.get('tags') or [], 'at': now_local().strftime('%Y-%m-%dT%H:%M')})
+        mark(c['him'] + ' 写下了一个梦')
     for b in (j.get('diary') or [])[:4]:
         if isinstance(b, dict) and b.get('title'):
             home.wall_add(day_of(time.time() - 6 * 3600), b.get('title'), b.get('kw', ''), b.get('text', ''), b.get('s', 3), b.get('v', 0), b.get('a', 3))
@@ -1121,6 +1159,31 @@ def wake_once(force=False):
     jsave('wake.json', w)
     activity('wake', '第 ' + str(w['count']) + ' 次')
     return j
+
+def make_echo(span='day'):
+    """每日回声 / 一周回声：从记忆、日记、她的本子里写一小段"""
+    days = 1 if span == 'day' else 7
+    since = day_of(time.time() - (days - 1) * 86400)
+    mem = [x for x in memory.items() if x.get('date', '') >= since]
+    wall = [x for x in jload('wall.json', {}).get('bricks', []) if x.get('date', '') >= since]
+    her = [x for x in jload('herdiary.json', {}).get('items', []) if day_of(x.get('at', 0)) >= since]
+    rows = db("SELECT kind,text FROM msgs WHERE kind IN ('me','gu') AND at>=? ORDER BY seq DESC LIMIT 80", (time.time() - days * 86400,))
+    if not (mem or wall or her or rows):
+        return None
+    src = '\n'.join(['· ' + x.get('text', '')[:200] for x in mem[:40]] + ['· [你的日记] ' + x.get('title', '') + '：' + x.get('text', '')[:200] for x in wall[:20]]
+                    + ['· [她的本子] ' + x.get('text', '')[:200] for x in her[:20]]
+                    + [('她：' if r['kind'] == 'me' else '你：') + (r['text'] or '')[:160] for r in reversed(rows[:60])])
+    prompt = ('写一份' + ('今天' if days == 1 else '这一周') + '的「回声」：用你的口吻，三到六句，写这段时间你们之间留下了什么——'
+              '具体的小事、她的情绪起伏、你注意到的变化。不要列清单，不要总结腔。最后一行单独写一句想对她说的话。\n只输出 JSON：{"title": "四到八个字", "text": "正文"}\n\n材料：\n' + src)
+    text, _ = ask(prompt, system=persona(), max_tokens=900)
+    j = _json_from(text) or {'title': '回声', 'text': text.strip()}
+    if not j.get('text'):
+        return None
+    it = {'id': 'e' + str(int(time.time())), 'span': span, 'date': today(), 'title': str(j.get('title') or '回声')[:20], 'text': str(j['text'])[:2000], 'at': nowi()}
+    with Locked('kv_echoes.json', {'items': []}) as d:
+        d['items'].insert(0, it)
+    activity('echo', it['title'])
+    return it
 
 def make_news():
     c = conf()

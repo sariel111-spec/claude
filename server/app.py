@@ -32,7 +32,7 @@ import home  # noqa: E402
 import mcp  # noqa: E402
 import memory  # noqa: E402
 import workroom  # noqa: E402
-from core import (BUS, DATA, WEB, P, conf, conf_set, current_chat, db, jload, new_chat, nowi,  # noqa: E402
+from core import (BUS, DATA, WEB, P, Locked, conf, conf_set, current_chat, db, jload, new_chat, nowi,  # noqa: E402
                   secret, secret_set, state, state_set, today, tload, tsave, inbox_add, push_to_her)
 
 PASSWORD = os.environ.get('HOME_PASSWORD', '')
@@ -134,7 +134,7 @@ def messages_view(q):
     rows.reverse()
     more = bool(rows) and bool(db('SELECT 1 FROM msgs WHERE chat=? AND seq<? LIMIT 1', (chat['id'], rows[0]['seq']), one=True))
     return {'msgs': [{'seq': r['seq'], 'kind': r['kind'], 'text': r['text'], 'extra': r['extra'], 'at': r['at']} for r in rows
-                     if r['kind'] in ('me', 'gu', 'think', 'tool')], 'upto': BUS.n, 'more': more}
+                     if r['kind'] in ('me', 'gu', 'think', 'tool', 'mark')], 'upto': BUS.n, 'more': more}
 
 def repo(cmd_args):
     path = conf().get('repo_path') or ''
@@ -354,7 +354,8 @@ def route_get(path, q, h):
     if path == 'cal': return home.cal_view()
     if path == 'notes': return home.notes_view()
     if path == 'whisper': return home.whisper_view()
-    if path == 'dreams': return {'items': []}
+    if path == 'dreams': return jload('kv_dreams.json', {'items': []})
+    if path.startswith('kv/'): return kv_get(path[3:])
     if path == 'night': return home.night_view()
     if path == 'favlines': return {'ok': True, 'text': tload('favlines.md', '')}
     if path == 'wall': return home.wall_view(lite=one('lite') == '1')
@@ -412,6 +413,44 @@ def route_get(path, q, h):
         m = re.match(r'^annotations/([^/]+)/(\d+)$', p)
         if m: return home.annos(urllib.parse.unquote(m.group(1)), int(m.group(2)))
     return None
+
+KV_NAMES = {'echoes', 'bookmarks', 'worldbook', 'milestones', 'echoes', 'pushbox', 'now', 'dreams', 'games'}
+
+def kv_get(name):
+    if name not in KV_NAMES:
+        return None
+    return jload('kv_' + name + '.json', {} if name == 'now' else {'items': []})
+
+def kv_post(name, b):
+    """列表类：{action:'add', item} / {action:'del', id} / {action:'set', id, item}；now：直接合并"""
+    if name not in KV_NAMES:
+        return None
+    if name == 'now':
+        with Locked('kv_now.json', {}) as d:
+            for k, v in (b or {}).items():
+                if v is None:
+                    d.pop(k, None)
+                else:
+                    d[k] = dict(v, at=nowi()) if isinstance(v, dict) else v
+        return jload('kv_now.json', {})
+    with Locked('kv_' + name + '.json', {'items': []}) as d:
+        L = d.setdefault('items', [])
+        a = b.get('action')
+        if a == 'add' and isinstance(b.get('item'), dict):
+            it = dict(b['item'], id=b['item'].get('id') or ('k' + str(int(time.time() * 1000))), at=b['item'].get('at') or nowi())
+            L.insert(0, it)
+            d['items'] = L[:1000]
+        elif a == 'del':
+            d['items'] = [x for x in L if x.get('id') != b.get('id')]
+        elif a == 'set':
+            for x in L:
+                if x.get('id') == b.get('id'):
+                    x.update(b.get('item') or {})
+        elif a == 'replace' and isinstance(b.get('items'), list):
+            d['items'] = b['items'][:1000]
+    if name == 'bookmarks' and b.get('action') == 'add':
+        inbox_add('她收藏了一段对话：' + str((b.get('item') or {}).get('text', ''))[:80])
+    return jload('kv_' + name + '.json', {'items': []})
 
 def parse_lock(v):
     """信的封存时间：秒时间戳，或 'YYYY-MM-DD'（按她的时区当天 0 点）"""
@@ -500,6 +539,13 @@ def route_post(path, q, b, h):
                 return {'ok': False, 'error': engine.explain(e)}
         return route_get('jobs', {}, h)
     if path == 'selftest': return selftest()
+    if path.startswith('kv/'): return kv_post(path[3:], b)
+    if path == 'echo/make':
+        try:
+            it = engine.make_echo('week' if b.get('span') == 'week' else 'day')
+            return {'ok': bool(it), 'item': it, 'error': '' if it else '这段时间还没什么可写的'}
+        except Exception as e:
+            return {'ok': False, 'error': engine.explain(e)}
     if path.startswith('work/'): return workroom.route_post(path[5:], b)
     if path == 'config':
         kw = {k: b[k] for k in ('me', 'him', 'since', 'tz', 'city', 'repo_path', 'push_url', 'news_auto', 'daily_token_budget', 'proactive', 'roll_at', 'work_dir') if k in b}

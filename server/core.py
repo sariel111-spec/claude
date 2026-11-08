@@ -224,6 +224,12 @@ def push_to_her(title, body, url='./'):
     """两条腿：网页推送（装了 pywebpush 才有）+ 兜底的 HTTP 推送（config.push_url）"""
     ok = False
     try:
+        with Locked('kv_pushbox.json', {'items': []}) as d:
+            d['items'].insert(0, {'title': title, 'body': body, 'at': nowi()})
+            d['items'] = d['items'][:300]
+    except Exception:
+        pass
+    try:
         ok = webpush_send(title, body, url) > 0
     except Exception:
         pass

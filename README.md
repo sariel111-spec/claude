@@ -13,7 +13,7 @@ python3 server/app.py      # 然后打开 http://localhost:8787
 
 后端怎么配见 [server/README.md](server/README.md)，前端见 [web/README.md](web/README.md)。
 
-**在线看演示**：https://sariel111-spec.github.io/claude/ （不连任何后端，数据是写死的，随便点）
+**在线打开**：https://sariel111-spec.github.io/claude/ ——先是演示数据，随便点；设置 → 接入 填上你的 API，就变成你自己的家（数据存在你这台设备的浏览器里）。
 
 这一版有：聊天（官端订阅常驻 / API 两条线）、记忆（涟漪 + 投石子）、信箱、今天、动态、待办、日历、日记、
 心愿、专注、共读、日报、健康、仓库、工作间（手机上用 Claude Code）、后台自检和备份、
