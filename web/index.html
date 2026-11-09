@@ -2262,6 +2262,119 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .wk-step .tx { flex: 1; font-size: 14.5px; line-height: 1.4; }
   .wk-step .tx small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 3px; word-break: break-all; }
   .wk-cp { flex: none; font-size: 12px; color: var(--accent); padding: 4px 8px; border-radius: 999px; background: var(--card); }
+
+  /* ═══ 第十轮：指挥台（管家模式） ═══ */
+  #hubSheet .body { padding-bottom: 40px; }
+  .hub-head { padding: 4px 4px 10px; }
+  .hub-head .eyebrow { font-size: 12px; color: var(--dim); letter-spacing: .1em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hub-head .eyebrow i { width: 4px; height: 4px; border-radius: 50%; background: var(--dim); display: inline-block; }
+  .hub-head h1 { font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.15; margin: 8px 0 0; letter-spacing: .01em; }
+  .hub-head .one { margin-top: 8px; font-size: 14.5px; line-height: 1.5; color: var(--dim); }
+  .hub-head .one b { color: var(--text); font-weight: 500; }
+  .hub-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 4px; }
+  .hub-stat { background: var(--panel); border-radius: 16px; padding: 12px 10px 10px; text-align: left; display: grid; gap: 3px; }
+  .hub-stat .lb { font-size: 11px; color: var(--dim); letter-spacing: .06em; }
+  .hub-stat .v { font-family: var(--serif); font-size: 22px; line-height: 1.1; }
+  .hub-stat .v small { font-size: 12px; color: var(--dim); font-family: var(--sans, inherit); margin-left: 2px; }
+  .hub-stat:active { transform: scale(.97); }
+  .hub-brief { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px 16px 12px; margin-top: 14px; overflow: hidden; }
+  .hub-brief::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .85; }
+  .hub-brief .eb { font-size: 12px; color: var(--dim); letter-spacing: .08em; display: flex; align-items: center; gap: 8px; }
+  .hub-brief .eb .who { color: var(--accent); }
+  .hub-brief .tx { margin-top: 8px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+  .hub-brief .tx.wait { color: var(--dim); }
+  .hub-brief .acts { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .hub-brief .acts .chip { font-size: 12.5px; }
+  .hub-brief.empty { border-style: dashed; }
+  .hub-brief.empty .go { margin-top: 8px; }
+  .hub-line { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 6px 14px; }
+  .hub-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .hub-row:first-child { border-top: 0; }
+  .hub-row .at { flex: none; width: 46px; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--dim); }
+  .hub-row .at.now { color: var(--accent); font-weight: 600; }
+  .hub-row .t { flex: 1; font-size: 15px; line-height: 1.35; }
+  .hub-row .t small { display: block; color: var(--dim); font-size: 12px; margin-top: 2px; }
+  .hub-row.done .t { color: var(--dim); text-decoration: line-through; }
+  .hub-row .ck { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); color: var(--dim); }
+  .hub-row.done .ck { background: var(--sage); color: #fff; }
+  .hub-row.past .t { color: var(--dim); }
+  .hub-empty { padding: 14px 2px; color: var(--dim); font-size: 14px; }
+  .hub-more { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 4px 0; font-size: 13px; color: var(--dim); }
+  .hub-more .val { font-variant-numeric: tabular-nums; }
+  /* 备考 */
+  .hub-study { background: linear-gradient(160deg, var(--card), var(--panel)); border: 1px solid var(--line); border-radius: 22px; padding: 16px; }
+  .hub-study .top { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .hub-study .kp .lb { font-size: 11px; color: var(--dim); letter-spacing: .06em; }
+  .hub-study .kp .v { font-family: var(--serif); font-size: 24px; line-height: 1.1; margin-top: 3px; }
+  .hub-study .kp .v small { font-size: 12px; color: var(--dim); margin-left: 2px; }
+  .hub-study .skills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+  .hub-sk { background: var(--card); border-radius: 16px; padding: 10px 8px 8px; display: grid; justify-items: center; gap: 6px; border: 1px solid var(--line); }
+  .hub-sk .ring { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--accent) var(--p, 0%), var(--line) 0); position: relative; }
+  .hub-sk .ring::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--card); }
+  .hub-sk .ring span { position: relative; z-index: 1; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .hub-sk .ring.full { background: var(--sage); }
+  .hub-sk .nm { font-size: 12.5px; }
+  .hub-sk .add { font-size: 11.5px; color: var(--accent); padding: 3px 9px; border-radius: 999px; background: var(--panel); }
+  .hub-study .week { display: flex; gap: 5px; align-items: flex-end; height: 34px; margin-top: 14px; padding: 0 2px; }
+  .hub-study .week i { flex: 1; background: var(--line); border-radius: 3px; min-height: 3px; display: block; }
+  .hub-study .week i.on { background: var(--accent); }
+  .hub-study .week i.td { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .hub-study .foot { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  .hub-study .foot .sp { flex: 1; }
+  .hub-setup { background: var(--panel); border-radius: 20px; padding: 16px; display: grid; gap: 10px; }
+  .hub-setup .t { font-family: var(--serif); font-size: 19px; }
+  .hub-setup .x { font-size: 13.5px; color: var(--dim); line-height: 1.5; }
+  .hub-setup .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hub-setup .row4 { grid-template-columns: repeat(4, 1fr); }
+  .hub-setup label { font-size: 11.5px; color: var(--dim); display: block; margin-bottom: 4px; }
+  .hub-setup input { width: 100%; }
+  /* 习惯 */
+  .hub-habits { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hub-hb { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px 9px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13.5px; }
+  .hub-hb .ic { width: 15px; height: 15px; color: var(--dim); }
+  .hub-hb b { font-weight: 400; color: var(--dim); font-size: 12px; }
+  .hub-hb.on { background: var(--sage); border-color: transparent; color: #fff; }
+  .hub-hb.on .ic, .hub-hb.on b { color: rgba(255,255,255,.85); }
+  .hub-hb.plus { color: var(--dim); border-style: dashed; }
+  /* 钱 */
+  .hub-money { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; }
+  .hub-money .top { display: flex; align-items: baseline; gap: 14px; }
+  .hub-money .big { font-family: var(--serif); font-size: 30px; line-height: 1; }
+  .hub-money .big small { font-size: 13px; color: var(--dim); margin-left: 3px; }
+  .hub-money .sub { font-size: 12.5px; color: var(--dim); }
+  .hub-money .bar { height: 6px; border-radius: 3px; background: var(--line); margin-top: 12px; overflow: hidden; display: flex; }
+  .hub-money .bar i { display: block; height: 100%; }
+  .hub-money .cats { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--dim); }
+  .hub-money .cats i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .hub-money .add { display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; margin-top: 12px; align-items: center; }
+  .hub-money .add input, .hub-money .add select { height: 38px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); padding: 0 10px; font-size: 14px; color: var(--text); }
+  .hub-money .add input[type=number] { font-variant-numeric: tabular-nums; }
+  .hub-money .add .go { height: 38px; padding: 0 14px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 13.5px; }
+  .hub-money .cat-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .hub-money .cat-row .chip { font-size: 12px; padding: 5px 10px; }
+  .hub-money .recent { margin-top: 10px; display: grid; gap: 4px; }
+  .hub-money .recent div { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); }
+  .hub-money .recent div b { font-weight: 400; color: var(--text); font-variant-numeric: tabular-nums; }
+  /* 领域 */
+  .hub-domains { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hub-dm { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; text-align: left; display: grid; gap: 6px; align-content: start; }
+  .hub-dm .hd { display: flex; align-items: center; gap: 8px; font-size: 15.5px; }
+  .hub-dm .hd .ic { width: 16px; height: 16px; color: var(--accent); }
+  .hub-dm .sm { font-size: 12.5px; color: var(--dim); line-height: 1.4; min-height: 17px; }
+  .hub-dm .links { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .hub-dm .links button { font-size: 12px; padding: 5px 9px; border-radius: 999px; background: var(--panel); color: var(--text); }
+  .hub-asks { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hub-mode { display: flex; align-items: center; gap: 12px; background: var(--panel); border-radius: 18px; padding: 12px 14px; margin-top: 24px; }
+  .hub-mode .tx { flex: 1; font-size: 14px; }
+  .hub-mode .tx small { display: block; color: var(--dim); font-size: 12px; margin-top: 2px; }
+  .hub-mode .sw { width: 44px; height: 26px; border-radius: 13px; background: var(--line); position: relative; transition: background .2s; flex: none; }
+  .hub-mode .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .hub-mode .sw.on { background: var(--accent); }
+  .hub-mode .sw.on::after { left: 21px; }
+  .hub-fab { position: sticky; bottom: 14px; display: flex; justify-content: flex-end; pointer-events: none; margin-top: 10px; }
+  .hub-fab button { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; background: var(--text); color: var(--bg); font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+  .hub-fab button .ic { width: 16px; height: 16px; }
+  body.butler #navWe, body.butler #navLetter, body.butler #navMom, body.butler #navWish, body.butler #navSleep, body.butler #recGong, body.butler .dr-head { display: none !important; }
 </style>
 </head>
 <body>
@@ -2484,6 +2597,20 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
     <div class="body" id="usageBody">
       <div class="ucard"><div class="ureset">正在问账房…</div></div>
     </div>
+  </div>
+</div>
+
+<!-- 指挥台（管家模式） -->
+<div class="sheetWrap page" id="hubSheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="hub"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+      <button class="hbtn" id="hubChat" title="去聊天"><span class="ic" data-i="chat"></span></button>
+    </div>
+    <div class="body" id="hubBody"></div>
   </div>
 </div>
 
@@ -10656,6 +10783,305 @@ if (IS_LOCAL) {
     workBody.appendChild(mkEl('div', 'board-sub', '连上之后：这页能发任务、看它一步步改文件、接上电脑上以前的会话；仓库页也会改读电脑上的 git。聊天、记忆还是存在这台设备上，不会搬过去。'));
   };
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   第十轮：指挥台（管家模式）
+   一开始想做的是贾维斯——站在学习 / 生活 / 工作 / 爱好中间的那个中枢，
+   不是陪聊的人。这一页就是中枢：问候 → 他写的简报 → 今天的时间线 →
+   最重要的三件 → 雅思 → 习惯 → 钱 → 各领域入口 → 快捷指令。
+   管家模式开着时，打开 App 先到这里；聊天退到右下角一键可达。
+   ═══════════════════════════════════════════════════════════════ */
+const HUB = { role: 'partner', briefTried: '', cat: '吃饭', data: {} };
+sheets.hub = document.getElementById('hubSheet');
+const hubBody = document.getElementById('hubBody');
+document.querySelector('[data-close="hub"]').onclick = () => sheets.hub.classList.remove('open');
+sheets.hub.querySelector('.shade').onclick = () => sheets.hub.classList.remove('open');
+document.getElementById('hubChat').onclick = () => { Object.values(sheets).forEach(s => s && s.classList.remove('open')); box.focus(); };
+const SKILL_N = { L: '听力', R: '阅读', W: '写作', S: '口语' };
+const CAT_COLORS = { '吃饭': '#e3a13a', '交通': '#6fa8dc', '购物': '#c96442', '学习': '#96B08F', '娱乐': '#b48ead', '住': '#8a867c', '医疗': '#e07a6a', '其他': '#a3a099' };
+const hubGet = (u) => fetch(u, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+
+function openHub() { closeDrawer(); Object.values(sheets).forEach(s => s && s.classList.remove('open')); sheets.hub.classList.add('open'); loadHub(); }
+window.openHub = openHub;
+
+async function loadHub() {
+  if (!hubBody.childElementCount) hubBody.innerHTML = '<div class="board-sub" style="padding:30px 0">把今天摆出来…</div>';
+  const [conf, cal, todos, study, habits, ledger, brief, wx] = await Promise.all([
+    hubGet('api/config'), hubGet('api/cal'), hubGet('api/todos'), hubGet('api/study'), hubGet('api/habits'), hubGet('api/ledger'), hubGet('api/brief'), hubGet('api/weather')]);
+  HUB.role = (conf && conf.role) || 'partner';
+  document.body.classList.toggle('butler', HUB.role === 'butler');
+  HUB.data = { cal: cal && cal.ok ? cal.cal : null, todos, study, habits, ledger, brief, wx };
+  renderHub();
+  /* 早上开 App 还没有简报：他自己写一份（一天只试一次，失败不烦人） */
+  const h = cnNow().getHours(), ds = todayStr();
+  const kind = h >= 18 ? 'evening' : 'morning';
+  if (brief && brief.ok && !brief[kind] && HUB.briefTried !== ds + kind && h >= 6) { HUB.briefTried = ds + kind; hubBrief(kind, false); }
+}
+
+async function hubBrief(kind, force) {
+  const card = hubBody.querySelector('.hub-brief'); if (card) { card.classList.remove('empty'); const tx = card.querySelector('.tx'); if (tx) { tx.className = 'tx wait'; tx.textContent = (HOME.him || '他') + '在写…'; } }
+  const r = await fetch('api/brief', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind, force: !!force }) }).then(x => x.json()).catch(e => ({ ok: false, error: e.message }));
+  if (!r || !r.text) { HUB.data.brief = HUB.data.brief || {}; HUB.data.brief.err = (r && r.error) || '没写出来'; renderHub(); return; }
+  HUB.data.brief = HUB.data.brief || { ok: true }; HUB.data.brief[kind] = r; delete HUB.data.brief.err;
+  renderHub();
+}
+
+function renderHub() {
+  const Dt = HUB.data; const keepTop = hubBody.scrollTop;
+  hubBody.innerHTML = '';
+  const now = cnNow(), ds = todayStr(), nowM = now.getHours() * 60 + now.getMinutes(), h = now.getHours();
+  const sect = (t, more, fn) => { const s = mkEl('div', 'hsect', t); if (more) { const x = mkEl('button', 'sect-x', more); x.onclick = fn; s.appendChild(x); } return s; };
+  const butler = HUB.role === 'butler';
+
+  /* ── 头 ── */
+  const head = mkEl('div', 'hub-head');
+  const eye = mkEl('div', 'eyebrow');
+  eye.append(mkEl('span', '', '周' + '日一二三四五六'[now.getDay()] + ' · ' + (now.getMonth() + 1) + '月' + now.getDate() + '日'));
+  if (Dt.wx && Dt.wx.ok && Dt.wx.now) { eye.append(mkEl('i'), mkEl('span', '', (Dt.wx.city ? Dt.wx.city + ' ' : '') + Dt.wx.now.text + ' ' + Dt.wx.now.t + '°' + (Dt.wx.hi != null ? ' · ' + Dt.wx.lo + '–' + Dt.wx.hi + '°' : ''))); }
+  const st = Dt.study && Dt.study.cfg ? Dt.study : null;
+  if (st && st.left != null && st.left >= 0) { eye.append(mkEl('i'), mkEl('span', '', '距雅思 ' + st.left + ' 天')); }
+  head.appendChild(eye);
+  head.appendChild(mkEl('h1', '', greetWord(h) + '，' + (HOME.me || '')));
+  const bf = Dt.brief || {}; const kind = h >= 18 ? 'evening' : 'morning'; const cur = bf[kind] || bf.morning || null;
+  const hers = (Dt.todos && Dt.todos.hers) || [];
+  const undone = hers.filter(x => !x.done);
+  const one = mkEl('div', 'one');
+  if (cur) { const first = String(cur.text).split('\n').find(l => l.trim()) || ''; one.innerHTML = '<b>' + escapeHtml(first.replace(/^[·•\-\s]+/, '').slice(0, 60)) + '</b>'; }
+  else one.textContent = undone.length ? '清单上还有 ' + undone.length + ' 件没做。' + (undone[0] ? '先从「' + undone[0].text + '」开始？' : '') : '清单是空的。今天想做点什么？';
+  head.appendChild(one);
+  hubBody.appendChild(head);
+
+  /* ── 四个数 ── */
+  const stats = mkEl('div', 'hub-stats');
+  const stat = (lb, v, unit, fn) => { const b = mkEl('button', 'hub-stat'); b.appendChild(mkEl('div', 'lb', lb)); const vv = mkEl('div', 'v', v); if (unit) vv.appendChild(mkEl('small', '', unit)); b.appendChild(vv); b.onclick = fn; return b; };
+  const scrollTo = (sel) => () => { const el = hubBody.querySelector(sel); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  stats.appendChild(stat('待办', hers.filter(x => x.done).length + '/' + hers.length, '', scrollTo('#hubTodo')));
+  stats.appendChild(stat('学习', st ? String(st.todayTotal) : '—', st ? '分' : '', scrollTo('#hubStudy')));
+  stats.appendChild(stat('习惯', Dt.habits && Dt.habits.items.length ? Dt.habits.doneN + '/' + Dt.habits.items.length : '—', '', scrollTo('#hubHabit')));
+  stats.appendChild(stat('今天花', Dt.ledger ? '¥' + Dt.ledger.todayTotal : '—', '', scrollTo('#hubMoney')));
+  hubBody.appendChild(stats);
+
+  /* ── 简报 ── */
+  const card = mkEl('div', 'hub-brief' + (cur ? '' : ' empty'));
+  const eb = mkEl('div', 'eb'); eb.append(mkEl('span', 'who', HOME.him || '他'), mkEl('span', '', (kind === 'evening' ? '晚简报' : '早简报') + (cur ? ' · ' + cur.hm : '')));
+  card.appendChild(eb);
+  if (cur) {
+    card.appendChild(mkEl('div', 'tx', cur.text));
+    const acts = mkEl('div', 'acts');
+    const c1 = mkEl('button', 'chip'); c1.append(icEl('chat', 13), '跟他聊这个'); c1.onclick = () => talkWith(kind === 'evening' ? '看了你的晚简报。' : '看了你的早简报。', false);
+    const c2 = mkEl('button', 'chip'); c2.append(icEl('refresh', 13), '重写'); c2.onclick = () => hubBrief(kind, true);
+    acts.append(c1, c2);
+    if (kind === 'morning' && h >= 18) { const c3 = mkEl('button', 'chip'); c3.append(icEl('moon', 13), '写晚简报'); c3.onclick = () => hubBrief('evening', false); acts.appendChild(c3); }
+    card.appendChild(acts);
+  } else {
+    card.appendChild(mkEl('div', 'tx' + (bf.err ? '' : ' wait'), bf.err ? '（' + bf.err + '）' : (h < 6 ? '天还没亮，简报六点后才写。' : (kind === 'evening' ? '今天过得怎么样，让他给你复个盘。' : '让他把今天该盯的事列出来。'))));
+    const go = mkEl('button', 'ap-b go'); go.textContent = kind === 'evening' ? '写今天的晚简报' : '写今天的早简报'; go.onclick = () => hubBrief(kind, false);
+    card.appendChild(go);
+  }
+  hubBody.appendChild(card);
+
+  /* ── 今天的时间线 ── */
+  hubBody.appendChild(sect('今天', '看整天 ›', () => { sheets.hub.classList.remove('open'); openToday(); }));
+  const evs = Dt.cal ? Dt.cal.events.filter(e => e.date === ds || (e.yearly && e.date.slice(5) === ds.slice(5))) : [];
+  const rows = [];
+  evs.forEach(e => rows.push({ at: e.time || '', text: e.text, kind: e.type === 'special' ? 'special' : 'event' }));
+  hers.filter(x => x.at).forEach(x => { const same = rows.find(r => r.at === x.at && !r.todo && (x.text.includes(r.text) || r.text.slice(0, 3) === x.text.slice(0, 3))); if (same) { same.done = x.done; same.todo = x; return; } rows.push({ at: x.at, text: x.text, kind: 'todo', done: x.done, todo: x }); });
+  rows.sort((a, b) => (a.at ? hmNum(a.at) : -1) - (b.at ? hmNum(b.at) : -1));
+  const line = mkEl('div', 'hub-line');
+  if (!rows.length) line.appendChild(mkEl('div', 'hub-empty', '今天没排事。' + (butler ? '要我排吗？点下面「帮我排一下今天」。' : '空着也挺好。')));
+  let nowPlaced = false;
+  rows.forEach(r => {
+    const m = r.at ? hmNum(r.at) : -1; const past = m >= 0 && m < nowM - 5 && !r.done;
+    if (!nowPlaced && m > nowM) { nowPlaced = true; const nl = mkEl('div', 'hub-row'); nl.append(mkEl('span', 'at now', '现在'), mkEl('span', 't', '')); nl.style.padding = '4px 0'; line.appendChild(nl); }
+    const row = mkEl('div', 'hub-row' + (r.done ? ' done' : past ? ' past' : ''));
+    row.appendChild(mkEl('span', 'at', r.at || '全天'));
+    const t = mkEl('span', 't', r.text);
+    if (!r.done && m >= 0 && m - nowM > 0 && m - nowM <= 90) t.appendChild(mkEl('small', '', (m - nowM) + ' 分钟后'));
+    else if (past) t.appendChild(mkEl('small', '', '过了'));
+    row.appendChild(t);
+    if (r.todo) { const ck = mkEl('button', 'ck'); ck.appendChild(icEl('check', 14)); ck.onclick = () => hubToggle(r.todo.id); row.appendChild(ck); }
+    line.appendChild(row);
+  });
+  hubBody.appendChild(line);
+
+  /* ── 最重要的三件 ── */
+  const top3 = undone.filter(x => !x.at).slice(0, 3);
+  const td3 = mkEl('div'); td3.id = 'hubTodo';
+  td3.appendChild(sect('最重要的三件', '全部待办 ›', () => { sheets.hub.classList.remove('open'); document.getElementById('navTodo').click(); }));
+  const tl = mkEl('div', 'hub-line');
+  if (!top3.length && !undone.length) tl.appendChild(mkEl('div', 'hub-empty', hers.length ? '全做完了。' : '还没有待办。跟他说一句「帮我记一下…」就行。'));
+  else if (!top3.length) tl.appendChild(mkEl('div', 'hub-empty', '没定时间的都做完了，剩下的在上面的时间线里。'));
+  top3.forEach(x => { const row = mkEl('div', 'hub-row'); row.append(mkEl('span', 'at', ''), mkEl('span', 't', x.text)); row.firstChild.style.width = '8px'; const ck = mkEl('button', 'ck'); ck.appendChild(icEl('check', 14)); ck.onclick = () => hubToggle(x.id); row.appendChild(ck); tl.appendChild(row); });
+  td3.appendChild(tl);
+  const addT = mkEl('button', 'hub-more'); addT.append(mkEl('span', 'tx', '＋ 加一件'), mkEl('span', 'val', undone.length ? '还有 ' + undone.length + ' 件没做' : '')); addT.onclick = () => talkWith('帮我记一下：', false);
+  td3.appendChild(addT);
+  hubBody.appendChild(td3);
+
+  /* ── 备考（雅思） ── */
+  const sd = mkEl('div'); sd.id = 'hubStudy';
+  sd.appendChild(sect('备考 · 雅思', st ? '设置 ›' : '', st ? () => hubStudySetup() : null));
+  if (!st) {
+    const su = mkEl('div', 'hub-setup');
+    su.append(mkEl('div', 't', '把雅思放进来'), mkEl('div', 'x', '填上目标分和考试日期，这里会有倒计时、每天听读写说四个环、连续天数和本周时长。你说一句「刚听了半小时」他就会记进来；没学，他也看得见。'));
+    const go = mkEl('button', 'ap-b go'); go.textContent = '开始'; go.onclick = () => hubStudySetup(); su.appendChild(go);
+    sd.appendChild(su);
+  } else {
+    const c = st.cfg; const card2 = mkEl('div', 'hub-study');
+    const top = mkEl('div', 'top');
+    const kp = (lb, v, unit) => { const d = mkEl('div', 'kp'); d.appendChild(mkEl('div', 'lb', lb)); const vv = mkEl('div', 'v', v); if (unit) vv.appendChild(mkEl('small', '', unit)); d.appendChild(vv); return d; };
+    const weekMin = st.week.reduce((a, x) => a + x.m, 0);
+    top.append(kp('目标', String(c.target)), kp('倒计时', st.left != null ? (st.left >= 0 ? String(st.left) : '过了') : '—', st.left != null && st.left >= 0 ? '天' : ''), kp('连续', String(st.streak), '天'), kp('本周', (weekMin / 60).toFixed(1), 'h'));
+    card2.appendChild(top);
+    const sk = mkEl('div', 'skills');
+    ['L', 'R', 'W', 'S'].forEach(k => {
+      const plan = c.daily[k] || 0, done = st.today[k] || 0; const p = plan ? Math.min(100, Math.round(done / plan * 100)) : 0;
+      const d = mkEl('div', 'hub-sk');
+      const ring = mkEl('div', 'ring' + (plan && done >= plan ? ' full' : '')); ring.style.setProperty('--p', p + '%'); ring.appendChild(mkEl('span', '', done + (plan ? '/' + plan : '')));
+      const add = mkEl('button', 'add', '+15'); add.onclick = () => hubStudyLog(k, 15);
+      d.append(ring, mkEl('div', 'nm', SKILL_N[k]), add);
+      sk.appendChild(d);
+    });
+    card2.appendChild(sk);
+    const wk = mkEl('div', 'week'); const mx = Math.max(60, ...st.week.map(x => x.m));
+    st.week.forEach((x, i) => { const b = mkEl('i', (x.m ? 'on' : '') + (i === 6 ? ' td' : '')); b.style.height = Math.max(3, Math.round(x.m / mx * 34)) + 'px'; b.title = x.d.slice(5) + ' ' + x.m + ' 分钟'; wk.appendChild(b); });
+    card2.appendChild(wk);
+    const foot = mkEl('div', 'foot');
+    const coach = mkEl('button', 'chip'); coach.append(icEl('zap', 13), '教练，排今晚的'); coach.onclick = () => talkWith('教练模式：看一下我今天的备考进度，直接给我排今晚的任务（听读写说分别做什么、多久），没学的部分不用安慰我。', true);
+    const logB = mkEl('button', 'chip'); logB.append(icEl('pen', 13), '记一段'); logB.onclick = () => talkWith('记一下学习：', false);
+    const wrong = mkEl('button', 'chip'); wrong.append(icEl('book', 13), '错题归因'); wrong.onclick = () => talkWith('错题归因：我刚做的这篇错了这些——（贴题目/选项/我的答案）。帮我归类是「定位词没抓住」「同义替换没反应」「听到数字就错」还是别的，记到今天的学习笔记里。', false);
+    foot.append(coach, logB, wrong);
+    card2.appendChild(foot);
+    sd.appendChild(card2);
+  }
+  hubBody.appendChild(sd);
+
+  /* ── 习惯 ── */
+  const hb = mkEl('div'); hb.id = 'hubHabit';
+  hb.appendChild(sect('每天的小事', ''));
+  const hrow = mkEl('div', 'hub-habits');
+  const items = (Dt.habits && Dt.habits.items) || [];
+  if (!items.length) { const seed = mkEl('button', 'hub-hb plus'); seed.append(icEl('plus', 14), '放几个常见的进来'); seed.onclick = async () => { await postJSON('api/habits', { action: 'seed' }); loadHub(); }; hrow.appendChild(seed); }
+  items.forEach(x => { const b = mkEl('button', 'hub-hb' + (x.doneToday ? ' on' : '')); b.append(icEl(x.icon || 'check', 15), x.name); if (x.streak > 1) b.appendChild(mkEl('b', '', x.streak + ' 天')); b.onclick = async () => { await postJSON('api/habits', { action: 'toggle', id: x.id }); loadHub(); }; b.oncontextmenu = async (e) => { e.preventDefault(); const ok = await askBox({ title: '去掉「' + x.name + '」？', ok: '去掉', danger: true }); if (ok) { await postJSON('api/habits', { action: 'del', id: x.id }); loadHub(); } }; hrow.appendChild(b); });
+  const plus = mkEl('button', 'hub-hb plus'); plus.append(icEl('plus', 14), '加一个'); plus.onclick = async () => { const n = await askBox({ title: '每天要做的一件小事', input: true, placeholder: '比如 背 30 个单词', ok: '加上' }); if (n && n.trim()) { await postJSON('api/habits', { action: 'add', name: n.trim(), icon: /水/.test(n) ? 'drop' : /睡/.test(n) ? 'moon' : /词|读|书/.test(n) ? 'book' : /跑|动|练/.test(n) ? 'activity' : 'check' }); loadHub(); } };
+  hrow.appendChild(plus);
+  hb.appendChild(hrow);
+  hubBody.appendChild(hb);
+
+  /* ── 钱 ── */
+  const my = mkEl('div'); my.id = 'hubMoney';
+  const lg = Dt.ledger || { items: [], monthTotal: 0, todayTotal: 0, byCat: {}, budget: 0 };
+  my.appendChild(sect('钱', lg.budget ? '预算 ¥' + lg.budget + ' ›' : '设预算 ›', async () => { const v = await askBox({ title: '这个月打算花多少', input: true, value: lg.budget || '', placeholder: '比如 3000', ok: '定下' }); if (v != null) { await postJSON('api/ledger', { action: 'budget', budget: +v || 0 }); loadHub(); } }));
+  const mc = mkEl('div', 'hub-money');
+  const topm = mkEl('div', 'top');
+  const big = mkEl('div', 'big', '¥' + lg.monthTotal); big.appendChild(mkEl('small', '', '本月'));
+  topm.append(big, mkEl('div', 'sub', '今天 ¥' + lg.todayTotal + (lg.budget ? ' · 还剩 ¥' + Math.max(0, Math.round((lg.budget - lg.monthTotal) * 100) / 100) : '') + ' · ' + lg.items.length + ' 笔'));
+  mc.appendChild(topm);
+  const cats = Object.entries(lg.byCat).sort((a, b) => b[1] - a[1]);
+  if (cats.length) {
+    const bar = mkEl('div', 'bar'); const tot = lg.monthTotal || 1;
+    cats.forEach(([k, v]) => { const i = mkEl('i'); i.style.width = (v / tot * 100) + '%'; i.style.background = CAT_COLORS[k] || CAT_COLORS['其他']; bar.appendChild(i); });
+    mc.appendChild(bar);
+    const cl = mkEl('div', 'cats'); cats.slice(0, 5).forEach(([k, v]) => { const s = mkEl('span'); const i = mkEl('i'); i.style.background = CAT_COLORS[k] || CAT_COLORS['其他']; s.append(i, k + ' ¥' + v); cl.appendChild(s); }); mc.appendChild(cl);
+  }
+  const add = mkEl('div', 'add');
+  const amt = mkEl('input'); amt.type = 'number'; amt.inputMode = 'decimal'; amt.placeholder = '¥ 多少';
+  const nt = mkEl('input'); nt.placeholder = '买了什么（可不填）';
+  const go = mkEl('button', 'go', '记上');
+  const doAdd = async () => { const v = +amt.value; if (!v) { amt.focus(); return; } await postJSON('api/ledger', { action: 'add', amt: v, cat: HUB.cat, note: nt.value.trim() }); amt.value = ''; nt.value = ''; note('（记了 ¥' + v + ' · ' + HUB.cat + '）'); loadHub(); };
+  go.onclick = doAdd; nt.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); }); amt.addEventListener('keydown', e => { if (e.key === 'Enter') nt.focus(); });
+  add.append(amt, nt, go); mc.appendChild(add);
+  const cr = mkEl('div', 'cat-row');
+  Object.keys(CAT_COLORS).forEach(k => { const c = mkEl('button', 'chip' + (HUB.cat === k ? ' on' : ''), k); c.onclick = () => { HUB.cat = k; cr.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.textContent === k)); }; cr.appendChild(c); });
+  mc.appendChild(cr);
+  if (lg.items.length) { const rc = mkEl('div', 'recent'); lg.items.slice(0, 4).forEach(x => { const d = mkEl('div'); d.append(mkEl('span', '', (x.date === ds ? '今天' : x.date.slice(5).replace('-', '/')) + ' · ' + x.cat + (x.note ? ' · ' + x.note : '')), mkEl('b', '', '¥' + x.amt)); d.oncontextmenu = async (e) => { e.preventDefault(); const ok = await askBox({ title: '删掉这笔 ¥' + x.amt + '？', ok: '删', danger: true }); if (ok) { await postJSON('api/ledger', { action: 'del', id: x.id }); loadHub(); } }; rc.appendChild(d); }); mc.appendChild(rc); }
+  my.appendChild(mc);
+  hubBody.appendChild(my);
+
+  /* ── 领域入口 ── */
+  hubBody.appendChild(sect('各个方面', ''));
+  const dg = mkEl('div', 'hub-domains');
+  const nav = (id) => () => { sheets.hub.classList.remove('open'); const b = document.getElementById(id); if (b) b.click(); };
+  const dom = (ic, title, sub, links) => { const d = mkEl('div', 'hub-dm'); const hd = mkEl('div', 'hd'); hd.append(icEl(ic, 16), title); d.append(hd, mkEl('div', 'sm', sub)); const ls = mkEl('div', 'links'); links.forEach(([n, fn]) => { const b = mkEl('button', '', n); b.onclick = fn; ls.appendChild(b); }); d.appendChild(ls); return d; };
+  dg.appendChild(dom('book', '学习', st ? '今天 ' + st.todayTotal + ' 分钟 · 连续 ' + st.streak + ' 天' : '雅思还没放进来', [['备考', scrollTo('#hubStudy')], ['共读', nav('navNook')], ['专注', nav('navFocus')]]));
+  dg.appendChild(dom('sun', '生活', undone.length ? undone.length + ' 件待办 · ' + evs.length + ' 个日程' : evs.length ? evs.length + ' 个日程' : '今天空着', [['日历', nav('navCal')], ['待办', nav('navTodo')], ['便签', nav('navNotes')]]));
+  dg.appendChild(dom('terminal', '工作', '电脑上的 Claude Code', [['工作间', nav('navWork')], ['仓库', nav('navRepo')]]));
+  dg.appendChild(dom('music', '爱好', '一起听 · 一起看', [['听', nav('navListen')], ['看', nav('navWatch')], ['玩', nav('navPlay')]]));
+  dg.appendChild(dom('heartIc', '身体', Dt.habits && Dt.habits.items.length ? '习惯 ' + Dt.habits.doneN + '/' + Dt.habits.items.length : '睡眠 · 步数 · 心情', [['健康', nav('navHealth')], ['今天', () => { sheets.hub.classList.remove('open'); openToday(); }]]));
+  dg.appendChild(dom('pen', '记录', '日记 · 记忆 · 日报', [['日记', nav('navWall')], ['记忆', nav('navMem')], ['日报', nav('navNews')]]));
+  hubBody.appendChild(dg);
+
+  /* ── 快捷指令 ── */
+  hubBody.appendChild(sect('一句话让他做', ''));
+  const asks = mkEl('div', 'hub-asks');
+  [['帮我排一下今天', 'calendar', true], ['雅思今天练什么', 'book', true], ['记一笔：', 'tag', false], ['今晚复盘', 'moon', true], ['提醒我喝水', 'drop', true], ['帮我查一下：', 'search', false]].forEach(([t, ic, now]) => { const b = mkEl('button', 'chip'); b.append(icEl(ic, 14), t); b.onclick = () => talkWith(t, now); asks.appendChild(b); });
+  hubBody.appendChild(asks);
+
+  /* ── 模式 ── */
+  const mode = mkEl('div', 'hub-mode');
+  const tx = mkEl('div', 'tx'); tx.append(document.createTextNode('管家模式'), mkEl('small', '', butler ? '打开就到这页；他按管家的样子说话；抽屉里收起了情侣那些页' : '打开先进聊天；他是住在一起的那个人'));
+  const sw = mkEl('button', 'sw' + (butler ? ' on' : '')); sw.onclick = () => hubSetRole(butler ? 'partner' : 'butler');
+  mode.append(tx, sw);
+  hubBody.appendChild(mode);
+
+  const fab = mkEl('div', 'hub-fab'); const fb = mkEl('button'); fb.append(icEl('chat', 16), '跟' + (HOME.him || '他') + '说'); fb.onclick = () => { Object.values(sheets).forEach(s => s && s.classList.remove('open')); box.focus(); }; fab.appendChild(fb);
+  hubBody.appendChild(fab);
+  hubBody.scrollTop = keepTop;
+}
+
+async function hubToggle(id) {
+  const res = await postJSON('api/todos', { action: 'toggle', list: 'hers', id }).catch(() => null);
+  if (res) { HUB.data.todos = res; renderHub(); }
+}
+async function hubStudyLog(skill, minutes) {
+  const r = await postJSON('api/study', { action: 'log', skill, minutes }).catch(() => null);
+  if (r) { HUB.data.study = r; renderHub(); note('（' + SKILL_N[skill] + ' +' + minutes + ' 分钟）'); }
+}
+async function hubStudySetup() {
+  const st = HUB.data.study || {}; const c = st.cfg || { target: 7, exam: '', daily: { L: 30, R: 30, W: 30, S: 20 } };
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+  body.innerHTML = '';
+  body.appendChild(mkEl('div', 'ask-t', '雅思备考'));
+  body.appendChild(mkEl('div', 'ask-x', '目标分、考试日期，和每天听读写说各打算练多少分钟。改了之后，他排计划、写简报都按这个来。'));
+  const su = mkEl('div', 'hub-setup'); su.style.padding = '0'; su.style.background = 'transparent';
+  const r1 = mkEl('div', 'row');
+  const f = (lb, val, type, ph) => { const w = mkEl('div'); w.appendChild(mkEl('label', '', lb)); const i = mkEl('input', 'ap-in'); i.type = type || 'text'; i.value = val == null ? '' : val; if (ph) i.placeholder = ph; if (type === 'number') i.inputMode = 'decimal'; w.appendChild(i); w._i = i; return w; };
+  const tg = f('目标分', c.target, 'number', '7'), ex = f('考试日期', c.exam, 'date');
+  r1.append(tg, ex); su.appendChild(r1);
+  const r2 = mkEl('div', 'row row4'); const ds = {}; ['L', 'R', 'W', 'S'].forEach(k => { ds[k] = f(SKILL_N[k] + ' 分钟', c.daily[k], 'number'); r2.appendChild(ds[k]); }); su.appendChild(r2);
+  body.appendChild(su);
+  const row = mkEl('div', 'ap-btns'); const no = mkEl('button', 'ap-b', '算了'); const ok = mkEl('button', 'ap-b go', '就这样');
+  no.onclick = () => wrap.classList.remove('open');
+  ok.onclick = async () => { const daily = {}; ['L', 'R', 'W', 'S'].forEach(k => daily[k] = Math.max(0, parseInt(ds[k]._i.value, 10) || 0)); const r = await postJSON('api/study', { action: 'set', target: +tg._i.value || 7, exam: ex._i.value || '', daily }).catch(() => null); wrap.classList.remove('open'); if (r) { HUB.data.study = r; renderHub(); } };
+  if (st.cfg) { const rs = mkEl('button', 'ap-b', '清空记录'); rs.onclick = async () => { const y = await askBox({ title: '把备考记录全清掉？', text: '目标、每天的分钟数都会没了。', ok: '清掉', danger: true }); if (y) { await postJSON('api/study', { action: 'reset' }); loadHub(); } else hubStudySetup(); }; row.appendChild(rs); }
+  row.append(no, ok); body.appendChild(row);
+  wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open');
+  wrap.classList.add('open'); setTimeout(() => tg._i.focus(), 60);
+}
+async function hubSetRole(role) {
+  if (role === 'butler') {
+    let p = null; try { p = await getJSON('api/persona'); } catch (e) {}
+    if (p && p.custom) {
+      const y = await askBox({ title: '人设也换成管家版？', text: '你自己改过他的人设。换成管家版会用一套贾维斯式的默认人设（冷静、先结论、会催你）；选「只换页面」就保留你写的。', ok: '换成管家版', cancel: '只换页面' });
+      if (y) await postJSON('api/persona', { reset: true }).catch(() => {});
+    }
+  }
+  await postJSON('api/config', { role }).catch(() => {});
+  HUB.role = role; document.body.classList.toggle('butler', role === 'butler');
+  note(role === 'butler' ? '（管家模式开了。下次打开先到这页）' : '（回到同居模式）');
+  loadHub();
+}
+/* 抽屉里加「指挥台」，放最上面；顶栏标题在管家模式下也指到这里 */
+(function hubNav() {
+  const main = document.querySelector('#drawer .dr-main') || document.querySelector('#drawer .nav');
+  const b = mkEl('button', 'item'); b.id = 'navHub'; b.append(icEl('gauge', 18), '指挥台'); b.onclick = openHub;
+  main.prepend(b);
+  const title = document.querySelector('header .title'); if (title) title.onclick = () => (HUB.role === 'butler' ? openHub() : openToday());
+  fetch('api/config', { cache: 'no-store' }).then(r => r.json()).then(c => {
+    HUB.role = (c && c.role) || 'partner'; document.body.classList.toggle('butler', HUB.role === 'butler');
+    if (HUB.role === 'butler' && !location.hash) setTimeout(openHub, 350);
+  }).catch(() => {});
+})();
 
 box.focus();
 </script>
