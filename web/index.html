@@ -10370,7 +10370,7 @@ async function openVoice() {
    · 悬浮聊天：把聊天变成一个始终在最上面的小窗，另开标签页看什么都行
    · 全屏里：弹幕 + 底部一条输入
    ═══════════════════════════════════════════════════════════════ */
-const WATCH = { cur: null, media: null, stream: null, pos: 0, iv: null, tailIv: null, lastSeq: 0, danmu: true, pip: null, chatOpen: true, hls: null };
+const WATCH = { cur: null, media: null, stream: null, pos: 0, iv: null, tailIv: null, lastSeq: 0, danmu: true, pip: null, chatOpen: false, hls: null };
 const watchGet = () => lsGet('dwell.nowwatch', null);
 const watchSet = (v) => lsSet('dwell.nowwatch', v);
 embedOf = function (url) {
@@ -10522,7 +10522,7 @@ loadWatch = async function () {
     const chat = mkEl('div', 'wt-chat2' + (WATCH.chatOpen ? ' open' : ''));
     const tail = mkEl('div', 'wt-tail2');
     const tog = mkEl('button', 'wt-tog'); tog.appendChild(icEl('chevL', 14)); tog.onclick = () => { WATCH.chatOpen = !WATCH.chatOpen; chat.classList.toggle('open', WATCH.chatOpen); };
-    const refresh = async () => { try { const d = await getJSON('api/messages?limit=12'); const ms = (d.msgs || []).filter(m => m.kind === 'me' || m.kind === 'gu'); tail.innerHTML = ''; ms.slice(-6).forEach(m => { const x = mkEl('div', 'wt-m ' + m.kind); x.textContent = (m.kind === 'me' ? '你：' : HOME.him + '：') + String(m.text).replace(/^（[^）]*）/, '').replace(/!\[[^\]]*\]\([^)]+\)/g, '[图]').slice(0, 160); tail.appendChild(x); }); tail.scrollTop = tail.scrollHeight;
+    const refresh = async () => { try { const d = await getJSON('api/messages?limit=12'); const strip = (t) => String(t).replace(/^（[^）]*）/, '').replace(/!\[[^\]]*\]\([^)]+\)/g, '[图]').trim(); const ms = (d.msgs || []).filter(m => (m.kind === 'me' || m.kind === 'gu') && strip(m.text)); tail.innerHTML = ''; ms.slice(-6).forEach(m => { const x = mkEl('div', 'wt-m ' + m.kind); x.textContent = (m.kind === 'me' ? '你：' : HOME.him + '：') + strip(m.text).slice(0, 160); tail.appendChild(x); }); tail.scrollTop = tail.scrollHeight;
       const last = ms[ms.length - 1]; if (last && last.kind === 'gu' && last.seq !== WATCH.lastSeq) { if (WATCH.lastSeq) danmu('gu', String(last.text).replace(/^（[^）]*）/, '')); WATCH.lastSeq = last.seq; } } catch (e) {} };
     refresh(); WATCH.tailIv = setInterval(() => { if (!sheets.watch.classList.contains('open')) return clearInterval(WATCH.tailIv); refresh(); }, 2500);
     const row = mkEl('div', 'mo-write'); const inp = mkEl('input'); inp.placeholder = '边看边说…'; const go = mkEl('button', 'go', '说');
