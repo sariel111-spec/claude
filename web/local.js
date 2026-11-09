@@ -1055,6 +1055,7 @@
       catch (e) { return { ok: false, code: e.code, detail: e.detail || e.message, url: e.url }; }
     }
     if (path === 'apiconf') {
+      if (method !== 'POST') return { ok: true, mode: D.demo ? 'demo' : 'api', route: D.api.route || 'relay', base: D.api.base || '', models: D.api.models || {}, hasToken: !!D.api.token };   // 只看不改：GET 不能把配置冲掉
       if (b.clear || b.route === 'sub' || b.preset === 'sub') return { ok: false, error: SUBTEXT };
       const route = b.route || 'relay', token = (b.token || '').trim() || (D.api.route === route ? D.api.token : '');
       if (!token) return { ok: false, error: '令牌是空的' };
