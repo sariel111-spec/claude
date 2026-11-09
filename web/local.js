@@ -4,7 +4,7 @@
    家就住在这个浏览器里：
    · 没接 API：放一份演示数据，什么都能点，改动会记住
    · 接了 API（设置 → 接入）：他真的会回你——浏览器直接连你的 API，
-     记忆、清单、日记、信……全存在这台设备的浏览器里（localStorage）
+     记忆、清单、日记、信……全存在这台设备的浏览器里（IndexedDB）
    从后端（python3 server/app.py）打开时这整个文件什么都不做。
    ═══════════════════════════════════════════════════════════════ */
 (function () {
@@ -228,24 +228,40 @@
   }
 
   /* ───────── 存取 ───────── */
-  let D;
-  try { D = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { D = null; }
-  if (!D || D.v !== 1) D = seed();
-  if (D.demo) { const s = seed(); s.api = D.api || s.api; s.conf = D.conf || s.conf; D = s; }   // 演示数据每次打开都是新鲜的一天
-  let saveT = null;
-  const save = () => {
-    if (D.demo) return;                   // 演示里的改动只活在这一页
-    clearTimeout(saveT);
-    saveT = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify(D)); }
-      catch (e) { try { window.note && note('（浏览器存储满了：设置 → 后台 → 下载备份，再删掉一些图片）', 'err'); } catch (e2) {} }
-    }, 250);
+  /* 家存在 IndexedDB 里（几百 MB 起步），不再用只有 5MB 的 localStorage——
+     以前聊几张图就"存储满了"，就是这个原因。老数据第一次打开时自动搬过来。 */
+  const idbOpen = () => new Promise((res) => { try { const r = indexedDB.open('dwell-home', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } });
+  const idbGet = (db, k) => new Promise((res) => { try { const q = db.transaction('kv', 'readonly').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); } catch (e) { res(undefined); } });
+  const idbPut = (db, k, v) => new Promise((res, rej) => { try { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); } catch (e) { rej(e); } });
+  const freshSeed = (d) => { const s = seed(); s.api = d.api || s.api; s.conf = d.conf || s.conf; return s; };   // 演示数据每次打开都是新鲜的一天
+  let lsD = null;
+  try { lsD = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { lsD = null; }
+  if (lsD && lsD.v !== 1) lsD = null;
+  let D = lsD ? (lsD.demo ? freshSeed(lsD) : lsD) : seed();
+  let DB = null;
+  const READY = (async () => {
+    DB = await idbOpen();
+    if (DB) {
+      const v = await idbGet(DB, 'home');
+      if (v && v.v === 1) D = v.demo ? freshSeed(v) : v;
+      else if (lsD) { try { await idbPut(DB, 'home', lsD); } catch (e) {} }
+      if (lsD) { try { localStorage.removeItem(KEY); } catch (e) {} }   // 搬完就把 5MB 让出来
+    }
+    D.kv = D.kv || {};
+  })();
+  let saveT = null, saveWarned = 0;
+  const persist = () => {
+    if (D.demo) return Promise.resolve();   // 演示里的改动只活在这一页
+    if (!DB) { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { warnFull(); } return Promise.resolve(); }
+    return idbPut(DB, 'home', D).catch(() => warnFull());
   };
-  const saveNow = () => { if (!D.demo) try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) {} };
+  const warnFull = () => { if (Date.now() - saveWarned < 60000) return; saveWarned = Date.now(); try { window.note && note('（这台设备给网页的存储空间用完了：设置 → 后台 → 清理旧图片）', 'err'); } catch (e2) {} };
+  const save = () => { if (D.demo) return; clearTimeout(saveT); saveT = setTimeout(persist, 250); };
+  const saveNow = () => { if (!D.demo) persist(); };
   window.addEventListener('pagehide', saveNow);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { D.lastSeen = now(); saveNow(); } });
   const live = () => D.api && D.api.token && D.api.route !== 'none';
-  D.kv = D.kv || {};
+  D.kv = D.kv || {};   // 真正的 D 到位后 READY 里会再补一次
   const kvL = (n) => (D.kv[n] = D.kv[n] || (n === 'now' ? {} : { items: [] }));
   window.__LOCAL_STATE__ = () => ({ demo: D.demo, live: !!live(), route: D.api.route });
 
@@ -395,7 +411,7 @@
     add_event: (a) => { D.cal.events.push({ id: ++D.evId, date: a.date, time: a.time || '', text: a.text, type: a.special ? 'special' : 'event', yearly: !!a.yearly }); return '记在日历上了：' + a.date + ' ' + (a.time || '') + ' ' + a.text; },
     memory_search: (a) => memFmt(memSearch(a.query, 5, 0.3, true)),
     remember: (a) => { const it = memAdd(a, 'gu'); if (!it) return '没记上：内容是空的'; act('remember', it.title || it.text.slice(0, 20)); return '记下了'; },
-    leave_note: (a) => { D.notes.gu.unshift({ id: 'n' + (++D.noteId), text: a.text, at: now() }); return '贴上了'; },
+    leave_note: (a) => { D.notes.gu.unshift({ id: 'n' + (++D.noteId), text: a.text, at: now() }); say('mark', '他贴了一张便签：' + String(a.text).slice(0, 40)); push({ type: 'mark', text: '他贴了一张便签：' + String(a.text).slice(0, 40) }); act('note', a.text); return '贴上了'; },
     post_moment: (a) => { D.moments.push({ id: 'm' + Date.now(), who: 'gu', text: a.text, at: now(), likes: [], comments: [] }); act('moment', a.text); return '发出去了'; },
     moment_comment: (a) => { const m = D.moments.find(x => x.id === a.id); if (!m) return '没找到那条动态'; m.comments.push({ who: 'gu', text: a.text, at: now() }); return '回了'; },
     give_coupon: (a) => { D.wishes.coupons.push({ id: 'c' + Date.now(), from: 'gu', title: a.title, note: a.note || '' }); return '券送出去了'; },
@@ -728,7 +744,7 @@
     Object.keys(D.sched).forEach(k => { if (D.sched[k] < now() - DAY) delete D.sched[k]; });
     save();
   }
-  setTimeout(scheduleAhead, 4000); setInterval(scheduleAhead, 30 * 60000);
+  READY.then(() => { setTimeout(scheduleAhead, 4000); setInterval(scheduleAhead, 30 * 60000); });
   const addMin = (s, m) => { const [a, b] = s.split(':').map(Number); const x = a * 60 + b + m; return pad(Math.floor(x / 60) % 24) + ':' + pad(x % 60); };
   setInterval(tick, 30000);
 
@@ -982,6 +998,20 @@
       if (wasDemo) setTimeout(() => location.reload(), 400);
       return { ok: true, mode: 'api', route, base: api.base, reset: wasDemo };
     }
+    if (path === 'storage') {
+      const IMG = /!\[[^\]]*\]\(data:[^)]+\)/g;
+      const imgBytes = () => { let n = 0, c = 0; D.msgs.forEach(m => { (String(m.text || '').match(IMG) || []).forEach(x => { n += x.length; c++; }); }); return { bytes: n, count: c }; };
+      if (method === 'POST' && b.action === 'strip_images') {
+        const cut = now() - (b.keep_days == null ? 7 : +b.keep_days) * DAY; let n = 0;
+        D.msgs.forEach(m => { if (m.at < cut && IMG.test(String(m.text || ''))) { m.text = String(m.text).replace(IMG, '[图，已清理]'); n++; } IMG.lastIndex = 0; });
+        D.msgs.forEach(m => { if (m.at < cut && m.extra && m.extra.length > 20000) m.extra = ''; });
+        save(); act('storage', '清理了 ' + n + ' 条消息里的图');
+        return { ok: true, stripped: n };
+      }
+      let est = {}; try { est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : {}; } catch (e) {}
+      const home = JSON.stringify(D).length;
+      return Object.assign({ ok: true, home, imgs: imgBytes(), msgs: D.msgs.length, engine: DB ? 'indexeddb' : 'localstorage' }, est.usage != null ? { usage: est.usage, quota: est.quota } : {});
+    }
     if (path === 'config') { if (method === 'POST') { Object.assign(D.conf, b); if (b.push_url != null) { D.sched = {}; setTimeout(scheduleAhead, 500); } if (b.tz != null && b.tz !== '') { try { localStorage.setItem('dwell.tz', b.tz); } catch (e) {} } save(); } return Object.assign({ ok: true, local: true }, D.conf); }
     if (path === 'persona') { if (method === 'POST') { D.persona = Object.assign({}, D.persona, b); save(); } return { ok: true, gu: (D.persona && D.persona.gu) || DEFAULT_PERSONA, gong: (D.persona && D.persona.gong) || DEFAULT_GONG }; }
     if (path === 'pushkey') return { key: null, local: true };
@@ -1078,9 +1108,9 @@
       if (evq.some(e => e.n > since)) return Promise.resolve(take());
       return new Promise(res => { waiter = () => res(take()); setTimeout(() => { if (waiter) { waiter = null; res(take()); } }, 25000); });
     }
-    return Promise.resolve().then(() => route(path, u.searchParams, method, body(init))).then(o => J(o)).catch(e => J({ ok: false, error: String(e && e.message || e) }));
+    return READY.then(() => route(path, u.searchParams, method, body(init))).then(o => J(o)).catch(e => J({ ok: false, error: String(e && e.message || e) }));
   };
 
   /* 打开的时候：离开久了，他说说这段时间 */
-  setTimeout(() => { if (live()) wakeOnReturn(false).catch(() => {}); tick(); }, 2500);
+  READY.then(() => setTimeout(() => { if (live()) wakeOnReturn(false).catch(() => {}); tick(); }, 2500));
 })();
