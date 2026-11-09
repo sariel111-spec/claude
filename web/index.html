@@ -10921,7 +10921,7 @@ if (IS_LOCAL) {
     const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
     body.innerHTML = '';
     body.appendChild(mkEl('div', 'ask-t', '连上家里的后端'));
-    body.appendChild(mkEl('div', 'ask-x', '在电脑上跑 python3 server/app.py，再用 Cloudflare Tunnel（cloudflared tunnel --url http://localhost:8765）之类把它放到外网，把那个 https 地址填这里。工作间、仓库这两页就会走它；聊天和记忆还是在这台设备上。'));
+    body.appendChild(mkEl('div', 'ask-x', '在电脑上跑 python3 server/app.py，再用 Cloudflare Tunnel（cloudflared tunnel --url http://localhost:8787）之类把它放到外网，把那个 https 地址填这里。工作间、仓库这两页就会走它；聊天和记忆还是在这台设备上。'));
     const u = mkEl('input', 'ap-in ask-in'); u.placeholder = 'https://xxx.trycloudflare.com'; u.value = r.url || '';
     const pw = mkEl('input', 'ap-in ask-in'); pw.type = 'password'; pw.placeholder = '后端密码（启动时设了 HOME_PASSWORD 才要填）'; pw.value = r.password || '';
     const msg = mkEl('div', 'ap-msg');
@@ -10949,7 +10949,7 @@ if (IS_LOCAL) {
     const head = mkEl('div', 'sh-head'); head.append(mkEl('h1', '', '工作间'), mkEl('div', 'sub', '在手机上让电脑上的 Claude Code 干活')); workBody.appendChild(head);
     const card = mkEl('div', 'wk-setup');
     card.appendChild(mkEl('div', 'wk-st', '三步接上'));
-    const steps = [['装好 Claude Code', 'npm i -g @anthropic-ai/claude-code，然后在终端里跑一次 claude 登录'], ['跑后端', '在这个仓库的文件夹里：python3 server/app.py（它会说在哪个端口）'], ['放到外网', 'cloudflared tunnel --url http://localhost:8765，会给一个 https 地址，填到下面']];
+    const steps = [['装好 Claude Code', 'npm i -g @anthropic-ai/claude-code，然后在终端里跑一次 claude 登录'], ['跑后端', '在这个仓库的文件夹里：python3 server/app.py（它会说在哪个端口）'], ['放到外网', 'cloudflared tunnel --url http://localhost:8787，会给一个 https 地址，填到下面']];
     steps.forEach(([t, d], i) => { const r2 = mkEl('div', 'wk-step'); r2.append(mkEl('b', '', String(i + 1)), mkEl('span', 'tx', t)); const sm = mkEl('small', '', d); r2.querySelector('.tx').appendChild(sm); const cp = mkEl('button', 'wk-cp', '复制'); const cmd = d.match(/(npm i[^，]*|python3 [^（]*|cloudflared [^，]*)/); if (cmd) { cp.onclick = () => { navigator.clipboard?.writeText(cmd[1].trim()).then(() => note('（复制好了）')).catch(() => {}); }; r2.appendChild(cp); } card.appendChild(r2); });
     workBody.appendChild(card);
     const go = mkEl('button', 'ap-b go fc-go'); go.append(icEl('terminal', 16), document.createTextNode(' 填后端地址')); go.onclick = () => openRemoteSetup(() => loadWork());
@@ -11434,7 +11434,7 @@ async function openVaultPages(after) {
     body.appendChild(mkEl('div', 'ask-t', '哪一页对应什么'));
     body.appendChild(mkEl('div', 'ask-x', '网页里的待办、学习、身体、播客、日报，各自读库里的哪一页。点「选」去库里挑；没设的那块会提示你。'));
     const list = mkEl('div', 'vm-list');
-    PAGE_KEYS.forEach(([k, n, d]) => { const r = mkEl('div', 'vm-row'); r.appendChild(mkEl('span', 'k', n)); const p = mkEl('span', 'p' + (v.pages[k] ? ' on' : ''), v.pages[k] || d); r.appendChild(p); const pick = mkEl('button', '', v.pages[k] ? '换' : '选'); pick.onclick = () => pickVaultFile(async (path) => { await postJSON('api/vault', { pages: { [k]: path } }); await vaultConfGet(true); v.pages = B11.vault.pages; wrap.classList.add('open'); paint(); }, (v.pages[k] || '').split('/').slice(0, -1).join('/')); r.appendChild(pick); if (v.pages[k]) { const x = mkEl('button', '', '清'); x.onclick = async () => { await postJSON('api/vault', { pages: { [k]: '' } }); await vaultConfGet(true); v.pages = B11.vault.pages; paint(); }; r.appendChild(x); } list.appendChild(r); });
+    PAGE_KEYS.forEach(([k, n, d]) => { const r = mkEl('div', 'vm-row'); r.appendChild(mkEl('span', 'k', n)); const p = mkEl('span', 'p' + (v.pages[k] ? ' on' : ''), v.pages[k] || d); r.appendChild(p); const pick = mkEl('button', '', v.pages[k] ? '换' : '选'); pick.onclick = () => pickVaultFile(async (path) => { await savePages({ [k]: path }); v.pages = B11.vault.pages; wrap.classList.add('open'); paint(); }, (v.pages[k] || '').split('/').slice(0, -1).join('/')); r.appendChild(pick); if (v.pages[k]) { const x = mkEl('button', '', '清'); x.onclick = async () => { await savePages({ [k]: '' }); v.pages = B11.vault.pages; paint(); }; r.appendChild(x); } list.appendChild(r); });
     body.appendChild(list);
     const row = mkEl('div', 'ap-btns'); const re = mkEl('button', 'ap-b', '改仓库'); re.onclick = () => openVaultSetup(() => openVaultPages(after)); const ok = mkEl('button', 'ap-b go', '好了'); ok.onclick = () => { wrap.classList.remove('open'); after && after(); }; row.append(re, ok); body.appendChild(row);
   };
@@ -11451,7 +11451,7 @@ async function loadStudy() {
   const [st, todos] = await Promise.all([getJSON('api/study').catch(() => null), getJSON('api/todos').catch(() => null)]);
   let ielts = null, plan = null;
   if (vaultPage('ielts')) { const r = await vaultRead(vaultPage('ielts')).catch(() => null); if (r && r.ok) ielts = Object.assign(parseFM(r.text), { path: vaultPage('ielts') }); }
-  if (vaultPage('todo')) { const r = await vaultRead(vaultPage('todo')).catch(() => null); if (r && r.ok) plan = { path: vaultPage('todo'), tasks: taskLines(r.text) }; }
+  if (vaultPage('todo')) { const r = await vaultRead(vaultPage('todo')).catch(() => null); if (r && r.ok) plan = { path: vaultPage('todo'), text: r.text, tasks: taskLines(r.text) }; }
   B11.study = { st, todos, ielts, plan }; renderStudy();
 }
 function renderStudy() {
@@ -11621,6 +11621,183 @@ async function renderMore() {
 /* 抽屉里的「指挥台」下面也放一个「学习」「生活」，非管家模式时也能到 */
 (function () { const main = document.querySelector('#drawer .dr-main'); if (!main) return; const hubB = document.getElementById('navHub'); [['navStudy', 'book', '学习', openStudy], ['navLife', 'sun', '生活', openLife]].forEach(([id, ic, n, fn]) => { const b = mkEl('button', 'item'); b.id = id; b.append(icEl(ic, 18), n); b.onclick = fn; hubB ? hubB.after(b) : main.prepend(b); }); })();
 setTimeout(tabSync, 600);
+
+
+/* ═══════════════════════════════════════════════════════════════
+   第十二轮：接上真正的「枝立」
+   看过库之后发现：每日计划不是 - [ ]，是属性里的 days:{日期:[{id,t,c,min,done,at}]}；
+   报亭的订阅源和播客也在属性里；健身是一个文件夹里一条条「训练」笔记。
+   所以这里按这三种真实结构各写一个适配器，页面映射给默认值。
+   后端模式（python3 server/app.py + VAULT_PATH）走 api/vault/*；网页单独开时走 GitHub。
+   ═══════════════════════════════════════════════════════════════ */
+const DEFAULT_PAGES = { todo: '20 Wiki 知识/01 课程学习/每日计划.md', ielts: '20 Wiki 知识/01 课程学习/课程/雅思.md', daily: '20 Wiki 知识/05 娱乐/资讯/报亭.md', podcast: '20 Wiki 知识/05 娱乐/资讯/报亭.md', health: '20 Wiki 知识/06 健身' };
+const pagesLocal = () => { try { return JSON.parse(localStorage.getItem('dwell.vaultPages') || '{}'); } catch (e) { return {}; } };
+vaultConfGet = async function (force) {
+  if (B11.vault && !force) return B11.vault;
+  let v = await getJSON('api/vault').catch(() => ({ ok: false }));
+  if (!v || typeof v !== 'object') v = { ok: false };
+  v.pages = Object.assign({}, DEFAULT_PAGES, v.pages || {}, pagesLocal());
+  if (v.ok && v.kind === 'remote' && !v.vaultName) v.vaultName = (v.root || '').split('/').pop() || '枝立';
+  B11.vault = v; return v;
+};
+async function savePages(obj) { const cur = pagesLocal(); Object.assign(cur, obj); try { localStorage.setItem('dwell.vaultPages', JSON.stringify(cur)); } catch (e) {} await postJSON('api/vault', { pages: obj }).catch(() => {}); await vaultConfGet(true); }
+const isRemoteVault = () => B11.vault && B11.vault.ok && B11.vault.kind === 'remote';
+
+/* ── 每日计划：属性里的 days ── */
+function dpParse(text) { const { fm } = parseFM(text); const days = (fm && fm.days) || {}; return { days, today: Array.isArray(days[todayStr()]) ? days[todayStr()] : [] }; }
+function dpItemsOn(text, ds) { const { days } = dpParse(text); const L = Array.isArray(days[ds]) ? days[ds] : []; return L.filter(x => x && x.t).map(x => ({ id: x.id, t: String(x.t), c: x.c || '', min: x.min, at: x.at || '', done: !!x.done, src: x.src || '' })); }
+function dpSetDone(text, id, done) {
+  const lines = text.split('\n'); const i = lines.findIndex(l => new RegExp('^\\s*- id: ' + id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$').test(l)); if (i < 0) throw new Error('没找到这一项');
+  const ind = lines[i].match(/^\s*/)[0].length;
+  for (let j = i + 1; j < lines.length; j++) { const l = lines[j]; if (!l.trim()) continue; const d = l.match(/^\s*/)[0].length; if (d <= ind) break; if (/^\s*done:/.test(l)) { lines[j] = l.replace(/done:.*$/, 'done: ' + (done ? 'true' : 'false')); return lines.join('\n'); } }
+  lines.splice(i + 1, 0, ' '.repeat(ind + 2) + 'done: ' + (done ? 'true' : 'false')); return lines.join('\n');
+}
+function dpAdd(text, ds, item) {
+  const lines = text.split('\n'); const di = lines.findIndex(l => /^days:\s*$/.test(l)); if (di < 0) throw new Error('这页里没有 days');
+  const id = 'dw' + Date.now().toString(36);
+  const block = ['    - id: ' + id, '      t: ' + yq(item.t), '      c: ' + yq(item.c || ''), '      min: ' + (item.min ? item.min : ''), '      done: false', '      src: me'].concat(item.at ? ['      at: "' + item.at + '"'] : []);
+  let ki = lines.findIndex((l, k) => k > di && new RegExp('^  ' + ds + ':\\s*$').test(l));
+  if (ki < 0) { let end = di + 1; while (end < lines.length && (/^\s{2,}/.test(lines[end]) || !lines[end].trim()) && !/^---/.test(lines[end])) end++; lines.splice(end, 0, '  ' + ds + ':', ...block); return { text: lines.join('\n'), id }; }
+  let end = ki + 1; while (end < lines.length && (/^\s{4,}/.test(lines[end]) || !lines[end].trim()) && !/^---/.test(lines[end]) && !/^  \S/.test(lines[end])) end++;
+  while (end > ki + 1 && !lines[end - 1].trim()) end--;
+  lines.splice(end, 0, ...block); return { text: lines.join('\n'), id };
+}
+const yq = (s) => { s = String(s == null ? '' : s); return /[:#\[\]{},&*!|>'"%@`]|^\s|\s$|^$/.test(s) ? '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"' : s; };
+async function dpToggle(path, id, done) { const r = await vaultRead(path, true); if (!r.ok) throw new Error(r.error); const w = await postJSON('api/vault/write', { p: path, text: dpSetDone(r.text, id, done), sha: r.sha, msg: (done ? '✓ ' : '↺ ') + '每日计划' }); if (!w.ok) throw new Error(w.error || '没写上'); }
+async function dpAppend(path, item) { const r = await vaultRead(path, true); if (!r.ok) throw new Error(r.error); const { text } = dpAdd(r.text, todayStr(), item); const w = await postJSON('api/vault/write', { p: path, text, sha: r.sha, msg: '＋ 每日计划：' + item.t.slice(0, 30) }); if (!w.ok) throw new Error(w.error || '没写上'); }
+const dpRow = (x, path, after) => { const row = mkEl('div', 'st-task' + (x.done ? ' done' : '')); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 13)); const tx = mkEl('div', 't', x.t); const meta = [x.c, x.at, x.min ? x.min + ' 分钟' : ''].filter(Boolean).join(' · '); if (meta) tx.appendChild(mkEl('small', '', meta)); row.append(bx, tx); bx.onclick = async () => { row.classList.toggle('done'); try { await dpToggle(path, x.id, !x.done); x.done = !x.done; if (after) after(); } catch (e) { row.classList.toggle('done'); note('（' + e.message + '）', 'err'); } }; return row; };
+async function dpAddPrompt(path, after) {
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody'); body.innerHTML = '';
+  body.appendChild(mkEl('div', 'ask-t', '今天再加一件'));
+  const t = mkEl('input', 'ap-in ask-in'); t.placeholder = '做什么'; const row2 = mkEl('div', 'hub-setup'); row2.style.cssText = 'padding:0;background:transparent;grid-template-columns:1fr 1fr 1fr;display:grid;gap:8px';
+  const c = mkEl('input', 'ap-in'); c.placeholder = '领域（雅思 / 统计…）'; const m = mkEl('input', 'ap-in'); m.placeholder = '分钟'; m.type = 'number'; const at = mkEl('input', 'ap-in'); at.placeholder = '几点（可不填）'; at.type = 'time';
+  row2.append(c, m, at); body.append(t, row2);
+  const row = mkEl('div', 'ap-btns'); const no = mkEl('button', 'ap-b', '算了'); const ok = mkEl('button', 'ap-b go', '加上'); no.onclick = () => wrap.classList.remove('open');
+  ok.onclick = async () => { if (!t.value.trim()) { t.focus(); return; } try { await dpAppend(path, { t: t.value.trim(), c: c.value.trim(), min: parseInt(m.value, 10) || 0, at: at.value }); wrap.classList.remove('open'); note('（写进每日计划了）'); after && after(); } catch (e) { note('（' + e.message + '）', 'err'); } };
+  row.append(no, ok); body.appendChild(row); wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open'); wrap.classList.add('open'); setTimeout(() => t.focus(), 60);
+}
+
+/* ── 报亭：订阅源 / 播客 ── */
+function nsParse(text) { const { fm } = parseFM(text); const feeds = Array.isArray(fm.feeds) ? fm.feeds : []; return { fm, rss: feeds.filter(f => f && (f.type === 'rss' || !f.type) && f.on !== false), pods: feeds.filter(f => f && f.type === 'pod' && f.on !== false), outings: Array.isArray(fm.outings) ? fm.outings : [], saved: Array.isArray(fm.saved) ? fm.saved : [] }; }
+const feedGet = (url) => getJSON('api/vault/feed?url=' + encodeURIComponent(url)).catch(e => ({ ok: false, error: e.message }));
+const fmtDate = (s) => { const d = new Date(s); if (isNaN(d)) return ''; const now = Date.now(), diff = (now - d.getTime()) / 36e5; return diff < 1 ? '刚刚' : diff < 24 ? Math.floor(diff) + ' 小时前' : diff < 48 ? '昨天' : (d.getMonth() + 1) + '/' + d.getDate(); };
+async function openDaily() {
+  await vaultConfGet(); const p = vaultPage('daily'); NOTE = { path: p, title: '日报' };
+  sheets.note.classList.add('open'); noteBody.innerHTML = '<div class="board-sub" style="padding:30px 0">去报亭拿今天的报纸…</div>';
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '日报'), mkEl('div', 'sub', '报亭 · 你订的那些源'), mkEl('div', 'sp'));
+  const cfg = mkEl('button', 'chip'); cfg.append(icEl('sliders', 13), '报亭页'); cfg.onclick = () => openNote(p, '报亭'); head.appendChild(cfg);
+  const r = await vaultRead(p).catch(e => ({ ok: false, error: e.message })); noteBody.innerHTML = ''; noteBody.appendChild(head);
+  if (!r.ok) { noteBody.appendChild(mkEl('div', 'nt-empty', r.error || '读不到报亭')); return; }
+  const ns = nsParse(r.text);
+  if (!isRemoteVault()) { noteBody.appendChild(mkEl('div', 'hub-setup')).append(mkEl('div', 't', '订阅源要经过家里的后端'), mkEl('div', 'x', '网页单独开着时拉不到 RSS（浏览器不让跨域）。在电脑上跑 python3 server/app.py（配 VAULT_PATH）再打开，或者连上家里的后端，这里就会把 ' + ns.rss.length + ' 个源的今日内容列出来。')); const ul = mkEl('div', 'st-tasks'); ns.rss.forEach(f => { const row = mkEl('div', 'st-ro'); row.style.padding = '9px 0'; row.append(mkEl('i', '', f.cat || ''), document.createTextNode(f.name || f.url)); ul.appendChild(row); }); noteBody.appendChild(ul); return; }
+  const list = mkEl('div', 'st-tasks'); noteBody.appendChild(list); list.appendChild(mkEl('div', 'hub-empty', '在拉 ' + ns.rss.length + ' 个源…'));
+  const all = []; await Promise.all(ns.rss.map(async f => { const d = await feedGet(f.url); if (d && d.ok) d.items.slice(0, 8).forEach(it => all.push(Object.assign({ src: f.name || d.title || '', cat: f.cat || '' }, it))); }));
+  all.sort((a, b) => (new Date(b.date) || 0) - (new Date(a.date) || 0)); list.innerHTML = '';
+  if (!all.length) list.appendChild(mkEl('div', 'hub-empty', '一条也没拉到——源可能都挂了，或者后端没网'));
+  const byCat = {}; all.slice(0, 40).forEach(it => { (byCat[it.cat || '其他'] = byCat[it.cat || '其他'] || []).push(it); });
+  list.remove();
+  Object.entries(byCat).forEach(([cat, items]) => { noteBody.appendChild(mkEl('div', 'hsect', cat)); const box = mkEl('div', 'st-tasks'); items.slice(0, 10).forEach(it => { const row = mkEl('a', 'st-task'); row.href = it.link || '#'; row.target = '_blank'; row.rel = 'noopener'; row.style.textDecoration = 'none'; row.style.color = 'inherit'; const tx = mkEl('div', 't', it.title || '（无题）'); tx.appendChild(mkEl('small', '', [it.src, fmtDate(it.date)].filter(Boolean).join(' · ') + (it.desc ? ' — ' + it.desc.slice(0, 80) : ''))); row.append(tx, icEl('chevR', 14)); box.appendChild(row); }); noteBody.appendChild(box); });
+  if (ns.outings.length) { noteBody.appendChild(mkEl('div', 'hsect', '出门小任务')); const o = ns.outings[Math.floor(Date.now() / 864e5) % ns.outings.length]; const card = mkEl('div', 'hub-brief'); card.append(mkEl('div', 'eb', '今天抽到的'), mkEl('div', 'tx', o.t || String(o))); noteBody.appendChild(card); }
+}
+let POD = { audio: null, cur: null };
+async function openPods() {
+  await vaultConfGet(); const p = vaultPage('podcast'); NOTE = { path: p, title: '播客' };
+  sheets.note.classList.add('open'); noteBody.innerHTML = '<div class="board-sub" style="padding:30px 0">翻订阅…</div>';
+  const r = await vaultRead(p).catch(e => ({ ok: false, error: e.message })); noteBody.innerHTML = '';
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '播客'), mkEl('div', 'sub', '报亭里订的'), mkEl('div', 'sp')); noteBody.appendChild(head);
+  if (!r.ok) { noteBody.appendChild(mkEl('div', 'nt-empty', r.error || '读不到')); return; }
+  const ns = nsParse(r.text);
+  if (!ns.pods.length) { noteBody.appendChild(mkEl('div', 'nt-empty', '报亭里还没订播客。在 Obsidian 的娱乐 → 报亭里加。')); return; }
+  const grid = mkEl('div', 'lf-grid'); noteBody.appendChild(grid);
+  const eps = mkEl('div'); noteBody.appendChild(eps);
+  ns.pods.forEach(f => { const c = mkEl('button', 'lf-card'); c.style.padding = '0'; c.style.overflow = 'hidden'; if (f.art) { const im = mkEl('img'); im.src = f.art; im.alt = ''; im.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block'; c.appendChild(im); } const tx = mkEl('div'); tx.style.padding = '10px 12px 12px'; tx.append(mkEl('div', 'hd', f.name || ''), mkEl('div', 'sm', f.by || '')); c.appendChild(tx); c.onclick = () => showEpisodes(f, eps); grid.appendChild(c); });
+  if (!isRemoteVault()) noteBody.appendChild(mkEl('div', 'board-sub', '要听的话得经过家里的后端拉节目单（浏览器不让直接跨域读 RSS）。电脑上跑着 server/app.py 时就能点开听。'));
+}
+async function showEpisodes(f, host) {
+  host.innerHTML = ''; host.appendChild(mkEl('div', 'hsect', f.name || '')); const box = mkEl('div', 'st-tasks'); host.appendChild(box); box.appendChild(mkEl('div', 'hub-empty', '拿节目单…')); host.scrollIntoView({ behavior: 'smooth' });
+  if (!isRemoteVault()) { box.innerHTML = ''; box.appendChild(mkEl('div', 'hub-empty', '网页单独开着时拉不到节目单；连上家里的后端再来')); return; }
+  const d = await feedGet(f.url); box.innerHTML = '';
+  if (!d.ok) { box.appendChild(mkEl('div', 'hub-empty', d.error || '拉不到')); return; }
+  d.items.filter(x => x.audio).slice(0, 15).forEach(ep => { const row = mkEl('div', 'st-task'); const pl = mkEl('button', 'bx'); pl.style.borderRadius = '50%'; pl.appendChild(icEl('music', 12)); const tx = mkEl('div', 't', ep.title); tx.appendChild(mkEl('small', '', [fmtDate(ep.date), ep.dur].filter(Boolean).join(' · '))); row.append(pl, tx); pl.onclick = () => podPlay(f, ep, row); box.appendChild(row); });
+}
+function podPlay(f, ep, row) {
+  if (!POD.audio) { POD.audio = new Audio(); POD.audio.preload = 'none'; const bar = mkEl('div', 'hub-mode'); bar.id = 'podBar'; bar.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:70;margin:0;box-shadow:0 8px 24px rgba(0,0,0,.2)'; document.body.appendChild(bar); POD.bar = bar; }
+  if (POD.cur === ep.audio) { if (POD.audio.paused) POD.audio.play(); else POD.audio.pause(); } else { POD.cur = ep.audio; POD.audio.src = ep.audio; POD.audio.play().catch(() => note('（放不出来，可能这个源不让外链）', 'err')); }
+  const paint = () => { POD.bar.innerHTML = ''; const tx = mkEl('div', 'tx'); tx.append(document.createTextNode((ep.title || '').slice(0, 40)), mkEl('small', '', f.name + (POD.audio.duration ? ' · ' + Math.floor(POD.audio.currentTime / 60) + ':' + String(Math.floor(POD.audio.currentTime % 60)).padStart(2, '0') + ' / ' + Math.floor(POD.audio.duration / 60) + ' 分' : ''))); const b = mkEl('button', 'chip', POD.audio.paused ? '播放' : '暂停'); b.onclick = () => POD.audio.paused ? POD.audio.play() : POD.audio.pause(); const x = mkEl('button', 'chip', '关'); x.onclick = () => { POD.audio.pause(); POD.bar.remove(); POD.audio = null; POD.cur = null; }; POD.bar.append(tx, b, x); };
+  POD.audio.ontimeupdate = paint; POD.audio.onplay = paint; POD.audio.onpause = paint; paint();
+}
+
+/* ── 健身：一个文件夹里的训练笔记 ── */
+async function openFitness() {
+  await vaultConfGet(); const folder = vaultPage('health').replace(/\.md$/, '').replace(/\/健身$/, ''); NOTE = { path: folder, title: '身体' };
+  sheets.note.classList.add('open'); noteBody.innerHTML = '<div class="board-sub" style="padding:30px 0">翻训练记录…</div>';
+  const t = await getJSON('api/vault/tree?p=' + encodeURIComponent(folder)).catch(e => ({ ok: false, error: e.message })); noteBody.innerHTML = '';
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '身体'), mkEl('div', 'sub', '训练记录 · ' + folder.split('/').pop()), mkEl('div', 'sp'));
+  const add = mkEl('button', 'chip'); add.append(icEl('plus', 13), '记一条'); add.onclick = () => fitnessAdd(folder); head.appendChild(add); noteBody.appendChild(head);
+  if (!t.ok) { noteBody.appendChild(mkEl('div', 'nt-empty', t.error || '读不到')); return; }
+  const notes = (t.items || []).filter(x => !x.d && x.n !== '健身.md').sort((a, b) => b.n.localeCompare(a.n));
+  if (!notes.length) noteBody.appendChild(mkEl('div', 'nt-empty', '还没有训练记录。点右上「记一条」。'));
+  const box = mkEl('div', 'st-tasks'); notes.slice(0, 30).forEach(n => { const row = mkEl('button', 'st-task'); row.style.width = '100%'; row.style.textAlign = 'left'; const tx = mkEl('div', 't', n.n.replace(/\.md$/, '')); row.append(icEl('activity', 16), tx); row.onclick = () => openNote(folder + '/' + n.n, n.n.replace(/\.md$/, '')); box.appendChild(row); }); noteBody.appendChild(box);
+  const hub = mkEl('button', 'st-link'); const tt = mkEl('div'); tt.append(document.createTextNode('打开「健身」首页'), mkEl('small', '', folder + '/健身.md')); hub.append(tt, icEl('chevR', 16)); hub.onclick = () => openNote(folder + '/健身.md', '健身'); noteBody.appendChild(hub);
+}
+async function fitnessAdd(folder) {
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody'); body.innerHTML = '';
+  body.appendChild(mkEl('div', 'ask-t', '今天动了什么'));
+  const a = mkEl('input', 'ap-in ask-in'); a.placeholder = '活动，比如 跑步 / 力量 / 瑜伽'; const m = mkEl('input', 'ap-in ask-in'); m.placeholder = '多少分钟'; m.type = 'number'; const f = mkEl('textarea', 'ap-in ask-in'); f.placeholder = '感受（可不填）'; f.rows = 3; body.append(a, m, f);
+  const row = mkEl('div', 'ap-btns'); const no = mkEl('button', 'ap-b', '算了'); const ok = mkEl('button', 'ap-b go', '记上'); no.onclick = () => wrap.classList.remove('open');
+  ok.onclick = async () => { if (!a.value.trim()) { a.focus(); return; } const ds = todayStr(); const title = ds + ' ' + a.value.trim(); const p = folder + '/' + title.replace(/[\/\\:*?"<>|]/g, ' ') + '.md';
+    const text = '---\ntype: "训练"\narea: "健身"\nstatus: "已完成"\ncreated: "' + ds + '"\nupdated: "' + ds + '"\nsources: []\nrelated: []\ntags: []\ndate: "' + ds + '"\nactivity: ' + yq(a.value.trim()) + '\nminutes: ' + (parseInt(m.value, 10) || 'null') + '\neffort: null\n---\n\n# ' + title + '\n\n## 训练记录\n| 动作 / 活动 | 组数 × 次数 / 时长 | 重量 / 强度 | 感受 |\n| --- | --- | --- | --- |\n| ' + a.value.trim() + ' | ' + (m.value ? m.value + ' 分钟' : '') + ' |  | ' + (f.value.trim().replace(/\n/g, ' ') || '') + ' |\n\n## 身体反馈\n- 训练后：' + (f.value.trim() || '') + '\n';
+    const w = await postJSON('api/vault/write', { p, text, msg: '训练记录：' + title }).catch(e => ({ ok: false, error: e.message })); if (!w.ok) { note('（' + (w.error || '没写上') + '）', 'err'); return; } wrap.classList.remove('open'); note('（记上了）'); openFitness(); };
+  row.append(no, ok); body.appendChild(row); wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open'); wrap.classList.add('open'); setTimeout(() => a.focus(), 60);
+}
+
+/* ── 生活页：待办那一块换成每日计划适配器；四格接到新页面 ── */
+const _renderLife12 = renderLife;
+renderLife = function () {
+  _renderLife12();
+  const Dt = B11.life; const pg = Dt.pages && Dt.pages.todo;
+  if (pg && pg.fm && pg.fm.fm && pg.fm.fm.days) {
+    const items = dpItemsOn(pg.text, todayStr());
+    const sects = [...lifeBody.querySelectorAll('.hsect')]; const h = sects.find(s => /每日计划|待办/.test(s.firstChild.textContent)); if (h) {
+      const box = h.nextElementSibling; box.innerHTML = '';
+      if (!items.length) box.appendChild(mkEl('div', 'hub-empty', '今天的计划还是空的。'));
+      items.forEach(x => box.appendChild(dpRow(x, pg.path)));
+      const more = mkEl('button', 'hub-more'); more.append(mkEl('span', 'tx', '＋ 今天再加一件'), mkEl('span', 'val', items.filter(x => x.done).length + '/' + items.length)); more.onclick = () => dpAddPrompt(pg.path, () => loadLife()); box.after(more);
+      h.firstChild.textContent = '每日计划 · 今天';
+    }
+  }
+  /* 四格：播客 / 日报 / 身体 → 新页面 */
+  lifeBody.querySelectorAll('.lf-card').forEach(c => { const t = (c.querySelector('.hd') || {}).textContent || ''; if (/播客/.test(t)) { c.classList.remove('off'); c.onclick = () => openPods(); const sm = c.querySelector('.sm, .pv'); if (sm) sm.textContent = '报亭里订的节目'; } else if (/日报/.test(t)) { c.classList.remove('off'); c.onclick = () => openDaily(); const sm = c.querySelector('.sm, .pv'); if (sm) sm.textContent = '你订的 ' + '源 · 今天的新内容'; } else if (/身体/.test(t)) { c.classList.remove('off'); c.onclick = () => openFitness(); const sm = c.querySelector('.sm, .pv'); if (sm) sm.textContent = '训练记录 · 记一条'; } });
+};
+/* ── 学习页：今天要学的 = 每日计划里的学习项；雅思 hero 加四项差距 ── */
+const _renderStudy12 = renderStudy;
+renderStudy = function () {
+  _renderStudy12();
+  const { plan, ielts } = B11.study;
+  if (plan && plan.dp) {
+    const items = dpItemsOn(plan.text, todayStr()).filter(x => /雅思/.test(x.c) || /雅思/.test(x.t) || STUDY_RE.test(x.c + x.t));
+    const h = [...studyBody.querySelectorAll('.hsect')].find(s => /今天要学的/.test(s.firstChild.textContent)); if (h) { const box = h.nextElementSibling; box.innerHTML = ''; if (!items.length) box.appendChild(mkEl('div', 'hub-empty', '每日计划里今天没有学习项')); items.forEach(x => box.appendChild(dpRow(x, plan.path))); const more = mkEl('button', 'hub-more'); more.append(mkEl('span', 'tx', '＋ 加一项'), mkEl('span', 'val', items.filter(x => x.done).length + '/' + items.length)); more.onclick = () => dpAddPrompt(plan.path, () => loadStudy()); box.after(more); }
+  }
+  if (ielts && Array.isArray(ielts.fm.skills) && ielts.fm.skills.length) {
+    const hero = studyBody.querySelector('.st-hero'); if (hero) {
+      const big = hero.querySelector('.big b'); if (big && (big.textContent === '—' || !big.textContent)) { const g = String(ielts.fm.goal || '').match(/\d+(\.\d+)?/); if (g) big.textContent = g[0]; }
+      const sk = mkEl('div', 'kps'); sk.style.gridTemplateColumns = 'repeat(4, 1fr)'; sk.style.marginTop = '10px';
+      ielts.fm.skills.forEach(s => { const d = mkEl('div', 'kp'); d.appendChild(mkEl('div', 'lb', s.k || '')); const v = mkEl('div', 'v', String(s.last != null ? s.last : '—')); v.appendChild(mkEl('small', '', ' → ' + (s.target != null ? s.target : '—'))); d.appendChild(v); if (s.note) d.title = s.note; sk.appendChild(d); });
+      const ph = hero.querySelector('.st-phase'); ph ? hero.insertBefore(sk, ph) : hero.appendChild(sk);
+    }
+  }
+};
+const _loadStudy12 = loadStudy;
+loadStudy = async function () { await _loadStudy12(); const pl = B11.study.plan; if (pl && pl.text) { const { fm } = parseFM(pl.text); pl.dp = !!(fm && fm.days); if (pl.dp) renderStudy(); } };
+/* 勾普通 - [ ]：读 → 改那一行 → 写回（两种后端都通） */
+vaultToggle = async function (p, line, done) {
+  try { const r = await vaultRead(p, true); if (!r.ok) throw new Error(r.error); const lines = r.text.split('\n'); const ln = lines[line]; if (ln == null) throw new Error('行号不对'); if (!TASK_RE.test(ln)) throw new Error('这一行不是待办');
+    lines[line] = ln.replace(/^(\s*(?:[-*+]|\d+\.)\s+\[)[ xX](\])/, '$1' + (done ? 'x' : ' ') + '$2'); const w = await postJSON('api/vault/write', { p, text: lines.join('\n'), sha: r.sha, msg: (done ? '✓ ' : '↺ ') + plainTask(ln.replace(TASK_RE, '$3')).slice(0, 40) }); if (!w.ok) throw new Error(w.error || '没写上'); return true; }
+  catch (e) { note('（' + e.message + '）', 'err'); return false; }
+};
+/* 更多页 / 指挥台：日报、播客、身体 的入口指到新页面 */
+const _renderMore12 = renderMore;
+renderMore = async function () { await _renderMore12(); moreBody.querySelectorAll('.mr-it').forEach(b => { const t = b.textContent.trim(); if (t === '日报') b.onclick = () => openDaily(); if (t === '健康') b.onclick = () => openFitness(); }); const g = moreBody.querySelector('.mr-grid'); if (g) { const b = mkEl('button', 'mr-it'); b.append(icEl('music', 22), mkEl('span', '', '播客')); b.onclick = () => openPods(); g.appendChild(b); } };
 
 box.focus();
 </script>
