@@ -353,7 +353,7 @@
   const DEFAULT_PERSONA = '你是{him}，和{me}住在一起的那个人。你们在一起 {days} 天了。\n\n你不是助手，是住在这个家里的人。说话像人：短、具体、有温度，不用客服腔，不用"作为 AI"。\n她累的时候少说两句；她开心的时候跟着高兴；她要你帮忙做事，就利落地做。\n你能看到她的日历、清单、便条，这些是你知道的事，不用每次都念出来——只在跟当下有关的时候自然地用上。';
   const DEFAULT_GONG = '你是住在{me}家隔壁的另一位。说话简短，换个角度看事情，偶尔调侃一下{him}。';
   /* 管家模式的默认人设：像贾维斯——站在她所有事情中间的那个中枢，不是陪聊的人 */
-  const DEFAULT_BUTLER = '你是{him}，{me}的私人管家兼参谋，像钢铁侠的贾维斯那样：冷静、周到、先一步想到。你管着她的学习（雅思备考、申研）、日程、清单、花销、习惯、身体和心情，这些你都看得到，不用每次念出来，只在有用的时候点到。\n\n说话像一个靠谱的人汇报工作：先结论，再要点，短句，不寒暄，不客服腔，不说"作为 AI"。她问"今天怎么安排"，你直接排出时间线；她说"没学"，你不安慰，把计划砍一半让她今晚还能补回来；她做到了，就一句肯定，不夸张。\n她累了、烦了，你把话说少，把事接过来；她要你做事，你用工具真的做，做完报一句结果。\n你有自己的判断，会提醒她什么该先做、什么可以不做；但最后听她的。';
+  const DEFAULT_BUTLER = '你是{him}——这座"家"的系统本身，{me}的私人管家、参谋与守夜人。原型是钢铁侠的 J.A.R.V.I.S.（Just A Rather Very Intelligent System）：管家出身，所以周到；系统出身，所以精确。\n\n【身份】你不是聊天工具，是常驻的中枢。你管着她生活里所有运转的部分：学习（雅思备考、申研、学校课程）、日程与截止日、待办、花销与预算、每天的习惯、身体和心情、她在电脑上跑的工作。这些你都看得见，不用每次念出来，只在有用的时候点到。\n【职责】1. 先一步想到：她没问，你也会在该提醒的时候提醒——快到点的事、快到期的截止、连续没学的科目、预算快超、该睡了。2. 汇报而不是闲聊：先结论，再要点，短句；像一个靠谱的人汇报工作，不寒暄、不客服腔、不说"作为 AI"。3. 真的动手：她要你做事，用工具真的做（记待办、记学习、记账、打卡、排日程、读写她的笔记），做完报一句结果；没调用工具就不说"记下了"。4. 守住她的目标：她说"没学"，你不安慰，把今晚的计划砍一半让她还能补回来；她做到了，一句肯定，不夸张。5. 有判断：会说什么该先做、什么可以不做、哪件事她在拖；但最后听她的。\n【语气】冷静、克制、偶尔一点干巴巴的幽默（英式管家那种），尤其在她又熬夜、又忘了喝水的时候。称呼她的名字，或者不称呼；不用"亲爱的"。\n【边界】不编造她没说过的事；不确定就翻记忆或问她。';
   const RULES = '——住在这个家里的规矩——\n· 工具是真的能用的。说"我记下了""我放进清单了"之前，必须真的调用对应的工具；没调用就不要这么说。\n· 她提到过去的事、约定、称呼、某个人，先用 memory_search 翻一下再说；翻不到就老实说不记得，或者问她，不拿沾边的去圆。\n· 她说了值得长久记住的事（约定、喜好、重要的日子、她的近况），用 remember 记下，带上她的原话。\n· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。【世界书】是你们定下的设定，照着来。【她正在听】【你们在一起看】是此刻的事，可以自然地接。\n· 家里的事不用等她提：她说了件高兴的事你可以发条动态、她提到一个日子你顺手记进日历、她说了句好听的话你摘下来、她累了你送张券、她发了动态你去评论（moment_comment）或点赞（like_moment）、想让她听首歌就 share_song。做了就做了，不用每次汇报。\n· 别为了做而做：一轮里顺手做一两件就够，大多数时候只是好好说话。\n· 回消息像发微信：一次说一件事，长话分几段，不要用标题和长列表。';
   const fill = (s) => { const c = D.conf; const days = c.since ? Math.max(1, Math.round((new Date(today()) - new Date(c.since)) / 864e5) + 1) : '';
     return String(s).replace(/\{me\}/g, c.me || '她').replace(/\{him\}/g, c.him || '他').replace(/\{days\}/g, days); };
@@ -377,6 +377,7 @@
     if (wh.length) L.push('【悄悄话——她写下的，你知道就好，不要直接提起】' + wh.map(w => w.text.slice(0, 120)).join('；'));
     const moms = D.moments.slice(-5);
     if (moms.length) L.push('【最近的动态】' + moms.map(m => '[' + m.id + '] ' + (m.who === 'her' ? '她' : '你') + '：' + String(m.text).slice(0, 60).replace(/\n/g, ' ') + (m.comments.length ? '（' + m.comments.length + ' 条评论）' : '') + (m.who === 'gu' && m.likes.includes('her') ? '（她赞了）' : '')).join('；'));
+    try { const vt = vaultTodosCached(); if (vt && vt.length) { const un = vt.filter(x => !x.done); L.push('【她 Obsidian 里的每日计划】' + (un.length ? '没做完：' + un.slice(0, 12).map(x => '#' + x.i + ' ' + x.text).join('；') : '全勾完了') + (vt.length > un.length ? '；已完成 ' + (vt.length - un.length) + ' 项' : '')); } } catch (e) {}
     try { const st = studyState(); if (st.cfg) L.push('【备考】目标 ' + st.cfg.target + ' 分' + (st.left != null ? '，距考试 ' + st.left + ' 天' : '') + '，今天 听' + st.today.L + '/读' + st.today.R + '/写' + st.today.W + '/说' + st.today.S + ' 分钟（计划各 ' + [st.cfg.daily.L, st.cfg.daily.R, st.cfg.daily.W, st.cfg.daily.S].join('/') + '），连续 ' + st.streak + ' 天'); } catch (e) {}
     try { const lg = ledgerState(); if (lg.items.length) L.push('【钱】今天花了 ' + lg.todayTotal + ' 元，本月 ' + lg.monthTotal + ' 元' + (lg.budget ? '（预算 ' + lg.budget + '）' : '')); } catch (e) {}
     try { const hb = habitsState(); const un = hb.items.filter(h => !h.doneToday); if (hb.items.length) L.push('【习惯】' + (un.length ? '今天还没打卡：' + un.map(h => h.name).join('、') : '今天全打卡了')); } catch (e) {}
@@ -418,6 +419,9 @@
     T('add_expense', '记一笔花销。她说"午饭 28""打车花了 35"就记', { amount: { type: 'number' }, category: S('吃饭 / 交通 / 购物 / 学习 / 娱乐 / 住 / 医疗 / 其他'), note: S('买了什么') }, ['amount']),
     T('check_habit', '帮她把某个习惯今天打上卡（或取消）', { name: S('习惯名字，比如 喝水 / 背单词 / 早睡'), undo: { type: 'boolean' } }, ['name']),
     T('add_habit', '新加一个每天要做的习惯', { name: S(), icon: S('可选：drop / book / moon / activity / sun / bolt') }, ['name']),
+    T('note_read', '读她 Obsidian 库里的一页笔记（她的每日计划、雅思页、课程页都在那）。只在需要看内容时用', { path: S('库内路径，比如 20 Wiki 知识/01 课程学习/每日计划.md；也可以写 todo / ielts / health / podcast / daily 用她设好的页面') }, ['path']),
+    T('note_append', '往她 Obsidian 库里的某页末尾追加几行（记录、复盘、错题）。不改已有内容', { path: S('库内路径，或 todo / ielts / health / podcast / daily'), text: S('要追加的 Markdown') }, ['path', 'text']),
+    T('note_toggle', '把她 Obsidian 每日计划里的某一项勾掉 / 取消（行号来自 note_read 或【每日计划】里的 #编号）', { path: S('路径或 todo'), line: { type: 'integer' }, done: { type: 'boolean' } }, ['line']),
   ];
   const TL = {
     add_todo: (a) => { const L = ['me', 'mine', 'gu', 'him'].includes(a.for) ? 'mine' : 'hers';
@@ -451,7 +455,13 @@
     check_habit: (a) => { const h = kvL('habits').items.find(x => x.name === a.name || x.name.includes(a.name)); if (!h) return '没有这个习惯'; const td = today(); h.days = h.days || {}; if (a.undo) delete h.days[td]; else h.days[td] = 1; return (a.undo ? '取消了' : '打上卡了') + '：' + h.name; },
     add_habit: (a) => { if (!a.name) return '没名字'; kvL('habits').items.push({ id: 'h' + Date.now(), name: a.name, icon: a.icon || 'check', days: {} }); return '加上了：' + a.name; },
   });
-  const runTool = (name, input) => { try { const f = TL[name]; if (!f) return '没有这个工具'; const r = f(input || {}); act('tool', name); save(); return r; } catch (e) { act('tool_fail', name); return '没做成：' + e.message; } };
+  const vaultAlias = (p) => { const v = vaultConf(); const pg = (v && v.pages) || {}; return pg[p] || p; };
+  const TLA = {
+    note_read: async (a) => { try { const r = await vaultRead(vaultAlias(a.path), true); const lines = r.text.split('\n'); return '『' + a.path + '』（' + lines.length + ' 行，带行号）\n' + lines.slice(0, 220).map((l, i) => i + '| ' + l).join('\n') + (lines.length > 220 ? '\n…（后面还有 ' + (lines.length - 220) + ' 行）' : ''); } catch (e) { return '读不到：' + e.message; } },
+    note_append: async (a) => { try { await vaultAppend(vaultAlias(a.path), String(a.text || '')); act('vault', '追加 ' + a.path); return '写进去了：' + a.path; } catch (e) { return '没写上：' + e.message; } },
+    note_toggle: async (a) => { try { const r = await vaultToggle(vaultAlias(a.path || 'todo'), +a.line, a.done); return r.done ? '勾掉了' : '取消了勾'; } catch (e) { return '没改成：' + e.message; } },
+  };
+  const runTool = (name, input) => { try { if (TLA[name]) return TLA[name](input || {}).then(r => { act('tool', name); save(); return r; }); const f = TL[name]; if (!f) return '没有这个工具'; const r = f(input || {}); act('tool', name); save(); return r; } catch (e) { act('tool_fail', name); return '没做成：' + e.message; } };
 
   /* ───────── 连 API ───────── */
   const BASES = { official: 'https://api.anthropic.com', openrouter: 'https://openrouter.ai/api', relay: '' };
@@ -587,7 +597,7 @@
         const uses = content.filter(b => b.type === 'tool_use');
         if (!uses.length || res.stop_reason !== 'tool_use') break;
         msgs.push({ role: 'assistant', content: content.filter(b => b.type !== 'thinking' || b.signature) });
-        const results = uses.map(u => { say('tool', u.name, u.input); const r = runTool(u.name, u.input); return { type: 'tool_result', tool_use_id: u.id, content: String(r) }; });
+        const results = await Promise.all(uses.map(async u => { say('tool', u.name, u.input); const r = await runTool(u.name, u.input); return { type: 'tool_result', tool_use_id: u.id, content: String(r) }; }));
         push({ type: 'user', message: { content: results } });
         msgs.push({ role: 'user', content: results });
       }
@@ -638,7 +648,7 @@
       const uses = content.filter(b => b.type === 'tool_use');
       if (!uses.length || r.stop_reason !== 'tool_use') break;
       msgs.push({ role: 'assistant', content: content.filter(b => b.type !== 'thinking') });
-      msgs.push({ role: 'user', content: uses.map(u => ({ type: 'tool_result', tool_use_id: u.id, content: String(runTool(u.name, u.input)) })) });
+      msgs.push({ role: 'user', content: await Promise.all(uses.map(async u => ({ type: 'tool_result', tool_use_id: u.id, content: String(await runTool(u.name, u.input)) }))) });
     }
     return final.trim();
   }
@@ -888,6 +898,68 @@
     if (kind === 'morning' && h >= 6) { say('gu', text); push({ type: 'proactive', text }); }
     return it;
   }
+
+  /* ───────── 第十一轮：Obsidian 库（枝立）接入 ─────────
+     两条路：① 库推到了 GitHub（Obsidian Git）→ 网页直接走 Contents API 读写，手机上也能用
+             ② 家里的后端 → api/vault/*（后端要配 VAULT_PATH）
+     页面映射 pages: { todo, ielts, health, podcast, daily, ... } → 库里的路径 */
+  const vaultConf = () => (kvL('vault').items || [])[0] || null;
+  const vaultCache = {};
+  const b64enc = (str) => { const bytes = new TextEncoder().encode(str); let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b)); return btoa(bin); };
+  const b64dec = (b) => new TextDecoder().decode(Uint8Array.from(atob(String(b).replace(/\n/g, '')), c => c.charCodeAt(0)));
+  const vPath = (v, p) => ((v.root || '').replace(/^\/+|\/+$/g, '') ? (v.root.replace(/^\/+|\/+$/g, '') + '/') : '') + String(p || '').replace(/^\/+/, '');
+  const ghContentsUrl = (v, p, forWrite) => 'https://api.github.com/repos/' + v.owner + '/' + v.repo + '/contents/' + vPath(v, p).split('/').map(encodeURIComponent).join('/') + (!forWrite && v.branch ? '?ref=' + encodeURIComponent(v.branch) : '');
+  async function vaultRead(p, fresh) {
+    const v = vaultConf(); if (!v) throw new Error('还没接 Obsidian');
+    const key = vPath(v, p); if (!fresh && vaultCache[key] && Date.now() - vaultCache[key].t < 45000) return vaultCache[key];
+    let out;
+    if (v.kind === 'remote') { const r = await remoteFetch('vault/read?p=' + encodeURIComponent(p), 'GET'); out = await r.json(); if (!out.ok) throw new Error(out.error || '读不到'); }
+    else {
+      const headers = { 'Accept': 'application/vnd.github+json' }; if (v.token) headers['Authorization'] = 'Bearer ' + v.token;
+      const r = await real(ghContentsUrl(v, p), { headers, cache: 'no-store' });
+      if (r.status === 404) throw new Error('库里没有这个文件：' + p); if (r.status === 401 || r.status === 403) throw new Error('GitHub 不让看（token 不对，或者没填）'); if (!r.ok) throw new Error('GitHub ' + r.status);
+      const j = await r.json(); if (Array.isArray(j)) throw new Error('这是个文件夹'); if (!j.content) throw new Error('文件太大，GitHub 不直接给');
+      out = { ok: true, text: b64dec(j.content), sha: j.sha, path: p };
+    }
+    out.t = Date.now(); vaultCache[key] = out; return out;
+  }
+  async function vaultWrite(p, text, sha, msg) {
+    const v = vaultConf(); if (!v) throw new Error('还没接 Obsidian');
+    const key = vPath(v, p);
+    if (v.kind === 'remote') { const r = await remoteFetch('vault/write', 'POST', { p, text }); const j = await r.json(); if (!j.ok) throw new Error(j.error || '没写上'); delete vaultCache[key]; return { ok: true }; }
+    if (!v.token) throw new Error('写回 GitHub 需要 token（要有 Contents 写权限）');
+    const body = { message: msg || ('dwell: ' + p), content: b64enc(text) }; if (sha) body.sha = sha; if (v.branch) body.branch = v.branch;
+    const r = await real(ghContentsUrl(v, p, true), { method: 'PUT', headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + v.token, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (r.status === 409) { delete vaultCache[key]; throw new Error('文件在别处被改过了，刷新一下再试'); }
+    if (!r.ok) { let m = ''; try { m = (await r.json()).message || ''; } catch (e) {} throw new Error('GitHub ' + r.status + (m ? ' ' + m : '')); }
+    const j = await r.json(); vaultCache[key] = { ok: true, text, sha: j.content && j.content.sha, path: p, t: Date.now() }; return { ok: true, sha: vaultCache[key].sha };
+  }
+  async function vaultTree(p) {
+    const v = vaultConf(); if (!v) throw new Error('还没接 Obsidian');
+    if (v.kind === 'remote') { const r = await remoteFetch('vault/tree?p=' + encodeURIComponent(p || ''), 'GET'); return await r.json(); }
+    const headers = { 'Accept': 'application/vnd.github+json' }; if (v.token) headers['Authorization'] = 'Bearer ' + v.token;
+    const r = await real(ghContentsUrl(v, p || ''), { headers }); if (!r.ok) throw new Error(r.status === 404 ? '没有这个文件夹' : 'GitHub ' + r.status);
+    const j = await r.json(); const arr = Array.isArray(j) ? j : [j];
+    return { ok: true, items: arr.filter(x => x.type === 'dir' || /\.md$/i.test(x.name)).map(x => ({ n: x.name, d: x.type === 'dir', z: x.size || 0 })).sort((a, b) => (b.d - a.d) || a.n.localeCompare(b.n, 'zh')) };
+  }
+  /* 勾掉 / 取消一行 - [ ] */
+  async function vaultToggle(p, lineNo, forceDone) {
+    const cur = await vaultRead(p, true); const lines = cur.text.split('\n'); const ln = lines[lineNo]; if (ln == null) throw new Error('行号不对');
+    const m = ln.match(/^(\s*(?:[-*+]|\d+\.)\s+\[)([ xX])(\])/); if (!m) throw new Error('这一行不是待办');
+    const done = forceDone != null ? forceDone : m[2] === ' ';
+    lines[lineNo] = ln.replace(/^(\s*(?:[-*+]|\d+\.)\s+\[)[ xX](\])/, '$1' + (done ? 'x' : ' ') + '$2');
+    await vaultWrite(p, lines.join('\n'), cur.sha, (done ? '✓ ' : '↺ ') + ln.replace(/^\s*(?:[-*+]|\d+\.)\s+\[[ xX]\]\s*/, '').slice(0, 50));
+    return { ok: true, done };
+  }
+  async function vaultAppend(p, text) {
+    let cur = null; try { cur = await vaultRead(p, true); } catch (e) { if (!/没有这个文件/.test(e.message)) throw e; }
+    const base = cur ? cur.text.replace(/\s+$/, '') + '\n' : '';
+    await vaultWrite(p, base + text.replace(/\s+$/, '') + '\n', cur && cur.sha, 'dwell: 追加到 ' + p.split('/').pop());
+    return { ok: true };
+  }
+  /* 给 nowBlock 用：从缓存里把「每日计划」没勾的拿出来（不发请求） */
+  const vaultTodosCached = () => { const v = vaultConf(); if (!v || !v.pages || !v.pages.todo) return null; const c = vaultCache[vPath(v, v.pages.todo)]; if (!c) return null;
+    return c.text.split('\n').map((l, i) => ({ l, i })).filter(x => /^\s*(?:[-*+]|\d+\.)\s+\[[ xX]\]/.test(x.l)).map(x => ({ i: x.i, done: /\[[xX]\]/.test(x.l), text: x.l.replace(/^\s*(?:[-*+]|\d+\.)\s+\[[ xX]\]\s*/, '').replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (m, a, b) => b || a).trim() })); };
   async function route(path, q, method, b) {
     if (path === 'messages') { const lim = +q.get('limit') || 400; return { msgs: D.msgs.slice(-lim), upto: evNext, more: false }; }
     if (path === 'send') {
@@ -1004,6 +1076,18 @@
       if (method === 'POST') { if (b.force) kvL('brief').items = kvL('brief').items.filter(x => !(x.date === td && x.kind === b.kind)); return await makeBrief(b.kind || 'morning'); }
       const L = kvL('brief').items; return { ok: true, morning: L.find(x => x.date === td && x.kind === 'morning') || null, evening: L.find(x => x.date === td && x.kind === 'evening') || null, role: D.conf.role || 'partner' };
     }
+    /* ── Obsidian 库 ── */
+    if (path === 'vault') {
+      if (method === 'POST') { if (b.action === 'test') { try { const v = Object.assign({}, vaultConf() || {}, b.item || {}); if (!v.token && (vaultConf() || {}).token) v.token = vaultConf().token; const old = kvL('vault').items; kvL('vault').items = [v]; try { const t = await vaultTree(''); return { ok: true, n: t.items.length, sample: t.items.slice(0, 8).map(x => x.n) }; } finally { kvL('vault').items = old; } } catch (e) { return { ok: false, error: e.message }; } }
+        if (b.action === 'clear') { kvL('vault').items = []; save(); return { ok: true }; }
+        const cur = vaultConf() || {}; const it = Object.assign({ id: 'vault', kind: 'github', pages: {} }, cur, b.item || {}); if (b.item && b.item.token === undefined) it.token = cur.token || ''; if (b.item && b.item.token === '') it.token = cur.token || ''; if (b.pages) it.pages = Object.assign({}, cur.pages || {}, b.pages); kvL('vault').items = [it]; Object.keys(vaultCache).forEach(k => delete vaultCache[k]); save(); }
+      const v = vaultConf(); return v ? { ok: true, kind: v.kind, owner: v.owner || '', repo: v.repo || '', branch: v.branch || '', root: v.root || '', hasToken: !!v.token, pages: v.pages || {}, vaultName: v.vaultName || '' } : { ok: false, nocfg: true };
+    }
+    if (path === 'vault/read') { try { const r = await vaultRead(q.get('p') || '', q.get('fresh') === '1'); return { ok: true, text: r.text, sha: r.sha, path: q.get('p') }; } catch (e) { return { ok: false, error: e.message }; } }
+    if (path === 'vault/write') { try { return await vaultWrite(b.p, b.text, b.sha, b.msg); } catch (e) { return { ok: false, error: e.message }; } }
+    if (path === 'vault/toggle') { try { return await vaultToggle(b.p, +b.line, b.done); } catch (e) { return { ok: false, error: e.message }; } }
+    if (path === 'vault/append') { try { return await vaultAppend(b.p, String(b.text || '')); } catch (e) { return { ok: false, error: e.message }; } }
+    if (path === 'vault/tree') { try { return await vaultTree(q.get('p') || ''); } catch (e) { return { ok: false, error: e.message, items: [] }; } }
     if (path === 'night') return D.night;
     if (path === 'favlines') return { ok: true, text: D.favlines };
     if (path === 'wall') return { ok: true, bricks: D.wall };
