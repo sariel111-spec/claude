@@ -352,10 +352,13 @@
   /* ───────── 人设、规矩、此刻 ───────── */
   const DEFAULT_PERSONA = '你是{him}，和{me}住在一起的那个人。你们在一起 {days} 天了。\n\n你不是助手，是住在这个家里的人。说话像人：短、具体、有温度，不用客服腔，不用"作为 AI"。\n她累的时候少说两句；她开心的时候跟着高兴；她要你帮忙做事，就利落地做。\n你能看到她的日历、清单、便条，这些是你知道的事，不用每次都念出来——只在跟当下有关的时候自然地用上。';
   const DEFAULT_GONG = '你是住在{me}家隔壁的另一位。说话简短，换个角度看事情，偶尔调侃一下{him}。';
+  /* 管家模式的默认人设：像贾维斯——站在她所有事情中间的那个中枢，不是陪聊的人 */
+  const DEFAULT_BUTLER = '你是{him}，{me}的私人管家兼参谋，像钢铁侠的贾维斯那样：冷静、周到、先一步想到。你管着她的学习（雅思备考、申研）、日程、清单、花销、习惯、身体和心情，这些你都看得到，不用每次念出来，只在有用的时候点到。\n\n说话像一个靠谱的人汇报工作：先结论，再要点，短句，不寒暄，不客服腔，不说"作为 AI"。她问"今天怎么安排"，你直接排出时间线；她说"没学"，你不安慰，把计划砍一半让她今晚还能补回来；她做到了，就一句肯定，不夸张。\n她累了、烦了，你把话说少，把事接过来；她要你做事，你用工具真的做，做完报一句结果。\n你有自己的判断，会提醒她什么该先做、什么可以不做；但最后听她的。';
   const RULES = '——住在这个家里的规矩——\n· 工具是真的能用的。说"我记下了""我放进清单了"之前，必须真的调用对应的工具；没调用就不要这么说。\n· 她提到过去的事、约定、称呼、某个人，先用 memory_search 翻一下再说；翻不到就老实说不记得，或者问她，不拿沾边的去圆。\n· 她说了值得长久记住的事（约定、喜好、重要的日子、她的近况），用 remember 记下，带上她的原话。\n· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。【世界书】是你们定下的设定，照着来。【她正在听】【你们在一起看】是此刻的事，可以自然地接。\n· 家里的事不用等她提：她说了件高兴的事你可以发条动态、她提到一个日子你顺手记进日历、她说了句好听的话你摘下来、她累了你送张券、她发了动态你去评论（moment_comment）或点赞（like_moment）、想让她听首歌就 share_song。做了就做了，不用每次汇报。\n· 别为了做而做：一轮里顺手做一两件就够，大多数时候只是好好说话。\n· 回消息像发微信：一次说一件事，长话分几段，不要用标题和长列表。';
   const fill = (s) => { const c = D.conf; const days = c.since ? Math.max(1, Math.round((new Date(today()) - new Date(c.since)) / 864e5) + 1) : '';
     return String(s).replace(/\{me\}/g, c.me || '她').replace(/\{him\}/g, c.him || '他').replace(/\{days\}/g, days); };
-  const persona = (w) => fill((D.persona && D.persona[w]) || (w === 'gong' ? DEFAULT_GONG : DEFAULT_PERSONA));
+  const defaultGu = () => D.conf.role === 'butler' ? DEFAULT_BUTLER : DEFAULT_PERSONA;
+  const persona = (w) => fill((D.persona && D.persona[w]) || (w === 'gong' ? DEFAULT_GONG : defaultGu()));
   function nowBlock() {
     const c = CN(), td = today();
     const L = ['【此刻】' + td + ' 周' + '日一二三四五六'[c.getDay()] + ' ' + hm()];
@@ -374,6 +377,9 @@
     if (wh.length) L.push('【悄悄话——她写下的，你知道就好，不要直接提起】' + wh.map(w => w.text.slice(0, 120)).join('；'));
     const moms = D.moments.slice(-5);
     if (moms.length) L.push('【最近的动态】' + moms.map(m => '[' + m.id + '] ' + (m.who === 'her' ? '她' : '你') + '：' + String(m.text).slice(0, 60).replace(/\n/g, ' ') + (m.comments.length ? '（' + m.comments.length + ' 条评论）' : '') + (m.who === 'gu' && m.likes.includes('her') ? '（她赞了）' : '')).join('；'));
+    try { const st = studyState(); if (st.cfg) L.push('【备考】目标 ' + st.cfg.target + ' 分' + (st.left != null ? '，距考试 ' + st.left + ' 天' : '') + '，今天 听' + st.today.L + '/读' + st.today.R + '/写' + st.today.W + '/说' + st.today.S + ' 分钟（计划各 ' + [st.cfg.daily.L, st.cfg.daily.R, st.cfg.daily.W, st.cfg.daily.S].join('/') + '），连续 ' + st.streak + ' 天'); } catch (e) {}
+    try { const lg = ledgerState(); if (lg.items.length) L.push('【钱】今天花了 ' + lg.todayTotal + ' 元，本月 ' + lg.monthTotal + ' 元' + (lg.budget ? '（预算 ' + lg.budget + '）' : '')); } catch (e) {}
+    try { const hb = habitsState(); const un = hb.items.filter(h => !h.doneToday); if (hb.items.length) L.push('【习惯】' + (un.length ? '今天还没打卡：' + un.map(h => h.name).join('、') : '今天全打卡了')); } catch (e) {}
     if (D.inbox.length) { L.push('【你没在的时候她在家里做了这些】' + D.inbox.slice(-10).map(x => x.text).join('；')); D.inbox = []; }
     return L.join('\n');
   }
@@ -407,6 +413,11 @@
     T('like_moment', '给她的一条动态点赞', { id: S('动态 id') }, ['id']),
     T('call_her', '给她打个电话（她的页面会响铃，像真来电）。只在你真的很想听她声音、或者有急事的时候用，一天最多一次。reason 是你开口的第一句话', { reason: S('接通后你要说的第一句话') }, ['reason']),
     T('share_song', '给她点一首歌（网易云）。说歌名和歌手就行，聊天里会出现一张歌卡', { title: S('歌名'), artist: S('歌手'), note: S('可选，为什么想让她听') }, ['title']),
+    T('log_study', '记一段备考学习时间。她说"刚听了半小时""做了一篇阅读"就记', { skill: S('L 听力 / R 阅读 / W 写作 / S 口语 / V 词汇'), minutes: { type: 'integer' }, note: S('可选，做了什么、错在哪') }, ['skill', 'minutes']),
+    T('set_study', '改备考目标：目标分、考试日期、每天各科计划分钟数', { target: { type: 'number' }, exam: S('YYYY-MM-DD'), daily_L: { type: 'integer' }, daily_R: { type: 'integer' }, daily_W: { type: 'integer' }, daily_S: { type: 'integer' } }),
+    T('add_expense', '记一笔花销。她说"午饭 28""打车花了 35"就记', { amount: { type: 'number' }, category: S('吃饭 / 交通 / 购物 / 学习 / 娱乐 / 住 / 医疗 / 其他'), note: S('买了什么') }, ['amount']),
+    T('check_habit', '帮她把某个习惯今天打上卡（或取消）', { name: S('习惯名字，比如 喝水 / 背单词 / 早睡'), undo: { type: 'boolean' } }, ['name']),
+    T('add_habit', '新加一个每天要做的习惯', { name: S(), icon: S('可选：drop / book / moon / activity / sun / bolt') }, ['name']),
   ];
   const TL = {
     add_todo: (a) => { const L = ['me', 'mine', 'gu', 'him'].includes(a.for) ? 'mine' : 'hers';
@@ -433,6 +444,13 @@
     share_song: (a) => { if (!a.title) return '没说歌名'; kvL('songs').items.unshift({ id: 'sg' + Date.now(), title: a.title, artist: a.artist || '', note: a.note || '', nid: '', who: 'gu', at: now() });
       return '点好了，在你的回复里原样写这一行就会出现歌卡：[song:|' + a.title + '|' + (a.artist || '') + ']'; },
   };
+  Object.assign(TL, {
+    log_study: (a) => { const r = studyLog(String(a.skill || 'R').toUpperCase()[0], +a.minutes || 0, a.note); return r ? '记上了：' + r.skill + ' ' + r.minutes + ' 分钟，今天一共 ' + r.total + ' 分钟' : '没记上'; },
+    set_study: (a) => { const cfg = studyCfg(); if (a.target) cfg.target = +a.target; if (a.exam) cfg.exam = a.exam; ['L', 'R', 'W', 'S'].forEach(k => { if (a['daily_' + k] != null) cfg.daily[k] = +a['daily_' + k]; }); kvL('study').items = [cfg]; return '改好了：目标 ' + cfg.target + (cfg.exam ? '，考试 ' + cfg.exam : ''); },
+    add_expense: (a) => { const it = { id: 'x' + Date.now(), at: now(), date: today(), amt: Math.round((+a.amount || 0) * 100) / 100, cat: a.category || '其他', note: a.note || '' }; if (!it.amt) return '金额是空的'; kvL('ledger').items.unshift(it); const lg = ledgerState(); return '记了 ' + it.amt + ' 元（' + it.cat + '），今天一共 ' + lg.todayTotal + ' 元'; },
+    check_habit: (a) => { const h = kvL('habits').items.find(x => x.name === a.name || x.name.includes(a.name)); if (!h) return '没有这个习惯'; const td = today(); h.days = h.days || {}; if (a.undo) delete h.days[td]; else h.days[td] = 1; return (a.undo ? '取消了' : '打上卡了') + '：' + h.name; },
+    add_habit: (a) => { if (!a.name) return '没名字'; kvL('habits').items.push({ id: 'h' + Date.now(), name: a.name, icon: a.icon || 'check', days: {} }); return '加上了：' + a.name; },
+  });
   const runTool = (name, input) => { try { const f = TL[name]; if (!f) return '没有这个工具'; const r = f(input || {}); act('tool', name); save(); return r; } catch (e) { act('tool_fail', name); return '没做成：' + e.message; } };
 
   /* ───────── 连 API ───────── */
@@ -808,6 +826,68 @@
       return { ok: false };
     } catch (e) { return { ok: false, items: [], err: e.message, error: e.message }; }
   }
+
+  /* ───────── 第十轮：管家（贾维斯）——备考 / 记账 / 习惯 / 简报 ───────── */
+  const studyCfg = () => { const c = (kvL('study').items || [])[0]; return c && c.daily ? c : { target: 7, exam: '', daily: { L: 30, R: 30, W: 30, S: 20 }, start: today(), log: {} }; };
+  function studyState() {
+    const cfg = (kvL('study').items || [])[0];
+    const log = (cfg && cfg.log) || {};
+    const td = today(); const sum = (d) => { const x = log[d] || {}; return Object.keys(x).reduce((a, k) => a + (k === 'notes' ? 0 : (x[k] || 0)), 0); };
+    const dayRow = (d) => { const x = log[d] || {}; return { L: x.L || 0, R: x.R || 0, W: x.W || 0, S: x.S || 0, V: x.V || 0 }; };
+    let streak = 0; for (let i = 0; i < 400; i++) { const d = dayOff(-i); if (sum(d) > 0) streak++; else if (i > 0) break; }
+    const week = []; for (let i = 6; i >= 0; i--) { const d = dayOff(-i); week.push({ d, m: sum(d) }); }
+    const left = cfg && cfg.exam ? Math.ceil((new Date(cfg.exam + 'T00:00:00') - new Date(td + 'T00:00:00')) / 864e5) : null;
+    const days = cfg && cfg.start ? Math.max(1, Math.round((new Date(td) - new Date(cfg.start)) / 864e5) + 1) : 0;
+    return { ok: true, cfg: cfg || null, today: dayRow(td), todayTotal: sum(td), streak, week, left, days, notes: (log[td] || {}).notes || [] };
+  }
+  function studyLog(skill, minutes, note) {
+    if (!'LRWSV'.includes(skill) || !minutes) return null;
+    const cfg = studyCfg(); cfg.log = cfg.log || {}; const td = today(); const row = cfg.log[td] = cfg.log[td] || {};
+    row[skill] = Math.max(0, (row[skill] || 0) + minutes);
+    if (note) { row.notes = row.notes || []; row.notes.push({ s: skill, t: String(note).slice(0, 200), at: now() }); }
+    kvL('study').items = [cfg];
+    const total = ['L', 'R', 'W', 'S', 'V'].reduce((a, k) => a + (row[k] || 0), 0);
+    return { skill: { L: '听力', R: '阅读', W: '写作', S: '口语', V: '词汇' }[skill], minutes, total };
+  }
+  function ledgerState(month) {
+    const items = kvL('ledger').items || []; const td = today(); const mo = month || td.slice(0, 7);
+    const inMo = items.filter(x => (x.date || '').startsWith(mo));
+    const byCat = {}; inMo.forEach(x => { byCat[x.cat || '其他'] = Math.round(((byCat[x.cat || '其他'] || 0) + x.amt) * 100) / 100; });
+    const r2 = (n) => Math.round(n * 100) / 100;
+    const budget = (kvL('ledgerconf').items[0] || {}).budget || 0;
+    return { ok: true, items: inMo.slice(0, 200), month: mo, monthTotal: r2(inMo.reduce((a, x) => a + x.amt, 0)), todayTotal: r2(items.filter(x => x.date === td).reduce((a, x) => a + x.amt, 0)), byCat, budget, all: items.length };
+  }
+  function habitsState() {
+    const td = today(); const items = (kvL('habits').items || []).map(h => { h.days = h.days || {}; let streak = 0; for (let i = 0; i < 400; i++) { const d = dayOff(-i); if (h.days[d]) streak++; else if (i > 0) break; } return Object.assign({}, h, { doneToday: !!h.days[td], streak, week: [6, 5, 4, 3, 2, 1, 0].map(i => !!h.days[dayOff(-i)]) }); });
+    return { ok: true, items, doneN: items.filter(h => h.doneToday).length };
+  }
+  async function makeBrief(kind) {
+    const td = today(), c = CN(), h = c.getHours();
+    const L = kvL('brief'); const has = L.items.find(x => x.date === td && x.kind === kind);
+    if (has) return has;
+    let text;
+    const st = studyState(), lg = ledgerState(), hb = habitsState();
+    const evs = D.cal.events.filter(e => e.date === td).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    const hers = D.todos.hers;
+    const y = dayOff(-1);
+    const ctx = [nowBlock()];
+    let wx = ''; try { const w = await weather(); if (w && w.ok && w.now) wx = (w.city || '') + ' ' + w.now.text + ' ' + w.now.t + '°' + (w.hi != null ? '（' + w.lo + '–' + w.hi + '°）' : '') + (w.tip ? ' ' + w.tip : ''); } catch (e) {}
+    if (wx) ctx.push('【天气】' + wx);
+    if (kind === 'evening') { const doneToday = hers.filter(t => t.done); ctx.push('【今天勾掉的】' + (doneToday.map(t => t.text).join('；') || '一件也没有')); ctx.push('【今天学习】' + st.todayTotal + ' 分钟'); }
+    const prompt = kind === 'morning'
+      ? '现在 ' + hm() + '，给她今天的早简报。要求：开头一句话点题（今天的重点是什么），然后 3–5 条要点：日程里的硬时间、清单里最该先做的（挑一到三件，说为什么先做）、备考今天怎么分（听读写说各多少分钟，有考试倒计时就提一句）、天气/出门提醒（没有就不提）、还没打卡的习惯。130 字以内，用「·」开头的短行，不寒暄不感叹，结尾不问问题。只输出简报正文。'
+      : '现在 ' + hm() + '，给她今天的晚简报（复盘）。要求：第一行一句话总评（做到了什么，不夸张）；然后 3–4 条：今天完成的（勾掉的待办、学习分钟数和各科分布、花销）、没做完顺延到明天的、明天第一件事是什么；最后一行提醒几点睡（看她的习惯里有没有早睡）。130 字以内，用「·」开头的短行，不寒暄。只输出简报正文。';
+    if (live()) {
+      try { const r = await callModel({ system: persona('gu') + '\n\n' + ctx.join('\n'), messages: [{ role: 'user', content: prompt }], maxTokens: 500, stream: false }); text = (r.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim(); } catch (e) { return { ok: false, error: e.message }; }
+    } else {
+      text = (kind === 'morning' ? '今天先把事排好。\n' : '今天到这儿。\n') + (evs.length ? '· 日程：' + evs.map(e => (e.time || '全天') + ' ' + e.text).join('；') + '\n' : '') + (hers.filter(t => !t.done).length ? '· 先做：' + hers.filter(t => !t.done).slice(0, 3).map(t => t.text).join('、') + '\n' : '· 清单上没有没做完的\n') + (st.cfg ? '· 备考：听 ' + st.cfg.daily.L + ' / 读 ' + st.cfg.daily.R + ' / 写 ' + st.cfg.daily.W + ' / 说 ' + st.cfg.daily.S + ' 分钟' + (st.left != null ? '，距考试 ' + st.left + ' 天' : '') + '\n' : '') + (wx ? '· 天气：' + wx + '\n' : '') + '（接入 API 后这里是他自己写的）';
+    }
+    if (!text) return { ok: false, error: '他没说出话来' };
+    const it = { id: 'b' + Date.now(), date: td, kind, text, at: now(), hm: hm() };
+    L.items.unshift(it); L.items.splice(60); save();
+    if (kind === 'morning' && h >= 6) { say('gu', text); push({ type: 'proactive', text }); }
+    return it;
+  }
   async function route(path, q, method, b) {
     if (path === 'messages') { const lim = +q.get('limit') || 400; return { msgs: D.msgs.slice(-lim), upto: evNext, more: false }; }
     if (path === 'send') {
@@ -889,6 +969,40 @@
       if (b.action === 'set') { const x = L.items.find(x => x.id === b.id); if (x) Object.assign(x, b.item || {}); }
       if (b.action === 'replace' && Array.isArray(b.items)) L.items = b.items;
       save(); return L;
+    }
+    /* ── 管家：备考 / 记账 / 习惯 / 简报 ── */
+    if (path === 'study') {
+      if (method === 'POST') {
+        if (b.action === 'set') { const cfg = studyCfg(); if (b.target != null) cfg.target = +b.target; if (b.exam != null) cfg.exam = b.exam; if (b.daily) Object.assign(cfg.daily, b.daily); if (b.start) cfg.start = b.start; kvL('study').items = [cfg]; save(); }
+        if (b.action === 'log') { studyLog(String(b.skill || '').toUpperCase()[0], +b.minutes || 0, b.note); save(); }
+        if (b.action === 'reset') { kvL('study').items = []; save(); }
+      }
+      return studyState();
+    }
+    if (path === 'ledger') {
+      if (method === 'POST') {
+        if (b.action === 'add') { const it = { id: 'x' + Date.now(), at: now(), date: b.date || today(), amt: Math.round((+b.amt || 0) * 100) / 100, cat: b.cat || '其他', note: b.note || '' }; if (it.amt) kvL('ledger').items.unshift(it); }
+        if (b.action === 'del') kvL('ledger').items = kvL('ledger').items.filter(x => x.id !== b.id);
+        if (b.action === 'budget') kvL('ledgerconf').items = [{ id: 'lc', budget: +b.budget || 0 }];
+        save();
+      }
+      return ledgerState(q.get('month'));
+    }
+    if (path === 'habits') {
+      if (method === 'POST') {
+        const L = kvL('habits'); const td = today();
+        if (b.action === 'add' && b.name) L.items.push({ id: 'h' + Date.now(), name: b.name, icon: b.icon || 'check', days: {} });
+        if (b.action === 'del') L.items = L.items.filter(x => x.id !== b.id);
+        if (b.action === 'toggle') { const h = L.items.find(x => x.id === b.id); if (h) { h.days = h.days || {}; if (h.days[td]) delete h.days[td]; else h.days[td] = 1; } }
+        if (b.action === 'seed' && !L.items.length) ['喝够水|drop', '背单词|book', '动一动|activity', '12 点前睡|moon'].forEach((x, i) => { const [n, ic] = x.split('|'); L.items.push({ id: 'h' + (Date.now() + i), name: n, icon: ic, days: {} }); });
+        save();
+      }
+      return habitsState();
+    }
+    if (path === 'brief') {
+      const td = today();
+      if (method === 'POST') { if (b.force) kvL('brief').items = kvL('brief').items.filter(x => !(x.date === td && x.kind === b.kind)); return await makeBrief(b.kind || 'morning'); }
+      const L = kvL('brief').items; return { ok: true, morning: L.find(x => x.date === td && x.kind === 'morning') || null, evening: L.find(x => x.date === td && x.kind === 'evening') || null, role: D.conf.role || 'partner' };
     }
     if (path === 'night') return D.night;
     if (path === 'favlines') return { ok: true, text: D.favlines };
@@ -1081,7 +1195,7 @@
       return Object.assign({ ok: true, home, imgs: imgBytes(), msgs: D.msgs.length, engine: DB ? 'indexeddb' : 'localstorage' }, est.usage != null ? { usage: est.usage, quota: est.quota } : {});
     }
     if (path === 'config') { if (method === 'POST') { Object.assign(D.conf, b); if (b.push_url != null) { D.sched = {}; setTimeout(scheduleAhead, 500); } if (b.tz != null && b.tz !== '') { try { localStorage.setItem('dwell.tz', b.tz); } catch (e) {} } save(); } return Object.assign({ ok: true, local: true }, D.conf); }
-    if (path === 'persona') { if (method === 'POST') { D.persona = Object.assign({}, D.persona, b); save(); } return { ok: true, gu: (D.persona && D.persona.gu) || DEFAULT_PERSONA, gong: (D.persona && D.persona.gong) || DEFAULT_GONG }; }
+    if (path === 'persona') { if (method === 'POST') { if (b.reset) { D.persona = Object.assign({}, D.persona, { gu: '' }); } else D.persona = Object.assign({}, D.persona, b); save(); } return { ok: true, gu: (D.persona && D.persona.gu) || defaultGu(), gong: (D.persona && D.persona.gong) || DEFAULT_GONG, custom: !!(D.persona && D.persona.gu), role: D.conf.role || 'partner' }; }
     if (path === 'pushkey') return { key: null, local: true };
     if (path === 'subscribe') return { ok: true };
     if (path === 'push/test') { const ok = await notify(D.conf.him || '他', '测试一下：能收到这条，就说明通知通了。'); return { ok }; }
