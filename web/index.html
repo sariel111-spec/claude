@@ -10842,7 +10842,7 @@ function renderHub() {
   const st = Dt.study && Dt.study.cfg ? Dt.study : null;
   if (st && st.left != null && st.left >= 0) { eye.append(mkEl('i'), mkEl('span', '', '距雅思 ' + st.left + ' 天')); }
   head.appendChild(eye);
-  head.appendChild(mkEl('h1', '', greetWord(h) + '，' + (HOME.me || '')));
+  head.appendChild(mkEl('h1', '', greetWord(h) + (HOME.me && !['我', '她', '你'].includes(HOME.me) ? '，' + HOME.me : '')));
   const bf = Dt.brief || {}; const kind = h >= 18 ? 'evening' : 'morning'; const cur = bf[kind] || bf.morning || null;
   const hers = (Dt.todos && Dt.todos.hers) || [];
   const undone = hers.filter(x => !x.done);
