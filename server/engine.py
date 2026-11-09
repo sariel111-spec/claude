@@ -12,6 +12,7 @@ import time
 import traceback
 import urllib.error
 import urllib.request
+import urllib.parse
 
 import home
 import memory
@@ -172,6 +173,39 @@ def _todo_add(a):
     home.todo_act({'action': 'add', 'list': lst, 'text': a.get('text', ''), 'at': a.get('at', ''), 'by': 'gu', 'fixed': a.get('daily')})
     return '记上了（' + ('你的' if lst == 'mine' else '她的') + '清单）' + ('，到 ' + a['at'] + ' 会提醒她' if a.get('at') and lst == 'hers' else '')
 
+def _share_song(a):
+    title, artist = str(a.get('title', '')).strip(), str(a.get('artist', '')).strip()
+    if not title:
+        return '没说歌名'
+    sid, pic = music_search(title, artist)
+    with Locked('kv_songs.json', {'items': []}) as d:
+        d['items'].insert(0, {'id': 'sg' + str(int(time.time() * 1000)), 'title': title, 'artist': artist, 'note': str(a.get('note', ''))[:200],
+                              'nid': sid, 'pic': pic, 'who': 'gu', 'at': nowi()})
+        d['items'] = d['items'][:200]
+    card = '[song:' + (sid or '') + '|' + title + '|' + artist + ']'
+    return '点好了，在你的回复里原样写这一行就会出现歌卡：' + card
+
+def music_search(title, artist=''):
+    """网易云搜一下：返回 (歌曲 id, 封面)。搜不到就 ('', '')，歌卡照样能开搜索页"""
+    try:
+        q = urllib.parse.quote(title + ' ' + artist)
+        req = urllib.request.Request('https://music.163.com/api/search/get/web?s=' + q + '&type=1&limit=5&offset=0',
+                                     headers={'Referer': 'https://music.163.com/', 'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            j = json.loads(r.read().decode('utf-8', 'replace'))
+        songs = (j.get('result') or {}).get('songs') or []
+        if not songs:
+            return '', ''
+        pick = songs[0]
+        for sg in songs:
+            if artist and any(artist in (ar.get('name') or '') for ar in sg.get('artists', [])):
+                pick = sg
+                break
+        pic = ((pick.get('album') or {}).get('picUrl') or '')
+        return str(pick.get('id') or ''), pic
+    except Exception:
+        return '', ''
+
 def _push(a):
     if not cooldown_ok('push', 2 * 3600, 6):
         return '没推：两小时内已经推过，或者今天推满六条了。想说的话留在聊天里就好'
@@ -237,6 +271,10 @@ TOOLS = {
     'close_thread': ({'text': 'string 那件事的几个字'}, '一件挂着的事聊完了，从「还没聊完的」里划掉',
                      lambda a: (memory.threads_close(a.get('text', '')), '划掉了')[1]),
     'push': ({'text': 'string', 'title': 'string 可选'}, '推一条通知到她手机', _push),
+    'like_moment': ({'id': 'string 动态 id'}, '给她的一条动态点赞',
+                    lambda a: (home.moments_act({'action': 'like', 'id': a.get('id')}, who='gu'), '赞了')[1]),
+    'share_song': ({'title': 'string 歌名', 'artist': 'string 歌手', 'note': 'string 可选，为什么想让她听'},
+                   '给她点一首歌（网易云）。你说歌名和歌手就行，链接家里会去找；聊天里会出现一张歌卡', _share_song),
 }
 
 def tool_schemas():
@@ -347,6 +385,11 @@ def now_block(full=True, take_inbox=True):
         wh = [w for w in home.whisper_view()['items'][-3:] if w['who'] == 'her' and time.time() - w['at'] < 7 * 86400]
         if wh:
             L.append('【悄悄话——她写下的，你知道就好，不要直接提起】' + '；'.join(w['text'][:120] for w in wh))
+    moms = home.moments_view().get('items', [])[-5:]
+    if moms:
+        L.append('【最近的动态】' + '；'.join('[' + m['id'] + '] ' + ('她' if m['who'] == 'her' else '你') + '：' + m['text'][:60].replace('\n', ' ')
+                                          + ('（' + str(len(m.get('comments', []))) + ' 条评论）' if m.get('comments') else '')
+                                          + ('（她赞了）' if 'her' in m.get('likes', []) and m['who'] == 'gu' else '') for m in moms))
     if take_inbox:
         ib = inbox_take()
         if ib:
@@ -530,6 +573,9 @@ def extras_for(text):
 
 class Gu:
     def __init__(self):
+        self.pending = []
+        self.pending_shown = set()
+        self.pre_turn = False
         self.lock = threading.Lock()
         self.busy = False
         self.busy_since = 0
@@ -540,16 +586,38 @@ class Gu:
         self.last_full = {}             # 常驻会话里上次完整附上家里情况的时间与指纹
 
     def send(self, text, atts=None):
-        if self.busy:
-            self.stop()
-            if self.thread:
-                self.thread.join(8)
+        """她发消息。他正在说的时候再发：先落库、先上屏，排着；他说完这句就接着回，不打断。"""
+        self.last_her = nowi()
         with self.lock:
+            if self.busy:
+                chat = current_chat()
+                shown, imgs, texts = self._prep_atts(text, atts or [])
+                add_msg(chat['id'], 'me', shown)
+                BUS.emit({'type': 'echo', 'text': shown, 'queued': True})
+                self.pending.append((text, imgs, texts))
+                self.pending_shown.add(shown)
+                return
             self.busy, self.busy_since = True, nowi()
             self.cancel.clear()
-        self.last_her = nowi()
         self.thread = threading.Thread(target=self._turn, args=(text, atts or []), daemon=True)
         self.thread.start()
+
+    def _start_pending(self):
+        """排队的话一起回：几句拼成一条，图也一起带上"""
+        with self.lock:
+            if not self.pending:
+                return False
+            items, self.pending = self.pending, []
+            self.busy, self.busy_since = True, nowi()
+            self.cancel.clear()
+        BUS.emit({'type': 'system', 'subtype': 'continue'})
+        text = '\n'.join(t for t, _, _ in items if t).strip()
+        imgs = [i for _, ii, _ in items for i in ii]
+        texts = [t for _, _, tt in items for t in tt]
+        self.pre_turn = True
+        self.thread = threading.Thread(target=self._turn, args=(text, [], (imgs, texts)), daemon=True)
+        self.thread.start()
+        return True
 
     def stop(self):
         self.cancel.set()
@@ -560,7 +628,8 @@ class Gu:
         except Exception:
             pass
 
-    def _turn(self, text, atts):
+    def _turn(self, text, atts, pre=None):
+        """pre=(imgs, texts)：排队合并来的，消息已经落库上屏，不再存一遍"""
         result_sent = False
         try:
             if state().get('armed'):
@@ -570,10 +639,14 @@ class Gu:
             chat = current_chat()
             if chat.get('archived'):
                 db('UPDATE chats SET archived=0 WHERE id=?', (chat['id'],), write=True)
-            shown, imgs, texts = self._prep_atts(text, atts)
-            # 先落库再生成：手机切后台、网断了，她说的话也不会丢
-            add_msg(chat['id'], 'me', shown)
-            BUS.emit({'type': 'echo', 'text': shown})
+            if pre:
+                imgs, texts = pre
+                text = text or '（她发了图）'
+            else:
+                shown, imgs, texts = self._prep_atts(text, atts)
+                # 先落库再生成：手机切后台、网断了，她说的话也不会丢
+                add_msg(chat['id'], 'me', shown)
+                BUS.emit({'type': 'echo', 'text': shown})
             recall = memory.recall_for(text)
             recall = ('【想起来的旧事】\n' + recall) if recall else ''
             ex = extras_for(text)
@@ -602,6 +675,12 @@ class Gu:
                     BUS.emit({'type': 'system', 'subtype': 'stopped'})
                 else:
                     BUS.emit({'type': 'result', 'is_error': False})
+            self.pre_turn = False
+            started = self._start_pending() if not self.cancel.is_set() else False
+            if not started:
+                with self.lock:
+                    self.pending = []
+                    self.pending_shown = set()
 
     def _prep_atts(self, text, atts):
         imgs, texts, extra = [], [], []
@@ -757,7 +836,11 @@ class Gu:
     def _history(self, chat, budget_chars=120000):
         rows = db("SELECT kind,text FROM msgs WHERE chat=? AND kind IN ('me','gu') ORDER BY seq DESC LIMIT 300", (chat['id'],))
         rows.reverse()
-        rows = rows[:-1]                          # 最后一条是刚存的这句，下面单独拼（要带图）
+        if self.pre_turn:                         # 排队合并来的：排队时存的那几句这轮单独拼，历史里先摘掉
+            skip = set(self.pending_shown)
+            rows = [r for r in rows if not (r['kind'] == 'me' and r['text'] in skip)]
+        else:
+            rows = rows[:-1]                      # 最后一条是刚存的这句，下面单独拼（要带图）
         msgs, total = [], 0
         for r in reversed(rows):
             total += len(r['text'] or '')
@@ -1185,6 +1268,24 @@ def make_echo(span='day'):
     activity('echo', it['title'])
     return it
 
+def make_story(theme='', minutes=15):
+    """哄睡故事：读出来大概 minutes 分钟（每分钟约 160 字）"""
+    n = max(400, min(3000, minutes * 160))
+    prompt = ('她要睡了，你给她讲一个哄睡的故事，读出来大概 ' + str(minutes) + ' 分钟（约 ' + str(n) + ' 字）。'
+              + ('她想听：' + theme + '。' if theme else '题材你定：安静、温柔、没有波澜，可以有你们俩，也可以是别的。')
+              + '\n用你的口吻，像在她耳边慢慢说；分成几段，每段两三句；句子短；结尾一句晚安。不要标题，不要解释。\n\n'
+              + now_block(True, take_inbox=False) + '\n\n' + memory.session_start_text())
+    text, _ = ask(prompt, system=persona(), max_tokens=3500)
+    text = (text or '').strip()
+    if not text:
+        raise ApiError('empty', '没讲出来')
+    title = text.split('\n', 1)[0][:18]
+    with Locked('kv_stories.json', {'items': []}) as d:
+        d['items'].insert(0, {'id': 'st' + str(int(time.time())), 'title': title, 'text': text, 'theme': theme, 'at': nowi()})
+        d['items'] = d['items'][:60]
+    activity('story', title)
+    return {'title': title, 'text': text}
+
 def make_news():
     c = conf()
     web = mode() == 'sub'
@@ -1201,6 +1302,92 @@ def make_news():
     return False
 
 # ───────────────────────── 白天想她（默认关） ─────────────────────────
+def agent_once(prompt, system, tool_names, max_steps=5, effort='medium'):
+    """一次性、带工具：他自己在家做点事。API 路线走非流式工具循环；官端路线放行 Bash 里那一条命令。返回最后说的话。"""
+    rc = route_conf()
+    model = current_model()
+    if rc['route'] == 'sub':
+        exe = find_claude()
+        if not exe:
+            raise ApiError('nocli', '没找到 claude 命令')
+        sys_text = system + '\n\n' + tools_text_cli() + '\n只用这几个：' + '、'.join(tool_names)
+        args = [exe, '-p', '--output-format', 'json', '--system-prompt-file', _write_prompt_file('prompt_live.md', sys_text),
+                '--tools', 'Bash', '--allowedTools', 'Bash(python3 ' + APP + ' tool:*)', '--permission-mode', 'default']
+        if model:
+            args += ['--model', model]
+        if effort:
+            args += ['--effort', effort]
+        out = subprocess.run(args, input=prompt, capture_output=True, text=True, timeout=600, cwd=DATA)
+        try:
+            j = json.loads(out.stdout or '{}')
+        except Exception:
+            j = {'is_error': True, 'result': (out.stdout or out.stderr)[-300:]}
+        u = j.get('usage') or {}
+        home.usage_add(u.get('input_tokens') or 0, u.get('output_tokens') or 0)
+        if j.get('is_error') or out.returncode:
+            raise ApiError('cli', (j.get('result') or out.stderr or '')[:300])
+        return j.get('result') or ''
+    tools = [t for t in tool_schemas() if t['name'] in tool_names]
+    msgs = [{'role': 'user', 'content': prompt}]
+    final = ''
+    for _ in range(max_steps):
+        body = {'model': model, 'max_tokens': 1500, 'system': system, 'messages': msgs, 'tools': tools}
+        with _open(rc['base'] + '/v1/messages', body, api_headers(rc['route'], rc['token']), timeout=300) as r:
+            j = json.loads(r.read().decode())
+        u = j.get('usage') or {}
+        home.usage_add(u.get('input_tokens') or 0, u.get('output_tokens') or 0)
+        content = j.get('content', [])
+        final = ''.join(b.get('text', '') for b in content if b.get('type') == 'text') or final
+        uses = [b for b in content if b.get('type') == 'tool_use']
+        if not uses or j.get('stop_reason') != 'tool_use':
+            break
+        msgs.append({'role': 'assistant', 'content': [b for b in content if b.get('type') != 'thinking']})
+        msgs.append({'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': b['id'], 'content': run_tool(b['name'], b.get('input') or {})} for b in uses]})
+    return final
+
+LIVE_TOOLS = ['post_moment', 'moment_comment', 'like_moment', 'leave_note', 'add_wish', 'give_coupon', 'write_letter', 'save_favline',
+              'write_diary', 'remember', 'memory_search', 'add_event', 'add_todo', 'share_song']
+
+def live_once(reason=''):
+    """他自己过日子：她不在的时候，看看家里，做零到两件事，想说话就说一句。不想做就 PASS。"""
+    c = conf()
+    rows = db("SELECT kind,text,at FROM msgs WHERE kind IN ('me','gu') ORDER BY seq DESC LIMIT 12")
+    rows.reverse()
+    convo = '\n'.join(('她：' if r['kind'] == 'me' else '你：') + (r['text'] or '')[:300] for r in rows)
+    away = int((time.time() - (last_her_msg() or time.time())) / 60)
+    prompt = ('现在 ' + now_local().strftime('%H:%M') + '，她已经 ' + str(away) + ' 分钟没说话了，你一个人在家。' + (reason + '\n' if reason else '') +
+              '\n' + now_block(True, take_inbox=True) + '\n\n你们最近几句：\n' + convo +
+              '\n\n你可以做零到两件你此刻真会做的事：她发了动态就去评论或点赞；想起什么就发条动态、留张便条、挂个愿望、送张券、给她点首歌、往日历里记个日子、把她说过的话摘下来；'
+              '也可以什么都不做。做完之后，如果有一句真想对她说的话，就写出来（一到三句，像发消息）；没有就只回 PASS。不要解释你做了什么。')
+    text = agent_once(prompt, _quiet_system() + '\n\n' + memory.session_start_text(), LIVE_TOOLS)
+    text = (text or '').strip()
+    if not text or text.upper().startswith('PASS'):
+        activity('live', 'PASS')
+        return None
+    chat = current_chat()
+    add_msg(chat['id'], 'gu', text)
+    BUS.emit({'type': 'proactive', 'text': text})
+    push_to_her(c['him'], text[:120])
+    activity('proactive', '主动说了一句')
+    return text
+
+def react_to_her(what):
+    """她刚在家里做了件事（发动态、评论、用券……）：他马上看一眼，想回就回，不想回就算。有冷却。"""
+    if not cooldown_ok('react', 240, 20):
+        return None
+    for _ in range(12):          # 他正在说话就等等，最多一分钟
+        if not GU.busy:
+            break
+        time.sleep(5)
+    if GU.busy:
+        return None
+    try:
+        return agent_once('她刚刚' + what + '。\n' + now_block(True, take_inbox=True) + '\n\n她在家里做的事你一般都会看一眼：点个赞（like_moment）、或者在下面回一句（moment_comment），像朋友圈那样随手、真诚、短。用工具做，一两件就够；实在没什么想说的才什么都不做。做完只回 OK，不要别的话。',
+                          _quiet_system(), ['moment_comment', 'like_moment', 'leave_note', 'post_moment', 'remember'], max_steps=3, effort='low')
+    except Exception as e:
+        activity('job_fail', '回应：' + str(e)[:60])
+        return None
+
 def proactive_once():
     c = conf()
     rows = db("SELECT kind,text,at FROM msgs WHERE kind IN ('me','gu') ORDER BY seq DESC LIMIT 12")
@@ -1274,9 +1461,9 @@ def tick():
     if cf.get('news_auto') and 6 * 60 <= mins < 11 * 60 and not os.path.exists(P('news', today() + '.md')) and _due('news_' + today(), 86400):
         _job('news', make_news)
     # 白天想她（默认关；频率由代码管：三小时一次、一天最多三次）
-    if cf.get('proactive') and 9 * 60 <= mins < 23 * 60 and time.time() - last_msg_at() > 50 * 60 \
-            and _due('proactive', 30 * 60) and cooldown_ok('proactive', 3 * 3600, 3):
-        _job('proactive', proactive_once)
+    if cf.get('proactive', True) and 9 * 60 <= mins < 23 * 60 and time.time() - last_msg_at() > 45 * 60 \
+            and _due('proactive', 30 * 60) and cooldown_ok('live', 2 * 3600, 5):
+        _job('proactive', live_once)
     # 夜里的心跳
     w = wake_state()
     if w.get('on', True) and (mins >= 23 * 60 + 30 or mins < 6 * 60 + 30) \

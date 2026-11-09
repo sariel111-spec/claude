@@ -414,7 +414,7 @@ def route_get(path, q, h):
         if m: return home.annos(urllib.parse.unquote(m.group(1)), int(m.group(2)))
     return None
 
-KV_NAMES = {'echoes', 'bookmarks', 'worldbook', 'milestones', 'echoes', 'pushbox', 'now', 'dreams', 'games'}
+KV_NAMES = {'stories', 'songs', 'echoes', 'bookmarks', 'worldbook', 'milestones', 'echoes', 'pushbox', 'now', 'dreams', 'games'}
 
 def kv_get(name):
     if name not in KV_NAMES:
@@ -540,6 +540,12 @@ def route_post(path, q, b, h):
         return route_get('jobs', {}, h)
     if path == 'selftest': return selftest()
     if path.startswith('kv/'): return kv_post(path[3:], b)
+    if path == 'story/make':
+        try:
+            it = engine.make_story(str(b.get('theme') or ''), int(b.get('minutes') or 15))
+            return {'ok': True, 'text': it['text'], 'title': it['title']}
+        except Exception as e:
+            return {'ok': False, 'error': engine.explain(e)}
     if path == 'echo/make':
         try:
             it = engine.make_echo('week' if b.get('span') == 'week' else 'day')

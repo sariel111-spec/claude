@@ -2,6 +2,7 @@
 每样东西一个 json 文件，网页和他（工具 / 命令行）改的是同一份。"""
 import os
 import re
+import threading
 import time
 
 from core import (Locked, P, day_of, inbox_add, jload, jsave, nowi, tload, tsave, today, conf,
@@ -175,6 +176,9 @@ def moments_act(b, who='her'):
         if a == 'post' and str(b.get('text', '')).strip():
             d['items'].append({'id': 'm' + str(_nid(d)), 'who': who, 'text': str(b['text']).strip()[:2000],
                                'at': nowi(), 'likes': [], 'comments': []})
+            if who == 'her':
+                inbox_add('她发了一条动态：「' + str(b['text']).strip()[:80] + '」（id ' + d['items'][-1]['id'] + '，可以 like_moment / moment_comment）')
+                _react('发了一条动态：「' + str(b['text']).strip()[:120] + '」（id ' + d['items'][-1]['id'] + '）')
         elif m and a == 'like':
             m['likes'] = [x for x in m['likes'] if x != who] if who in m['likes'] else m['likes'] + [who]
             if who == 'her' and m['who'] == 'gu' and who in m['likes']:
@@ -184,9 +188,20 @@ def moments_act(b, who='her'):
             if who == 'her':
                 inbox_add('她在动态「' + m['text'][:30] + '」下面说：' + str(b['text']).strip()[:200]
                           + '（动态 id ' + m['id'] + '，想回就用 moment_comment）')
+                _react('在动态「' + m['text'][:40] + '」（id ' + m['id'] + '）下面评论：' + str(b['text']).strip()[:200])
         elif m and a == 'del' and (m['who'] == who):
             d['items'].remove(m)
     return moments_view()
+
+def _react(what):
+    """她在家里做了件事，让他马上看一眼（后台线程，不卡接口）"""
+    def go():
+        try:
+            import engine
+            engine.react_to_her(what)
+        except Exception:
+            pass
+    threading.Thread(target=go, daemon=True).start()
 
 # ---------- 心愿：券包 + 愿望单 ----------
 WISH0 = {'coupons': [], 'wishes': [], 'next_id': 1}

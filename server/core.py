@@ -79,7 +79,7 @@ DEFAULT_CONF = {
     'push_url': '',           # 兜底推送：Bark / ntfy / 任意收 POST 的地址
     'claude_bin': 'claude',   # 官端订阅用的命令
     'news_auto': True,        # 每天早上让他排一份日报
-    'proactive': False,       # 白天他会不会主动找你（三小时最多一次、一天最多三次）
+    'proactive': True,        # 白天她不在时他自己过日子：发动态、评论、留便条，偶尔说一句（两小时最多一次、一天最多五次）
     'roll_at': None,          # 常驻会话用到多少 token 就换口气；不填按模型窗口的 60% 算
     'work_dir': '',           # 工作间的默认目录；不填就是家目录
     'daily_token_budget': 2000000,
@@ -240,7 +240,7 @@ def push_to_her(title, body, url='./'):
                 full = u.rstrip('/') + '/' + urllib.parse.quote(title) + '/' + urllib.parse.quote(body)
                 urllib.request.urlopen(full, timeout=8).read()
             elif 'ntfy' in u:
-                req = urllib.request.Request(u, data=body.encode(), headers={'Title': title.encode('utf-8').decode('latin-1', 'ignore') or 'home'})
+                req = urllib.request.Request(u, data=body.encode(), headers={'Title': '=?UTF-8?B?' + base64.b64encode(title.encode('utf-8')).decode() + '?='})
                 urllib.request.urlopen(req, timeout=8).read()
             else:
                 req = urllib.request.Request(u, data=json.dumps({'title': title, 'body': body}).encode(),
