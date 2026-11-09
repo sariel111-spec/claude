@@ -2375,6 +2375,128 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .hub-fab button { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; background: var(--text); color: var(--bg); font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
   .hub-fab button .ic { width: 16px; height: 16px; }
   body.butler #navWe, body.butler #navLetter, body.butler #navMom, body.butler #navWish, body.butler #navSleep, body.butler #recGong, body.butler .dr-head { display: none !important; }
+
+  /* ═══ 第十一轮：管家模式的壳——底部标签栏、学习 / 生活 / 更多 / 笔记页 ═══ */
+  #navListen { display: none !important; }
+  .tabbar { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; padding: 6px 10px calc(8px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); border-top: 1px solid var(--line); }
+  body.butler .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .tabbar button { display: grid; justify-items: center; gap: 3px; padding: 6px 0 4px; border-radius: 14px; color: var(--dim); font-size: 10.5px; letter-spacing: .04em; position: relative; }
+  .tabbar button .ic { width: 20px; height: 20px; }
+  .tabbar button.on { color: var(--text); }
+  .tabbar button.on::after { content: ''; position: absolute; top: 0; width: 18px; height: 2px; border-radius: 2px; background: var(--accent); }
+  body.butler footer { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+  body.butler #log { padding-bottom: 70px; }
+  body.butler .sheetWrap.page .body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  body.butler #pet { display: none; }
+  body.butler #menuBtn .ic { transform: rotate(0); }
+  body.butler .hub-fab { display: none; }
+  /* 页头统一 */
+  .pg-head { padding: 2px 4px 14px; display: flex; align-items: flex-end; gap: 12px; }
+  .pg-head h1 { font-family: var(--serif); font-weight: 500; font-size: 28px; line-height: 1.1; margin: 0; }
+  .pg-head .sub { font-size: 12.5px; color: var(--dim); margin-bottom: 4px; }
+  .pg-head .sp { flex: 1; }
+  .pg-head .chip { font-size: 12px; }
+  /* 学习 */
+  .st-hero { border-radius: 24px; padding: 18px 18px 16px; background: linear-gradient(150deg, var(--card), var(--panel)); border: 1px solid var(--line); position: relative; overflow: hidden; }
+  .st-hero::after { content: 'IELTS'; position: absolute; right: 14px; top: 10px; font-family: var(--serif); font-size: 54px; letter-spacing: .06em; color: var(--line); opacity: .9; pointer-events: none; }
+  .st-hero .eb { font-size: 11.5px; color: var(--dim); letter-spacing: .1em; }
+  .st-hero .big { display: flex; align-items: baseline; gap: 14px; margin-top: 6px; position: relative; }
+  .st-hero .big b { font-family: var(--serif); font-weight: 500; font-size: 46px; line-height: 1; }
+  .st-hero .big span { font-size: 13px; color: var(--dim); }
+  .st-hero .kps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; position: relative; }
+  .st-hero .kp { background: var(--card); border-radius: 14px; padding: 10px 12px; border: 1px solid var(--line); }
+  .st-hero .kp .lb { font-size: 11px; color: var(--dim); letter-spacing: .06em; }
+  .st-hero .kp .v { font-family: var(--serif); font-size: 22px; line-height: 1.1; margin-top: 2px; }
+  .st-hero .kp .v small { font-size: 11.5px; color: var(--dim); margin-left: 2px; }
+  .st-phase { margin-top: 12px; background: var(--text); color: var(--bg); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; }
+  .st-phase .lb { font-size: 11px; letter-spacing: .1em; opacity: .7; }
+  .st-phase .nm { font-family: var(--serif); font-size: 18px; }
+  .st-phase .tx { font-size: 13px; line-height: 1.5; opacity: .9; }
+  .st-tasks { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 6px 14px; }
+  .st-task { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .st-task:first-child { border-top: 0; }
+  .st-task .bx { flex: none; width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid var(--dim); display: grid; place-items: center; margin-top: 1px; color: transparent; }
+  .st-task.done .bx { background: var(--sage); border-color: var(--sage); color: #fff; }
+  .st-task .t { flex: 1; font-size: 15px; line-height: 1.45; }
+  .st-task.done .t { color: var(--dim); text-decoration: line-through; }
+  .st-task .t small { display: block; color: var(--dim); font-size: 12px; margin-top: 2px; }
+  .st-task .bx .ic { width: 13px; height: 13px; }
+  .st-rhythm { display: grid; gap: 8px; }
+  .st-rh { display: flex; gap: 10px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; font-size: 14px; line-height: 1.45; }
+  .st-rh b { flex: none; font-weight: 500; color: var(--accent); min-width: 34px; font-size: 12.5px; padding-top: 2px; }
+  .st-routine { display: grid; gap: 6px; }
+  .st-ro { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+  .st-ro i { flex: none; width: 40px; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--dim); font-size: 12.5px; }
+  .st-notes { display: grid; gap: 6px; }
+  .st-note { background: var(--panel); border-radius: 14px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; }
+  .st-note b { font-weight: 500; color: var(--accent); margin-right: 6px; }
+  .st-link { display: flex; align-items: center; justify-content: space-between; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; font-size: 14px; text-align: left; }
+  .st-link small { color: var(--dim); display: block; font-size: 12px; margin-top: 2px; }
+  .st-link .ic { width: 16px; height: 16px; color: var(--dim); flex: none; }
+  /* 生活 */
+  .lf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lf-card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; text-align: left; display: grid; gap: 6px; align-content: start; min-height: 96px; }
+  .lf-card .hd { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+  .lf-card .hd .ic { width: 15px; height: 15px; color: var(--accent); }
+  .lf-card .v { font-family: var(--serif); font-size: 26px; line-height: 1.1; }
+  .lf-card .v small { font-size: 12px; color: var(--dim); margin-left: 3px; }
+  .lf-card .sm { font-size: 12.5px; color: var(--dim); line-height: 1.4; }
+  .lf-card.off { border-style: dashed; }
+  .lf-card .pv { font-size: 13px; line-height: 1.45; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  /* 更多 */
+  .mr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .mr-it { display: grid; justify-items: center; gap: 7px; padding: 14px 4px 10px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); font-size: 12px; color: var(--text); }
+  .mr-it .ic { width: 22px; height: 22px; color: var(--accent); }
+  .mr-it:active { transform: scale(.96); }
+  .mr-sys { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 6px 14px; }
+  .mr-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .mr-row:first-child { border-top: 0; }
+  .mr-row .k { color: var(--dim); flex: none; width: 76px; font-size: 13px; }
+  .mr-row .v { flex: 1; }
+  .mr-row .v small { color: var(--dim); display: block; font-size: 12px; margin-top: 1px; }
+  .mr-row .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex: none; }
+  .mr-row .dot.ok { background: var(--green); }
+  .mr-row .dot.bad { background: var(--red); }
+  .mr-row .dot.warn { background: var(--amber); }
+  .mr-row button.chip { font-size: 12px; }
+  /* 笔记页 */
+  .nt-body { font-size: 15px; line-height: 1.65; }
+  .nt-body h1, .nt-body h2, .nt-body h3 { font-family: var(--serif); font-weight: 500; margin: 20px 0 8px; line-height: 1.25; }
+  .nt-body h1 { font-size: 24px; } .nt-body h2 { font-size: 20px; } .nt-body h3 { font-size: 17px; }
+  .nt-body p { margin: 8px 0; }
+  .nt-body ul, .nt-body ol { margin: 6px 0; padding-left: 20px; }
+  .nt-body li { margin: 4px 0; }
+  .nt-body li.task { list-style: none; margin-left: -20px; display: flex; gap: 10px; align-items: flex-start; }
+  .nt-body li.task .bx { flex: none; width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--dim); display: grid; place-items: center; margin-top: 3px; color: transparent; cursor: pointer; }
+  .nt-body li.task.done .bx { background: var(--sage); border-color: var(--sage); color: #fff; }
+  .nt-body li.task.done > span { color: var(--dim); text-decoration: line-through; }
+  .nt-body li.task .bx .ic { width: 12px; height: 12px; }
+  .nt-body blockquote { margin: 8px 0; padding: 6px 12px; border-left: 3px solid var(--accent); color: var(--dim); background: var(--panel); border-radius: 0 10px 10px 0; }
+  .nt-body code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--panel); padding: 1px 5px; border-radius: 5px; }
+  .nt-body pre { background: var(--panel); border-radius: 12px; padding: 10px 12px; overflow: auto; font-size: 12.5px; }
+  .nt-body hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+  .nt-body a { color: var(--accent); text-decoration: none; }
+  .nt-body .wl { color: var(--accent); border-bottom: 1px dashed var(--accent); }
+  .nt-body table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 8px 0; }
+  .nt-body th, .nt-body td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  .nt-body th { color: var(--dim); font-weight: 500; font-size: 12px; letter-spacing: .04em; }
+  .nt-fm { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .nt-fm span { font-size: 11.5px; color: var(--dim); background: var(--panel); border-radius: 999px; padding: 3px 9px; }
+  .nt-fm span b { color: var(--text); font-weight: 500; margin-left: 3px; }
+  .nt-empty { padding: 30px 0; color: var(--dim); text-align: center; font-size: 14px; }
+  /* 库设置里的页面映射 */
+  .vm-list { display: grid; gap: 6px; margin-top: 8px; }
+  .vm-row { display: flex; align-items: center; gap: 10px; background: var(--panel); border-radius: 14px; padding: 10px 12px; }
+  .vm-row .k { flex: none; width: 48px; font-size: 13px; }
+  .vm-row .p { flex: 1; font-size: 12.5px; color: var(--dim); word-break: break-all; }
+  .vm-row .p.on { color: var(--text); }
+  .vm-row button { font-size: 12px; color: var(--accent); flex: none; }
+  .vm-tree { max-height: 46vh; overflow: auto; display: grid; gap: 2px; margin-top: 8px; }
+  .vm-tree button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 9px 10px; border-radius: 12px; font-size: 14px; width: 100%; }
+  .vm-tree button:active { background: var(--panel); }
+  .vm-tree button .ic { width: 15px; height: 15px; color: var(--dim); flex: none; }
+  .vm-tree button.dir .ic { color: var(--accent); }
+  .vm-crumb { font-size: 12px; color: var(--dim); margin-top: 6px; word-break: break-all; }
 </style>
 </head>
 <body>
@@ -2597,6 +2719,58 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
     <div class="body" id="usageBody">
       <div class="ucard"><div class="ureset">正在问账房…</div></div>
     </div>
+  </div>
+</div>
+
+<!-- study -->
+<div class="sheetWrap page" id="studySheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="study"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="studyBody"></div>
+  </div>
+</div>
+
+<!-- life -->
+<div class="sheetWrap page" id="lifeSheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="life"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="lifeBody"></div>
+  </div>
+</div>
+
+<!-- more -->
+<div class="sheetWrap page" id="moreSheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="more"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="moreBody"></div>
+  </div>
+</div>
+
+<!-- note -->
+<div class="sheetWrap page" id="noteSheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="note"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="noteBody"></div>
   </div>
 </div>
 
@@ -11003,10 +11177,10 @@ function renderHub() {
   const dg = mkEl('div', 'hub-domains');
   const nav = (id) => () => { sheets.hub.classList.remove('open'); const b = document.getElementById(id); if (b) b.click(); };
   const dom = (ic, title, sub, links) => { const d = mkEl('div', 'hub-dm'); const hd = mkEl('div', 'hd'); hd.append(icEl(ic, 16), title); d.append(hd, mkEl('div', 'sm', sub)); const ls = mkEl('div', 'links'); links.forEach(([n, fn]) => { const b = mkEl('button', '', n); b.onclick = fn; ls.appendChild(b); }); d.appendChild(ls); return d; };
-  dg.appendChild(dom('book', '学习', st ? '今天 ' + st.todayTotal + ' 分钟 · 连续 ' + st.streak + ' 天' : '雅思还没放进来', [['备考', scrollTo('#hubStudy')], ['共读', nav('navNook')], ['专注', nav('navFocus')]]));
-  dg.appendChild(dom('sun', '生活', undone.length ? undone.length + ' 件待办 · ' + evs.length + ' 个日程' : evs.length ? evs.length + ' 个日程' : '今天空着', [['日历', nav('navCal')], ['待办', nav('navTodo')], ['便签', nav('navNotes')]]));
+  dg.appendChild(dom('book', '学习', st ? '今天 ' + st.todayTotal + ' 分钟 · 连续 ' + st.streak + ' 天' : '雅思还没放进来', [['学习页', () => { sheets.hub.classList.remove('open'); window.openStudy && openStudy(); }], ['备考', scrollTo('#hubStudy')], ['专注', nav('navFocus')]]));
+  dg.appendChild(dom('sun', '生活', undone.length ? undone.length + ' 件待办 · ' + evs.length + ' 个日程' : evs.length ? evs.length + ' 个日程' : '今天空着', [['生活页', () => { sheets.hub.classList.remove('open'); window.openLife && openLife(); }], ['日历', nav('navCal')], ['便签', nav('navNotes')]]));
   dg.appendChild(dom('terminal', '工作', '电脑上的 Claude Code', [['工作间', nav('navWork')], ['仓库', nav('navRepo')]]));
-  dg.appendChild(dom('music', '爱好', '一起听 · 一起看', [['听', nav('navListen')], ['看', nav('navWatch')], ['玩', nav('navPlay')]]));
+  dg.appendChild(dom('music', '爱好', '一起看 · 共读 · 玩', [['看', nav('navWatch')], ['共读', nav('navNook')], ['玩', nav('navPlay')]]));
   dg.appendChild(dom('heartIc', '身体', Dt.habits && Dt.habits.items.length ? '习惯 ' + Dt.habits.doneN + '/' + Dt.habits.items.length : '睡眠 · 步数 · 心情', [['健康', nav('navHealth')], ['今天', () => { sheets.hub.classList.remove('open'); openToday(); }]]));
   dg.appendChild(dom('pen', '记录', '日记 · 记忆 · 日报', [['日记', nav('navWall')], ['记忆', nav('navMem')], ['日报', nav('navNews')]]));
   hubBody.appendChild(dg);
@@ -11082,6 +11256,371 @@ async function hubSetRole(role) {
     if (HUB.role === 'butler' && !location.hash) setTimeout(openHub, 350);
   }).catch(() => {});
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   第十一轮：管家模式的壳
+   · 底部五个标签：指挥台 / 对话 / 学习 / 生活 / 更多（抽屉在管家模式里退休）
+   · 学习：雅思页（可以直接读 Obsidian 里的「雅思.md」）、今天的学习任务、四个环、口语当前阶段
+   · 生活：今天 / 每日计划（Obsidian）/ 习惯 / 钱 / 身体 / 播客 / 日报
+   · 更多：剩下的工具一屏放完 + 系统状态（贾维斯的自检）+ Obsidian 接入
+   · 笔记页：渲染库里任意一页 Markdown，- [ ] 能直接勾
+   ═══════════════════════════════════════════════════════════════ */
+const B11 = { vault: null, study: {}, life: {}, tab: 'hub' };
+const sheetOf = (k) => { const w = document.getElementById(k + 'Sheet'); sheets[k] = w; const close = () => { w.classList.remove('open'); tabSync(); }; w.querySelector('[data-close]').onclick = close; w.querySelector('.shade').onclick = close; return w.querySelector('.body'); };
+const studyBody = sheetOf('study'), lifeBody = sheetOf('life'), moreBody = sheetOf('more'), noteBody = sheetOf('note');
+const PAGE_KEYS = [['todo', '每日计划', '待办 / 今天要做的'], ['ielts', '雅思', '雅思备考那一页'], ['health', '身体', '健康记录'], ['podcast', '播客', '在听的播客 / 想听的'], ['daily', '日报', '资讯台 / 每日简报']];
+
+/* ── 标签栏 ── */
+const TABS = [['hub', '指挥台', 'gauge', () => openHub()], ['chat', '对话', 'chat', () => goChat()], ['study', '学习', 'book', () => openStudy()], ['life', '生活', 'sun', () => openLife()], ['more', '更多', 'menu', () => openMore()]];
+const tabbar = mkEl('nav', 'tabbar'); tabbar.id = 'tabbar';
+TABS.forEach(([k, n, ic, fn]) => { const b = mkEl('button'); b.dataset.k = k; b.append(icEl(ic, 20), mkEl('span', '', n)); b.onclick = fn; tabbar.appendChild(b); });
+document.body.appendChild(tabbar);
+function tabSync() { const open = ['hub', 'study', 'life', 'more'].find(k => sheets[k] && sheets[k].classList.contains('open')); const anyOther = Object.entries(sheets).some(([k, s]) => s && s.classList.contains('open') && !['hub', 'study', 'life', 'more', 'note', 'ask'].includes(k)); const cur = open || (anyOther ? 'more' : 'chat'); B11.tab = cur; tabbar.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.k === cur)); }
+function goChat() { Object.values(sheets).forEach(s => s && s.classList.remove('open')); tabSync(); setTimeout(() => box.focus(), 50); }
+new MutationObserver(() => tabSync()).observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+/* 管家模式：抽屉退休——哪里想开抽屉，都去指挥台 */
+const _openDrawer11 = openDrawer; openDrawer = function () { if (HUB.role === 'butler') { openHub(); return; } _openDrawer11(); };
+(function () { const mb = document.getElementById('menuBtn'); const old = mb.onclick; mb.onclick = (e) => { if (HUB.role === 'butler') { openHub(); return; } return old && old.call(mb, e); }; })();
+const _openHub11 = openHub; openHub = function () { _openHub11(); tabSync(); }; window.openHub = openHub;
+
+/* ── Obsidian 库：读、写、勾、挑文件 ── */
+async function vaultConfGet(force) { if (B11.vault && !force) return B11.vault; B11.vault = await getJSON('api/vault').catch(() => ({ ok: false })); return B11.vault; }
+const vaultPage = (k) => (B11.vault && B11.vault.ok && B11.vault.pages && B11.vault.pages[k]) || '';
+async function vaultRead(p, fresh) { return getJSON('api/vault/read?p=' + encodeURIComponent(p) + (fresh ? '&fresh=1' : '')); }
+function parseFM(text) {
+  const m = String(text).match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/); if (!m) return { fm: {}, body: text, fmLines: 0 };
+  const lines = m[1].split(/\r?\n/); const fmLines = lines.length + 2;
+  const scalar = (s) => { s = String(s).trim(); if (s === '' || s === '~' || s === 'null') return null; if (/^(true|false)$/i.test(s)) return /^true$/i.test(s); if (/^-?\d+(\.\d+)?$/.test(s)) return +s; if (/^(['"]).*\1$/.test(s)) return s.slice(1, -1).replace(/\\"/g, '"').replace(/''/g, "'"); if (/^\[.*\]$/.test(s)) { const inner = s.slice(1, -1).trim(); return inner ? inner.split(',').map(x => scalar(x)) : []; } if (/^\{.*\}$/.test(s)) { const o = {}; s.slice(1, -1).split(',').forEach(kv => { const i = kv.indexOf(':'); if (i > 0) o[kv.slice(0, i).trim()] = scalar(kv.slice(i + 1)); }); return o; } return s; };
+  const indentOf = (l) => l.match(/^ */)[0].length;
+  const nextNB = (i) => { while (i < lines.length && !lines[i].trim()) i++; return i; };
+  const isItem = (l) => /^\s*-( |$)/.test(l);
+  /* 一个 key 后面没写值：看下一行——同缩进的 "- " 是它的列表，更深的是它的子块 */
+  function child(i, d) { const j = nextNB(i); if (j >= lines.length) return [null, i]; const nd = indentOf(lines[j]); if (isItem(lines[j]) && nd >= d) return parseBlock(j, nd); if (nd > d) return parseBlock(j, nd); return [null, i]; }
+  function parseBlock(i, ind) {   // 返回 [value, nextIndex]；ind 是这一块的缩进
+    i = nextNB(i); if (i >= lines.length) return [null, i];
+    const isList = isItem(lines[i]); const out = isList ? [] : {};
+    while (i < lines.length) {
+      const l = lines[i]; if (!l.trim()) { i++; continue; } const d = indentOf(l); if (d < ind) break; if (d > ind) { i++; continue; }
+      if (isList) {
+        if (!isItem(l)) break;
+        const rest = l.replace(/^\s*-\s?/, '');
+        if (!rest.trim()) { const [v, ni] = child(i + 1, d + 1); out.push(v); i = Math.max(ni, i + 1); continue; }
+        const km = rest.match(/^([\w一-龥_.-]+):(?:\s|$)(.*)$/);
+        if (km) {
+          const obj = {}; const kd = d + 2;   // "- k: v" 里 k 的缩进
+          let j; if (km[2].trim()) { obj[km[1]] = scalar(km[2]); j = i + 1; } else { const [v0, ni0] = child(i + 1, kd); obj[km[1]] = v0; j = Math.max(ni0, i + 1); }
+          while (j < lines.length) { const l2 = lines[j]; if (!l2.trim()) { j++; continue; } if (indentOf(l2) !== kd || isItem(l2)) break; const k2 = l2.trim().match(/^([\w一-龥_.-]+):(?:\s|$)(.*)$/); if (!k2) break; if (k2[2].trim()) { obj[k2[1]] = scalar(k2[2]); j++; } else { const [v2, nj] = child(j + 1, kd); obj[k2[1]] = v2; j = Math.max(nj, j + 1); } }
+          out.push(obj); i = j; continue;
+        }
+        out.push(scalar(rest)); i++; continue;
+      } else {
+        if (isItem(l)) break;
+        const km = l.trim().match(/^([\w一-龥_.-]+):(?:\s|$)(.*)$/); if (!km) { i++; continue; }
+        if (km[2].trim()) { out[km[1]] = scalar(km[2]); i++; } else { const [v, ni] = child(i + 1, d); out[km[1]] = v; i = Math.max(ni, i + 1); }
+      }
+    }
+    return [out, i];
+  }
+  let fm = {}; try { fm = parseBlock(0, 0)[0] || {}; } catch (e) { fm = {}; }
+  return { fm, body: String(text).slice(m[0].length), fmLines };
+}
+const TASK_RE = /^(\s*)(?:[-*+]|\d+\.)\s+\[([ xX])\]\s?(.*)$/;
+const inlineMd = (s) => { const esc = escapeHtml(String(s)); return esc
+  .replace(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g, (m, a, b) => '<span class="wl">' + (b || a) + '</span>')
+  .replace(/!\[[^\]]*\]\([^)]+\)/g, '[图]')
+  .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+  .replace(/`([^`]+)`/g, '<code>$1</code>')
+  .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>')
+  .replace(/==([^=]+)==/g, '<mark>$1</mark>')
+  .replace(/#([\w一-龥/]+)(?=\s|$)/g, '<span class="wl">#$1</span>'); };
+/* Markdown → DOM。onToggle(lineNo, done) 勾待办 */
+function mdToDom(text, opt) {
+  opt = opt || {}; const { fm, body, fmLines } = parseFM(text);
+  const root = mkEl('div', 'nt-body');
+  if (opt.showFm && Object.keys(fm).length) { const f = mkEl('div', 'nt-fm'); Object.entries(fm).slice(0, 10).forEach(([k, v]) => { if (v == null || typeof v === 'object') return; const s = mkEl('span', '', k); s.appendChild(mkEl('b', '', String(v).slice(0, 40))); f.appendChild(s); }); root.appendChild(f); }
+  const lines = body.split(/\r?\n/); let i = 0; let list = null, listTag = '', para = [];
+  const flushP = () => { if (para.length) { const p = mkEl('p'); p.innerHTML = inlineMd(para.join(' ')); root.appendChild(p); para = []; } };
+  const flushL = () => { list = null; listTag = ''; };
+  while (i < lines.length) {
+    const raw = lines[i], ln = fmLines + i; const l = raw.replace(/\s+$/, '');
+    if (!l.trim()) { flushP(); flushL(); i++; continue; }
+    if (/^```/.test(l)) { flushP(); flushL(); const code = []; i++; while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; } i++; const pre = mkEl('pre'); pre.textContent = code.join('\n'); if (!/^```(dataview|zhili|button|tasks)/.test(l)) root.appendChild(pre); continue; }
+    const h = l.match(/^(#{1,6})\s+(.*)$/); if (h) { flushP(); flushL(); const el = mkEl('h' + Math.min(3, h[1].length)); el.innerHTML = inlineMd(h[2]); root.appendChild(el); i++; continue; }
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(l.trim())) { flushP(); flushL(); root.appendChild(mkEl('hr')); i++; continue; }
+    if (/^>/.test(l)) { flushP(); flushL(); const q = mkEl('blockquote'); const qs = []; while (i < lines.length && /^>/.test(lines[i])) { qs.push(lines[i].replace(/^>\s?/, '')); i++; } q.innerHTML = inlineMd(qs.join(' ')); root.appendChild(q); continue; }
+    if (/^\|/.test(l) && i + 1 < lines.length && /^\|?\s*:?-{2,}/.test(lines[i + 1])) { flushP(); flushL(); const t = mkEl('table'); const cells = (r) => r.replace(/^\||\|$/g, '').split('|').map(x => x.trim()); const th = mkEl('tr'); cells(l).forEach(c => { const e = mkEl('th'); e.innerHTML = inlineMd(c); th.appendChild(e); }); t.appendChild(th); i += 2; while (i < lines.length && /^\|/.test(lines[i])) { const tr = mkEl('tr'); cells(lines[i]).forEach(c => { const e = mkEl('td'); e.innerHTML = inlineMd(c); tr.appendChild(e); }); t.appendChild(tr); i++; } root.appendChild(t); continue; }
+    const tm = l.match(TASK_RE);
+    const lm = !tm && l.match(/^(\s*)(?:([-*+])|(\d+\.))\s+(.*)$/);
+    if (tm || lm) {
+      flushP(); const tag = (lm && lm[3]) ? 'ol' : 'ul';
+      if (!list || listTag !== tag) { list = mkEl(tag); listTag = tag; root.appendChild(list); }
+      const li = mkEl('li');
+      if (tm) { li.className = 'task' + (tm[2] !== ' ' ? ' done' : ''); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 12)); const sp = mkEl('span'); sp.innerHTML = inlineMd(tm[3]); li.append(bx, sp); if (opt.onToggle) bx.onclick = () => opt.onToggle(ln, tm[2] === ' ', li); else bx.disabled = true; }
+      else { li.innerHTML = inlineMd(lm[4]); if (lm[1].length >= 2) li.style.marginLeft = Math.min(3, Math.floor(lm[1].length / 2)) * 14 + 'px'; }
+      list.appendChild(li); i++; continue;
+    }
+    flushL(); para.push(l.trim()); i++;
+  }
+  flushP();
+  if (!root.childElementCount) root.appendChild(mkEl('div', 'nt-empty', '这页是空的'));
+  return root;
+}
+const taskLines = (text) => String(text).split(/\r?\n/).map((l, i) => ({ l, i })).map(x => { const m = x.l.match(TASK_RE); return m ? { line: x.i, done: m[2] !== ' ', text: m[3], raw: x.l, indent: m[1].length } : null; }).filter(Boolean);
+const plainTask = (t) => String(t).replace(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g, (m, a, b) => b || a).replace(/\*\*/g, '').replace(/\s+#[\w一-龥/]+/g, '').replace(/[⏳📅✅🔁]\s*\d{4}-\d{2}-\d{2}/g, '').trim();
+async function vaultToggle(p, line, done) { const r = await postJSON('api/vault/toggle', { p, line, done }).catch(e => ({ ok: false, error: e.message })); if (!r.ok) note('（' + (r.error || '没改成') + '）', 'err'); return r.ok; }
+
+/* 笔记页 */
+let NOTE = { path: '', title: '' };
+async function openNote(path, title) {
+  NOTE = { path, title: title || path.split('/').pop().replace(/\.md$/, '') };
+  sheets.note.classList.add('open'); noteBody.innerHTML = '<div class="board-sub" style="padding:30px 0">翻到那一页…</div>';
+  await renderNote(false);
+}
+async function renderNote(fresh) {
+  const r = await vaultRead(NOTE.path, fresh).catch(e => ({ ok: false, error: e.message }));
+  noteBody.innerHTML = '';
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', NOTE.title), mkEl('div', 'sp'));
+  const rf = mkEl('button', 'chip'); rf.append(icEl('refresh', 13), '刷新'); rf.onclick = () => renderNote(true);
+  const ob = mkEl('button', 'chip'); ob.append(icEl('link', 13), '在 Obsidian 打开'); ob.onclick = () => { const v = B11.vault || {}; location.href = 'obsidian://open?vault=' + encodeURIComponent(v.vaultName || '枝立') + '&file=' + encodeURIComponent(NOTE.path.replace(/\.md$/, '')); };
+  head.append(rf, ob); noteBody.appendChild(head);
+  if (!r.ok) { noteBody.appendChild(mkEl('div', 'nt-empty', r.error || '读不到')); return; }
+  noteBody.appendChild(mdToDom(r.text, { showFm: true, onToggle: async (line, done, li) => { li.classList.toggle('done', done); const ok = await vaultToggle(NOTE.path, line, done); if (!ok) li.classList.toggle('done', !done); else { if (NOTE.path === vaultPage('todo')) B11.life.todoDirty = true; } } }));
+}
+/* 挑文件：在库里一层层点 */
+function pickVaultFile(cb, start) {
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+  let cur = start || '';
+  const paint = async () => {
+    body.innerHTML = ''; body.appendChild(mkEl('div', 'ask-t', '选一页'));
+    const crumb = mkEl('div', 'vm-crumb', '枝立 / ' + (cur ? cur + ' /' : '')); body.appendChild(crumb);
+    const tree = mkEl('div', 'vm-tree'); body.appendChild(tree);
+    const r = await getJSON('api/vault/tree?p=' + encodeURIComponent(cur)).catch(e => ({ ok: false, error: e.message }));
+    if (cur) { const up = mkEl('button', 'dir'); up.append(icEl('chevL', 15), '上一层'); up.onclick = () => { cur = cur.split('/').slice(0, -1).join('/'); paint(); }; tree.appendChild(up); }
+    if (!r.ok) tree.appendChild(mkEl('div', 'nt-empty', r.error || '读不到'));
+    (r.items || []).forEach(it => { if (!it.d && !/\.md$/i.test(it.n)) return; const b = mkEl('button', it.d ? 'dir' : ''); b.append(icEl(it.d ? 'box' : 'fileText', 15), it.n.replace(/\.md$/, '')); b.onclick = () => { const p = (cur ? cur + '/' : '') + it.n; if (it.d) { cur = p; paint(); } else { wrap.classList.remove('open'); cb(p); } }; tree.appendChild(b); });
+    const row = mkEl('div', 'ap-btns'); const no = mkEl('button', 'ap-b', '算了'); no.onclick = () => wrap.classList.remove('open'); row.appendChild(no); body.appendChild(row);
+  };
+  wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open'); wrap.classList.add('open'); paint();
+}
+/* 接入 Obsidian：仓库 + token + 页面映射 */
+async function openVaultSetup(after) {
+  const v = await vaultConfGet(true);
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+  body.innerHTML = '';
+  body.appendChild(mkEl('div', 'ask-t', '接上 Obsidian 库'));
+  body.appendChild(mkEl('div', 'ask-x', '库用 Obsidian Git 插件推到 GitHub 之后，这里填那个仓库，网页就能直接读写里面的页面（手机上也行）。私有仓库要一个 Fine-grained token，只给这个仓库 Contents 的读写权限。'));
+  const f = (ph, val, type) => { const i = mkEl('input', 'ap-in ask-in'); i.placeholder = ph; i.value = val || ''; if (type) i.type = type; body.appendChild(i); return i; };
+  const repo = f('owner/repo 或仓库链接', v.ok ? v.owner + '/' + v.repo : '');
+  const br = f('分支（可不填）', v.ok ? v.branch : '');
+  const root = f('库在仓库里的子目录（库就在根目录就不填）', v.ok ? v.root : '');
+  const nm = f('库的名字（给「在 Obsidian 打开」用）', v.ok && v.vaultName ? v.vaultName : '枝立');
+  const tk = f(v.ok && v.hasToken ? 'token 已存，留空不改' : 'token（私有库必填；要写回也必填）', '', 'password');
+  const msg = mkEl('div', 'ap-msg'); body.appendChild(msg);
+  const row = mkEl('div', 'ap-btns');
+  const parse = () => { const m = repo.value.trim().match(/(?:github\.com\/)?([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[\/#?].*)?$/); return m ? { owner: m[1], repo: m[2] } : null; };
+  const test = mkEl('button', 'ap-b', '试一下'); test.onclick = async () => { const pr = parse(); if (!pr) { msg.className = 'ap-msg on bad'; msg.textContent = '仓库没认出来'; return; } msg.className = 'ap-msg on wait'; msg.textContent = '敲门…'; const r = await postJSON('api/vault', { action: 'test', item: Object.assign({ kind: 'github', branch: br.value.trim(), root: root.value.trim() }, pr, tk.value ? { token: tk.value } : {}) }).catch(e => ({ ok: false, error: e.message })); msg.className = 'ap-msg on ' + (r.ok ? 'ok' : 'bad'); msg.textContent = r.ok ? '通了，根目录下有 ' + r.n + ' 项：' + r.sample.join('、') : (r.error || '没通'); };
+  const no = mkEl('button', 'ap-b', '算了'); no.onclick = () => wrap.classList.remove('open');
+  const ok = mkEl('button', 'ap-b go', '就这样'); ok.onclick = async () => { const pr = parse(); if (!pr) { msg.className = 'ap-msg on bad'; msg.textContent = '仓库没认出来'; return; } const item = Object.assign({ kind: 'github', branch: br.value.trim(), root: root.value.trim(), vaultName: nm.value.trim() }, pr); if (tk.value) item.token = tk.value; await postJSON('api/vault', { item }).catch(() => {}); await vaultConfGet(true); wrap.classList.remove('open'); note('（接上了）'); after ? after() : openVaultPages(); };
+  if (v.ok) { const cl = mkEl('button', 'ap-b', '断开'); cl.onclick = async () => { await postJSON('api/vault', { action: 'clear' }).catch(() => {}); await vaultConfGet(true); wrap.classList.remove('open'); note('（断开了）'); after && after(); }; row.appendChild(cl); }
+  row.append(test, no, ok); body.appendChild(row);
+  wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open'); wrap.classList.add('open'); setTimeout(() => repo.focus(), 60);
+}
+async function openVaultPages(after) {
+  const v = await vaultConfGet(true); if (!v.ok) return openVaultSetup(() => openVaultPages(after));
+  const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+  const paint = () => {
+    body.innerHTML = '';
+    body.appendChild(mkEl('div', 'ask-t', '哪一页对应什么'));
+    body.appendChild(mkEl('div', 'ask-x', '网页里的待办、学习、身体、播客、日报，各自读库里的哪一页。点「选」去库里挑；没设的那块会提示你。'));
+    const list = mkEl('div', 'vm-list');
+    PAGE_KEYS.forEach(([k, n, d]) => { const r = mkEl('div', 'vm-row'); r.appendChild(mkEl('span', 'k', n)); const p = mkEl('span', 'p' + (v.pages[k] ? ' on' : ''), v.pages[k] || d); r.appendChild(p); const pick = mkEl('button', '', v.pages[k] ? '换' : '选'); pick.onclick = () => pickVaultFile(async (path) => { await postJSON('api/vault', { pages: { [k]: path } }); await vaultConfGet(true); v.pages = B11.vault.pages; wrap.classList.add('open'); paint(); }, (v.pages[k] || '').split('/').slice(0, -1).join('/')); r.appendChild(pick); if (v.pages[k]) { const x = mkEl('button', '', '清'); x.onclick = async () => { await postJSON('api/vault', { pages: { [k]: '' } }); await vaultConfGet(true); v.pages = B11.vault.pages; paint(); }; r.appendChild(x); } list.appendChild(r); });
+    body.appendChild(list);
+    const row = mkEl('div', 'ap-btns'); const re = mkEl('button', 'ap-b', '改仓库'); re.onclick = () => openVaultSetup(() => openVaultPages(after)); const ok = mkEl('button', 'ap-b go', '好了'); ok.onclick = () => { wrap.classList.remove('open'); after && after(); }; row.append(re, ok); body.appendChild(row);
+  };
+  wrap.querySelector('.shade').onclick = () => { wrap.classList.remove('open'); after && after(); }; wrap.classList.add('open'); paint();
+}
+/* 没接库时那张引导卡 */
+function vaultHint(what, after) { const c = mkEl('button', 'st-link'); const t = mkEl('div'); t.append(document.createTextNode(what)); t.appendChild(mkEl('small', '', B11.vault && B11.vault.ok ? '库接上了，还没说读哪一页——点这里选' : '把 Obsidian 库接进来，这里就读你自己的页面')); c.append(t, icEl('chevR', 16)); c.onclick = () => (B11.vault && B11.vault.ok ? openVaultPages(after) : openVaultSetup(after)); return c; }
+
+/* ── 学习 ── */
+const STUDY_RE = /雅思|IELTS|学|课|作业|复习|口语|听力|阅读|写作|单词|词汇|模考|论文|报告|考试|统计|财务|战略|资本|加密|读书|背/;
+async function openStudy() { Object.values(sheets).forEach(s => s && s.classList.remove('open')); sheets.study.classList.add('open'); tabSync(); if (!studyBody.childElementCount) studyBody.innerHTML = '<div class="board-sub" style="padding:30px 0">把学习摊开…</div>'; await loadStudy(); }
+async function loadStudy() {
+  await vaultConfGet();
+  const [st, todos] = await Promise.all([getJSON('api/study').catch(() => null), getJSON('api/todos').catch(() => null)]);
+  let ielts = null, plan = null;
+  if (vaultPage('ielts')) { const r = await vaultRead(vaultPage('ielts')).catch(() => null); if (r && r.ok) ielts = Object.assign(parseFM(r.text), { path: vaultPage('ielts') }); }
+  if (vaultPage('todo')) { const r = await vaultRead(vaultPage('todo')).catch(() => null); if (r && r.ok) plan = { path: vaultPage('todo'), tasks: taskLines(r.text) }; }
+  B11.study = { st, todos, ielts, plan }; renderStudy();
+}
+function renderStudy() {
+  const { st, todos, ielts, plan } = B11.study; const keep = studyBody.scrollTop; studyBody.innerHTML = '';
+  const ds = todayStr(); const fm = (ielts && ielts.fm) || {};
+  const sect = (t, more, fn) => { const s = mkEl('div', 'hsect', t); if (more) { const x = mkEl('button', 'sect-x', more); x.onclick = fn; s.appendChild(x); } return s; };
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '学习'), mkEl('div', 'sub', '雅思 · 课程'), mkEl('div', 'sp'));
+  const set = mkEl('button', 'chip'); set.append(icEl('sliders', 13), '设置'); set.onclick = () => hubStudySetup(); head.appendChild(set); studyBody.appendChild(head);
+  /* 雅思 hero：Obsidian 的「雅思.md」优先，没有就用本地设置 */
+  const cfg = (st && st.cfg) || null;
+  const target = fm.target != null ? fm.target : (cfg ? cfg.target : null);
+  const examDate = fm.exam_date || (cfg && cfg.exam) || '';
+  const left = examDate ? Math.ceil((new Date(examDate + 'T00:00:00') - new Date(ds + 'T00:00:00')) / 864e5) : null;
+  if (target == null && !ielts) {
+    const su = mkEl('div', 'hub-setup'); su.append(mkEl('div', 't', '把雅思放进来'), mkEl('div', 'x', '两条路：填目标分和考试日期（本地记录）；或者接上 Obsidian，直接读你库里的「雅思」页——目标、考试日、每天节奏、口语阶段都从那边来。'));
+    const r = mkEl('div', 'ap-btns'); const a = mkEl('button', 'ap-b go', '填目标'); a.onclick = () => hubStudySetup(); const b = mkEl('button', 'ap-b', '接 Obsidian'); b.onclick = () => openVaultPages(() => loadStudy()); r.append(a, b); su.appendChild(r); studyBody.appendChild(su);
+  } else {
+    const hero = mkEl('div', 'st-hero'); hero.appendChild(mkEl('div', 'eb', '雅思 · ' + (ielts ? '来自 Obsidian' : '本地记录')));
+    const big = mkEl('div', 'big'); const bb = mkEl('b', '', target != null ? String(target) : '—'); big.append(bb, mkEl('span', '', (fm.current ? '现在 ' + fm.current + ' → ' : '') + '目标总分' + (fm.strategy ? '' : ''))); hero.appendChild(big);
+    const kps = mkEl('div', 'kps'); const kp = (lb, v, unit) => { const d = mkEl('div', 'kp'); d.appendChild(mkEl('div', 'lb', lb)); const vv = mkEl('div', 'v', v); if (unit) vv.appendChild(mkEl('small', '', unit)); d.appendChild(vv); return d; };
+    kps.append(kp('倒计时', left != null ? (left >= 0 ? String(left) : '过了') : '—', left != null && left >= 0 ? '天' + (fm.exam_tentative ? ' · 暂定' : '') : ''), kp('连续', st ? String(st.streak) : '0', '天'), kp('本周', st ? (st.week.reduce((a, x) => a + x.m, 0) / 60).toFixed(1) : '0', 'h'));
+    hero.appendChild(kps);
+    if (fm.strategy) { const sx = mkEl('div', 'tx'); sx.style.cssText = 'margin-top:12px;font-size:13.5px;line-height:1.5;color:var(--dim);position:relative'; sx.textContent = fm.strategy; hero.appendChild(sx); }
+    /* 口语当前阶段 */
+    const phases = (fm.speaking && fm.speaking.phases) || []; const cur = phases.find(p => p.from && p.from <= ds && (!p.to || p.to >= ds));
+    if (cur) { const ph = mkEl('div', 'st-phase'); ph.append(mkEl('div', 'lb', '口语 · 当前阶段' + (cur.from ? ' · ' + cur.from.slice(5) + ' → ' + (cur.to ? cur.to.slice(5) : '考前') : '')), mkEl('div', 'nm', cur.n || ''), mkEl('div', 'tx', (['0', '6'].includes(String(new Date(ds).getDay())) && cur.weekend ? cur.weekend : cur.daily) || cur.goal || '')); hero.appendChild(ph); }
+    studyBody.appendChild(hero);
+  }
+  /* 今天的学习任务 */
+  studyBody.appendChild(sect('今天要学的', plan ? '打开每日计划 ›' : '', plan ? () => openNote(plan.path, '每日计划') : null));
+  const tasks = mkEl('div', 'st-tasks');
+  if (plan) {
+    const mine = plan.tasks.filter(t => STUDY_RE.test(t.text)); const show = mine.length ? mine : plan.tasks;
+    if (!show.length) tasks.appendChild(mkEl('div', 'hub-empty', '每日计划里今天没有待办项'));
+    show.slice(0, 14).forEach(t => { const row = mkEl('div', 'st-task' + (t.done ? ' done' : '')); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 13)); const tx = mkEl('div', 't', plainTask(t.text)); row.append(bx, tx); bx.onclick = async () => { row.classList.toggle('done'); const ok = await vaultToggle(plan.path, t.line, !t.done); if (ok) { t.done = !t.done; } else row.classList.toggle('done'); }; tasks.appendChild(row); });
+  } else {
+    const hers = ((todos && todos.hers) || []).filter(x => STUDY_RE.test(x.text));
+    if (!hers.length) tasks.appendChild(mkEl('div', 'hub-empty', '清单里没有学习相关的事。接上 Obsidian 的每日计划，这里会直接读那一页。'));
+    hers.slice(0, 12).forEach(x => { const row = mkEl('div', 'st-task' + (x.done ? ' done' : '')); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 13)); const tx = mkEl('div', 't', x.text); if (x.at) tx.appendChild(mkEl('small', '', x.at)); row.append(bx, tx); bx.onclick = async () => { const r = await postJSON('api/todos', { action: 'toggle', list: 'hers', id: x.id }).catch(() => null); if (r) { B11.study.todos = r; renderStudy(); } }; tasks.appendChild(row); });
+    if (!vaultPage('todo')) tasks.appendChild(vaultHint('读 Obsidian 里的每日计划', () => loadStudy()));
+  }
+  studyBody.appendChild(tasks);
+  /* 四个环（本地学习记录） */
+  if (st && st.cfg) {
+    studyBody.appendChild(sect('今天练了多少', ''));
+    const card2 = mkEl('div', 'hub-study'); const sk = mkEl('div', 'skills');
+    ['L', 'R', 'W', 'S'].forEach(k => { const plan2 = st.cfg.daily[k] || 0, done = st.today[k] || 0; const p = plan2 ? Math.min(100, Math.round(done / plan2 * 100)) : 0; const d = mkEl('div', 'hub-sk'); const ring = mkEl('div', 'ring' + (plan2 && done >= plan2 ? ' full' : '')); ring.style.setProperty('--p', p + '%'); ring.appendChild(mkEl('span', '', done + (plan2 ? '/' + plan2 : ''))); const add = mkEl('button', 'add', '+15'); add.onclick = async () => { const r = await postJSON('api/study', { action: 'log', skill: k, minutes: 15 }).catch(() => null); if (r) { B11.study.st = r; renderStudy(); } }; d.append(ring, mkEl('div', 'nm', SKILL_N[k]), add); sk.appendChild(d); });
+    card2.appendChild(sk);
+    const wk = mkEl('div', 'week'); const mx = Math.max(60, ...st.week.map(x => x.m)); st.week.forEach((x, i) => { const b = mkEl('i', (x.m ? 'on' : '') + (i === 6 ? ' td' : '')); b.style.height = Math.max(3, Math.round(x.m / mx * 34)) + 'px'; b.title = x.d.slice(5) + ' ' + x.m + ' 分钟'; wk.appendChild(b); }); card2.appendChild(wk);
+    studyBody.appendChild(card2);
+  } else if (!cfg) { const b = mkEl('button', 'st-link'); const t = mkEl('div'); t.append(document.createTextNode('开始记每天练了多少'), mkEl('small', '', '听读写说各多少分钟，连续几天，本周多少小时')); b.append(t, icEl('chevR', 16)); b.onclick = () => hubStudySetup(); studyBody.appendChild(b); }
+  /* 雅思页的节奏 / 口语流程 */
+  if (ielts) {
+    const rh = Array.isArray(fm.rhythm) ? fm.rhythm : [];
+    if (rh.length) { studyBody.appendChild(sect('每天的节奏', '')); const box2 = mkEl('div', 'st-rhythm'); rh.forEach(r => { const row = mkEl('div', 'st-rh'); row.append(mkEl('b', '', r.k || ''), document.createTextNode(String(r.t || r).replace(/^[^：:]+[：:]\s*/, ''))); box2.appendChild(row); }); studyBody.appendChild(box2); }
+    const ro = fm.speaking && Array.isArray(fm.speaking.routine) ? fm.speaking.routine : [];
+    if (ro.length) { studyBody.appendChild(sect('口语 · 平日固定流程', '')); const box3 = mkEl('div', 'st-tasks'); ro.forEach(r => { const row = mkEl('div', 'st-ro'); row.style.padding = '9px 0'; row.append(mkEl('i', '', (r.m || '') + '′'), document.createTextNode(r.t || '')); box3.appendChild(row); }); studyBody.appendChild(box3); }
+    const mocks = Array.isArray(fm.mocks) ? fm.mocks : [];
+    if (mocks.length) { studyBody.appendChild(sect('模考', '')); const t = mkEl('table'); t.className = 'nt-body'; const th = mkEl('tr'); ['日期', '听', '读', '写', '说', '总'].forEach(h => th.appendChild(mkEl('th', '', h))); t.appendChild(th); mocks.slice(-8).forEach(m => { const tr = mkEl('tr'); [m.d || m.date || '', m.L || m.l || '', m.R || m.r || '', m.W || m.w || '', m.S || m.s || '', m.total || m.o || ''].forEach(v => tr.appendChild(mkEl('td', '', String(v)))); t.appendChild(tr); }); studyBody.appendChild(t); }
+    const ln = mkEl('button', 'st-link'); const tt = mkEl('div'); tt.append(document.createTextNode('打开「雅思」整页'), mkEl('small', '', ielts.path)); ln.append(tt, icEl('chevR', 16)); ln.onclick = () => openNote(ielts.path, '雅思'); studyBody.appendChild(ln);
+  } else if (B11.vault && B11.vault.ok) { studyBody.appendChild(vaultHint('读 Obsidian 里的「雅思」页', () => loadStudy())); }
+  /* 今天的学习笔记（错题归因） */
+  if (st && st.notes && st.notes.length) { studyBody.appendChild(sect('今天的笔记', '')); const ns = mkEl('div', 'st-notes'); st.notes.slice(-8).forEach(n => { const d = mkEl('div', 'st-note'); d.append(mkEl('b', '', SKILL_N[n.s] || n.s), document.createTextNode(n.t)); ns.appendChild(d); }); studyBody.appendChild(ns); }
+  /* 教练 */
+  studyBody.appendChild(sect('让他来', ''));
+  const asks = mkEl('div', 'hub-asks');
+  [['教练，排今晚的', 'zap', '教练模式：看一下我今天的备考进度和每日计划，直接给我排今晚的任务（听读写说分别做什么、多久），没学的部分不用安慰我。', true], ['模拟口语 Part 2', 'mic', '你当雅思口语考官，给我一道 Part 2 题卡，1 分钟准备 2 分钟作答；我说完后按流利度 / 词汇 / 语法 / 发音四项逐项指出问题，再给我一版更好的答法。', true], ['批改写作', 'pen', '批改雅思写作：按 TR / CC / LR / GRA 四项打分，说清楚是「论点没撑住」还是「只是词不够高级」，给出改写。题目和我的作文如下：\n', false], ['错题归因', 'book', '错题归因：我刚做的这篇错了这些——（贴题目/选项/我的答案）。帮我归类是「定位词没抓住」「同义替换没反应」「听到数字就错」还是别的，用 log_study 记到今天的学习笔记里。', false], ['记一段', 'clock', '记一下学习：', false]].forEach(([t, ic, msg, now]) => { const b = mkEl('button', 'chip'); b.append(icEl(ic, 14), t); b.onclick = () => talkWith(msg, now); asks.appendChild(b); });
+  studyBody.appendChild(asks);
+  studyBody.scrollTop = keep;
+}
+
+/* ── 生活 ── */
+async function openLife() { Object.values(sheets).forEach(s => s && s.classList.remove('open')); sheets.life.classList.add('open'); tabSync(); if (!lifeBody.childElementCount) lifeBody.innerHTML = '<div class="board-sub" style="padding:30px 0">把生活摆出来…</div>'; await loadLife(); }
+async function loadLife() {
+  await vaultConfGet();
+  const get = (u) => getJSON(u).catch(() => null);
+  const [cal, todos, habits, ledger, wx, watch] = await Promise.all([get('api/cal'), get('api/todos'), get('api/habits'), get('api/ledger'), get('api/weather'), get('api/watch')]);
+  const pages = {};
+  await Promise.all(['todo', 'health', 'podcast', 'daily'].map(async k => { const p = vaultPage(k); if (!p) return; const r = await vaultRead(p, B11.life.todoDirty && k === 'todo').catch(() => null); if (r && r.ok) pages[k] = { path: p, text: r.text, tasks: taskLines(r.text), fm: parseFM(r.text) }; }));
+  B11.life = { cal: cal && cal.ok ? cal.cal : null, todos, habits, ledger, wx, watch, pages }; renderLife();
+}
+function renderLife() {
+  const Dt = B11.life; const keep = lifeBody.scrollTop; lifeBody.innerHTML = '';
+  const now = cnNow(), ds = todayStr(), nowM = now.getHours() * 60 + now.getMinutes();
+  const sect = (t, more, fn) => { const s = mkEl('div', 'hsect', t); if (more) { const x = mkEl('button', 'sect-x', more); x.onclick = fn; s.appendChild(x); } return s; };
+  const nav = (id) => () => { sheets.life.classList.remove('open'); const b = document.getElementById(id); if (b) b.click(); };
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '生活'), mkEl('div', 'sub', '周' + '日一二三四五六'[now.getDay()] + ' · ' + (now.getMonth() + 1) + '月' + now.getDate() + '日' + (Dt.wx && Dt.wx.ok && Dt.wx.now ? ' · ' + Dt.wx.now.text + ' ' + Dt.wx.now.t + '°' : '')), mkEl('div', 'sp'));
+  const cal = mkEl('button', 'chip'); cal.append(icEl('calendar', 13), '日历'); cal.onclick = nav('navCal'); head.appendChild(cal); lifeBody.appendChild(head);
+  /* 今天 */
+  const hers = (Dt.todos && Dt.todos.hers) || [];
+  const evs = Dt.cal ? Dt.cal.events.filter(e => e.date === ds || (e.yearly && e.date.slice(5) === ds.slice(5))) : [];
+  const rows = []; evs.forEach(e => rows.push({ at: e.time || '', text: e.text }));
+  hers.filter(x => x.at).forEach(x => { if (!rows.find(r => r.at === x.at && r.text.slice(0, 3) === x.text.slice(0, 3))) rows.push({ at: x.at, text: x.text, done: x.done, todo: x }); });
+  rows.sort((a, b) => (a.at ? hmNum(a.at) : -1) - (b.at ? hmNum(b.at) : -1));
+  lifeBody.appendChild(sect('今天', '看整天 ›', () => { sheets.life.classList.remove('open'); openToday(); }));
+  const line = mkEl('div', 'hub-line'); if (!rows.length) line.appendChild(mkEl('div', 'hub-empty', '今天没排事。'));
+  let placed = false; rows.forEach(r => { const m = r.at ? hmNum(r.at) : -1; if (!placed && m > nowM) { placed = true; const nl = mkEl('div', 'hub-row'); nl.append(mkEl('span', 'at now', '现在'), mkEl('span', 't', '')); nl.style.padding = '4px 0'; line.appendChild(nl); } const row = mkEl('div', 'hub-row' + (r.done ? ' done' : (m >= 0 && m < nowM - 5 ? ' past' : ''))); row.append(mkEl('span', 'at', r.at || '全天'), mkEl('span', 't', r.text)); if (r.todo) { const ck = mkEl('button', 'ck'); ck.appendChild(icEl('check', 14)); ck.onclick = async () => { const res = await postJSON('api/todos', { action: 'toggle', list: 'hers', id: r.todo.id }).catch(() => null); if (res) { Dt.todos = res; renderLife(); } }; row.appendChild(ck); } line.appendChild(row); });
+  lifeBody.appendChild(line);
+  /* 待办：Obsidian 每日计划优先 */
+  const pg = Dt.pages.todo;
+  lifeBody.appendChild(sect(pg ? '每日计划 · Obsidian' : '待办', pg ? '整页 ›' : '全部 ›', pg ? () => openNote(pg.path, '每日计划') : nav('navTodo')));
+  const tl = mkEl('div', 'st-tasks');
+  if (pg) {
+    const un = pg.tasks.filter(t => !t.done), dn = pg.tasks.filter(t => t.done);
+    if (!pg.tasks.length) tl.appendChild(mkEl('div', 'hub-empty', '这一页上没有 - [ ] 形式的待办'));
+    un.slice(0, 20).concat(dn.slice(0, 3)).forEach(t => { const row = mkEl('div', 'st-task' + (t.done ? ' done' : '')); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 13)); row.append(bx, mkEl('div', 't', plainTask(t.text))); bx.onclick = async () => { row.classList.toggle('done'); const ok = await vaultToggle(pg.path, t.line, !t.done); if (ok) t.done = !t.done; else row.classList.toggle('done'); }; tl.appendChild(row); });
+    if (un.length > 20) tl.appendChild(mkEl('div', 'hub-empty', '还有 ' + (un.length - 20) + ' 项，打开整页看'));
+  } else {
+    const un = hers.filter(x => !x.done); if (!un.length) tl.appendChild(mkEl('div', 'hub-empty', hers.length ? '全做完了。' : '还没有待办。'));
+    un.slice(0, 12).forEach(x => { const row = mkEl('div', 'st-task'); const bx = mkEl('button', 'bx'); bx.appendChild(icEl('check', 13)); const tx = mkEl('div', 't', x.text); if (x.at) tx.appendChild(mkEl('small', '', x.at)); row.append(bx, tx); bx.onclick = async () => { const r = await postJSON('api/todos', { action: 'toggle', list: 'hers', id: x.id }).catch(() => null); if (r) { Dt.todos = r; renderLife(); } }; tl.appendChild(row); });
+    tl.appendChild(vaultHint('读 Obsidian 里的每日计划', () => loadLife()));
+  }
+  lifeBody.appendChild(tl);
+  /* 习惯 */
+  lifeBody.appendChild(sect('每天的小事', ''));
+  const hrow = mkEl('div', 'hub-habits'); const items = (Dt.habits && Dt.habits.items) || [];
+  items.forEach(x => { const b = mkEl('button', 'hub-hb' + (x.doneToday ? ' on' : '')); b.append(icEl(x.icon || 'check', 15), x.name); if (x.streak > 1) b.appendChild(mkEl('b', '', x.streak + ' 天')); b.onclick = async () => { await postJSON('api/habits', { action: 'toggle', id: x.id }); loadLife(); }; b.oncontextmenu = async (e) => { e.preventDefault(); const ok = await askBox({ title: '去掉「' + x.name + '」？', ok: '去掉', danger: true }); if (ok) { await postJSON('api/habits', { action: 'del', id: x.id }); loadLife(); } }; hrow.appendChild(b); });
+  const plus = mkEl('button', 'hub-hb plus'); plus.append(icEl('plus', 14), items.length ? '加一个' : '放几个常见的进来'); plus.onclick = async () => { if (!items.length) { await postJSON('api/habits', { action: 'seed' }); loadLife(); return; } const n = await askBox({ title: '每天要做的一件小事', input: true, placeholder: '比如 背 30 个单词', ok: '加上' }); if (n && n.trim()) { await postJSON('api/habits', { action: 'add', name: n.trim(), icon: /水/.test(n) ? 'drop' : /睡/.test(n) ? 'moon' : /词|读|书/.test(n) ? 'book' : /跑|动|练/.test(n) ? 'activity' : 'check' }); loadLife(); } }; hrow.appendChild(plus);
+  lifeBody.appendChild(hrow);
+  /* 四格：钱 / 身体 / 播客 / 日报 */
+  lifeBody.appendChild(sect('顺手看看', ''));
+  const grid = mkEl('div', 'lf-grid');
+  const lg = Dt.ledger || { monthTotal: 0, todayTotal: 0, budget: 0 };
+  const money = mkEl('button', 'lf-card'); const mh = mkEl('div', 'hd'); mh.append(icEl('tag', 15), '钱'); const mv = mkEl('div', 'v', '¥' + lg.todayTotal); mv.appendChild(mkEl('small', '', '今天')); money.append(mh, mv, mkEl('div', 'sm', '本月 ¥' + lg.monthTotal + (lg.budget ? ' / ' + lg.budget : ''))); money.onclick = () => { openHub(); setTimeout(() => { const el = hubBody.querySelector('#hubMoney'); el && el.scrollIntoView({ behavior: 'smooth' }); }, 400); }; grid.appendChild(money);
+  const M = (Dt.watch && Dt.watch.metrics) || {};
+  const body = mkEl('button', 'lf-card' + (Dt.pages.health || M.steps ? '' : ' off')); const bh = mkEl('div', 'hd'); bh.append(icEl('heartIc', 15), '身体'); body.appendChild(bh);
+  if (Dt.pages.health) { const first = Dt.pages.health.text.replace(/^---[\s\S]*?---\s*/, '').split('\n').filter(l => l.trim() && !/^#/.test(l)).slice(0, 3).join(' · '); body.append(mkEl('div', 'pv', plainTask(first) || '（打开看）'), mkEl('div', 'sm', 'Obsidian · ' + Dt.pages.health.path.split('/').pop().replace(/\.md$/, ''))); body.onclick = () => openNote(Dt.pages.health.path, '身体'); }
+  else if (M.steps || M.sleep_hours) { const bv = mkEl('div', 'v', M.sleep_hours ? M.sleep_hours.value : M.steps.value); bv.appendChild(mkEl('small', '', M.sleep_hours ? '小时' : '步')); body.append(bv, mkEl('div', 'sm', M.steps ? '今天 ' + M.steps.value + ' 步' : '')); body.onclick = nav('navHealth'); }
+  else { body.append(mkEl('div', 'sm', B11.vault && B11.vault.ok ? '选一页当健康记录' : '接 Obsidian，或者接手表数据')); body.onclick = () => (B11.vault && B11.vault.ok ? openVaultPages(() => loadLife()) : nav('navHealth')()); }
+  grid.appendChild(body);
+  [['podcast', '播客', 'music'], ['daily', '日报', 'fileText']].forEach(([k, n, ic]) => { const p = Dt.pages[k]; const c = mkEl('button', 'lf-card' + (p ? '' : ' off')); const h = mkEl('div', 'hd'); h.append(icEl(ic, 15), n); c.appendChild(h); if (p) { const first = p.text.replace(/^---[\s\S]*?---\s*/, '').split('\n').filter(l => l.trim() && !/^#|^```/.test(l)).slice(0, 3).join(' · '); c.append(mkEl('div', 'pv', plainTask(first) || '（打开看）'), mkEl('div', 'sm', 'Obsidian · ' + p.path.split('/').pop().replace(/\.md$/, ''))); c.onclick = () => openNote(p.path, n); } else if (k === 'daily') { c.append(mkEl('div', 'sm', '接 Obsidian 的资讯台，或者看他写的日报')); c.onclick = () => (B11.vault && B11.vault.ok ? openVaultPages(() => loadLife()) : nav('navNews')()); } else { c.append(mkEl('div', 'sm', B11.vault && B11.vault.ok ? '选一页当播客清单' : '接 Obsidian 后读你的播客页')); c.onclick = () => (B11.vault && B11.vault.ok ? openVaultPages(() => loadLife()) : openVaultSetup(() => loadLife())); } grid.appendChild(c); });
+  lifeBody.appendChild(grid);
+  lifeBody.appendChild(sect('一句话让他做', ''));
+  const asks = mkEl('div', 'hub-asks');
+  [['帮我排一下今天', 'calendar', true], ['记一笔：', 'tag', false], ['提醒我：', 'bell', false], ['今晚复盘', 'moon', true], ['明天有什么', 'sun', true]].forEach(([t, ic, now2]) => { const b = mkEl('button', 'chip'); b.append(icEl(ic, 14), t); b.onclick = () => talkWith(t, now2); asks.appendChild(b); });
+  lifeBody.appendChild(asks);
+  lifeBody.scrollTop = keep;
+}
+
+/* ── 更多 ── */
+async function openMore() { Object.values(sheets).forEach(s => s && s.classList.remove('open')); sheets.more.classList.add('open'); tabSync(); renderMore(); }
+async function renderMore() {
+  moreBody.innerHTML = '';
+  const head = mkEl('div', 'pg-head'); head.append(mkEl('h1', '', '更多'), mkEl('div', 'sub', '工具 · 系统 · 设置')); moreBody.appendChild(head);
+  const nav = (id) => () => { sheets.more.classList.remove('open'); const b = document.getElementById(id); if (b) b.click(); };
+  const sect = (t) => mkEl('div', 'hsect', t);
+  const grid = (items) => { const g = mkEl('div', 'mr-grid'); items.forEach(([n, ic, fn]) => { const b = mkEl('button', 'mr-it'); b.append(icEl(ic, 22), mkEl('span', '', n)); b.onclick = fn; g.appendChild(b); }); return g; };
+  moreBody.appendChild(sect('记录'));
+  moreBody.appendChild(grid([['日历', 'calendar', nav('navCal')], ['便签', 'note', nav('navNotes')], ['日记', 'pen', nav('navWall')], ['记忆', 'ripple', nav('navMem')], ['专注', 'clock', nav('navFocus')], ['健康', 'heartIc', nav('navHealth')], ['日报', 'fileText', nav('navNews')], ['今天', 'sun', () => { sheets.more.classList.remove('open'); openToday(); }]]));
+  moreBody.appendChild(sect('一起 · 工作'));
+  moreBody.appendChild(grid([['一起看', 'tv', nav('navWatch')], ['共读', 'bookOpen', nav('navNook')], ['玩', 'dice', nav('navPlay')], ['工作间', 'terminal', nav('navWork')], ['仓库', 'box', nav('navRepo')], ['通话', 'phone', () => { sheets.more.classList.remove('open'); startCall(); }], ['窗口', 'menu', () => { sheets.more.classList.remove('open'); sheets.chats.classList.add('open'); loadChats(); }], ['搜索', 'search', () => { sheets.more.classList.remove('open'); openFind(); }]]));
+  /* 系统状态：贾维斯的自检 */
+  moreBody.appendChild(sect('系统'));
+  const sys = mkEl('div', 'mr-sys'); moreBody.appendChild(sys);
+  const row = (k, v, sub, dot, act) => { const r = mkEl('div', 'mr-row'); if (dot) r.appendChild(mkEl('i', 'dot ' + dot)); r.appendChild(mkEl('span', 'k', k)); const vv = mkEl('span', 'v', v); if (sub) vv.appendChild(mkEl('small', '', sub)); r.appendChild(vv); if (act) { const b = mkEl('button', 'chip', act[0]); b.onclick = act[1]; r.appendChild(b); } sys.appendChild(r); return r; };
+  const [st, model, storage, vc, remote, voice] = await Promise.all([getJSON('api/status').catch(() => null), getJSON('api/model').catch(() => null), getJSON('api/storage').catch(() => null), vaultConfGet(true), getJSON('api/remote').catch(() => null), getJSON('api/kv/voice').catch(() => null)]);
+  row('模型', st && st.mode === 'api' ? ((model && model.name) || '已接入') : '演示模式', st && st.mode === 'api' ? '线路 ' + ((model && model.route) || '') : '还没填 API，他只会几句固定的话', st && st.mode === 'api' ? 'ok' : 'warn', ['接入', () => { sheets.more.classList.remove('open'); sheets.api.classList.add('open'); }]);
+  const vz = voice && voice.items && voice.items[0]; row('声音', vz && vz.provider && vz.provider !== 'browser' ? (vz.provider === 'eleven' ? 'ElevenLabs · ' + (vz.voiceName || vz.model || '') : '中转站语音') : '浏览器自带', vz && vz.provider === 'eleven' ? (vz.model || '') : '想要他有自己的声音，接 ElevenLabs', vz && vz.provider && vz.provider !== 'browser' ? 'ok' : '', ['设置', () => { sheets.more.classList.remove('open'); openVoice(); }]);
+  row('Obsidian', vc && vc.ok ? vc.owner + '/' + vc.repo + (vc.branch ? ' · ' + vc.branch : '') : '没接', vc && vc.ok ? '已对应 ' + Object.values(vc.pages || {}).filter(Boolean).length + ' 页' + (vc.hasToken ? ' · 可写回' : ' · 只读（没 token）') : '接上之后待办 / 学习 / 身体 / 播客 / 日报读你自己的页面', vc && vc.ok ? 'ok' : '', [vc && vc.ok ? '页面' : '接入', () => (vc && vc.ok ? openVaultPages() : openVaultSetup())]);
+  row('家里的后端', remote && remote.url ? remote.url.replace(/^https?:\/\//, '') : '没连', remote && remote.url ? '工作间、仓库走它' : '工作间要用它；仓库可以直连 GitHub', remote && remote.url ? 'ok' : '', ['设置', () => window.openRemoteSetup && window.openRemoteSetup()]);
+  if (storage && storage.ok) { const used = storage.usage || storage.home || 0; row('存储', (used / 1048576).toFixed(1) + ' MB' + (storage.quota ? ' / ' + Math.round(storage.quota / 1073741824) + ' GB' : ''), (storage.msgs != null ? storage.msgs + ' 条消息' : '') + (storage.imgs && storage.imgs.count ? ' · 图片 ' + storage.imgs.count + ' 张（' + (storage.imgs.bytes / 1048576).toFixed(1) + ' MB）' : '') + ' · ' + (storage.engine === 'indexeddb' ? 'IndexedDB' : 'localStorage'), storage.quota && used > storage.quota * 0.8 ? 'warn' : 'ok', ['整理', () => { sheets.more.classList.remove('open'); sheets.settings.classList.add('open'); }]); }
+  /* 模式 + 设置 */
+  const mode = mkEl('div', 'hub-mode'); const tx = mkEl('div', 'tx'); const butler = HUB.role === 'butler'; tx.append(document.createTextNode('管家模式'), mkEl('small', '', butler ? '底部标签栏、指挥台首页、贾维斯式人设；关掉回到聊天 + 抽屉' : '打开：底部标签栏、指挥台首页、贾维斯式人设')); const sw = mkEl('button', 'sw' + (butler ? ' on' : '')); sw.onclick = async () => { await hubSetRole(butler ? 'partner' : 'butler'); renderMore(); }; mode.append(tx, sw); moreBody.appendChild(mode);
+  moreBody.appendChild(sect('设置'));
+  moreBody.appendChild(grid([['设置', 'sliders', () => { sheets.more.classList.remove('open'); sheets.settings.classList.add('open'); }], ['名字 · 人设', 'user', () => { sheets.more.classList.remove('open'); sheets.homeset.classList.add('open'); }], ['接入 API', 'bolt', () => { sheets.more.classList.remove('open'); sheets.api.classList.add('open'); }], ['他的声音', 'mic', () => { sheets.more.classList.remove('open'); openVoice(); }]]));
+}
+/* 抽屉里的「指挥台」下面也放一个「学习」「生活」，非管家模式时也能到 */
+(function () { const main = document.querySelector('#drawer .dr-main'); if (!main) return; const hubB = document.getElementById('navHub'); [['navStudy', 'book', '学习', openStudy], ['navLife', 'sun', '生活', openLife]].forEach(([id, ic, n, fn]) => { const b = mkEl('button', 'item'); b.id = id; b.append(icEl(ic, 18), n); b.onclick = fn; hubB ? hubB.after(b) : main.prepend(b); }); })();
+setTimeout(tabSync, 600);
 
 box.focus();
 </script>
