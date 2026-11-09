@@ -2226,6 +2226,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
       <button class="item" id="navMem"><span class="ic" data-i="ripple"></span>记忆</button>
       <button class="item" id="navLetter"><span class="ic" data-i="mail"></span>信箱</button>
       <button class="item" id="navMom"><span class="ic" data-i="image"></span>动态</button>
+      <button class="item" id="navNotes"><span class="ic" data-i="note"></span>便签</button>
       <button class="item" id="navTodo"><span class="ic" data-i="checkSquare"></span>待办</button>
       <button class="item" id="navCal"><span class="ic" data-i="calendar"></span>日历</button>
       <button class="item" id="navWall"><span class="ic" data-i="pen"></span>日记</button>
@@ -7747,6 +7748,7 @@ function pageSheet(key) {
         → 同 GET。他那边：心跳醒来时可以发一条；你评论了，下次醒来回一句。 */
 const momBody = pageSheet('mom');
 document.getElementById('navMom').onclick = () => { closeDrawer(); sheets.mom.classList.add('open'); loadMoments(); };
+document.getElementById('navNotes').onclick = () => { closeDrawer(); sheets.notes.classList.add('open'); loadNotes(true); };
 async function loadMoments(d) {
   if (!d) {
     if (!momBody.childElementCount) momBody.innerHTML = '<div class="board-sub" style="padding:30px 0">翻动态…</div>';
@@ -8713,7 +8715,7 @@ const backBody = pageSheet('back');
 document.getElementById('backRow').onclick = () => { sheets.settings.classList.remove('open'); sheets.back.classList.add('open'); loadBack(); };
 sheets.back.querySelector('[data-close]').onclick = () => { sheets.back.classList.remove('open'); sheets.settings.classList.add('open'); };
 const ACT_CN = { tool: '用了工具', tool_fail: '工具没成', cli_start: '醒来', cli_fallback: '常驻会话不在，改用单次', job_fail: '后台出错', archive: '整理记忆',
-  proactive: '白天想你', wake: '夜里醒来', push: '推送', moment: '发动态', rollover: '换口气', recall: '想起旧事', mcp: '外面的 Claude 来过', letter: '信' };
+  proactive: '白天想你', wake: '夜里醒来', push: '推送', moment: '发动态', rollover: '换口气', recall: '想起旧事', mcp: '外面的 Claude 来过', letter: '信', note: '贴便签', storage: '清理存储' };
 async function loadBack() {
   loadingInto(backBody, '看看后台…');
   let j, a, m, c;
@@ -8960,6 +8962,23 @@ if (IS_LOCAL) {
       im.onclick = () => f.click();
       dl.parentElement.append(im, f);
     }
+    /* 这台设备的存储：用了多少、图占多少、一键清理旧图 */
+    try {
+      const st = await getJSON('api/storage');
+      const fmt = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB';
+      const sec = mkEl('div', 'hsect', '这台设备的存储');
+      const c = mkEl('div', 'hcard');
+      const r1 = mkEl('div', 'hrow'); const t1 = mkEl('span', 'tx', '家的数据 ' + fmt(st.home) + (st.quota ? ' · 浏览器给的空间 ' + fmt(st.quota) : ''));
+      t1.appendChild(mkEl('small', '', (st.engine === 'indexeddb' ? '存在 IndexedDB 里，不受 5MB 限制' : '这个浏览器不支持 IndexedDB，只能放 localStorage（5MB）') + (st.usage ? ' · 已用 ' + fmt(st.usage) : '')));
+      r1.append(icEl('box', 16), t1); c.appendChild(r1);
+      const r2 = mkEl('div', 'hrow'); const t2 = mkEl('span', 'tx', '聊天里的图片 ' + st.imgs.count + ' 张 · ' + fmt(st.imgs.bytes));
+      t2.appendChild(mkEl('small', '', '一周前的图清掉只留「[图]」，文字都在；头像和表情包不受影响'));
+      const cb = mkEl('button', 'ap-b sm', '清理旧图片');
+      cb.onclick = async () => { if (!await askBox({ title: '清掉一周前聊天里的图片？', text: '文字一个不少，只是图换成「[图，已清理]」。清了找不回来。', ok: '清理', danger: true })) return; const r = await postJSON('api/storage', { action: 'strip_images', keep_days: 7 }).catch(() => ({})); note(r.ok ? '（清了 ' + r.stripped + ' 条里的图）' : '（没清成）', r.ok ? '' : 'err'); loadBack(); };
+      r2.append(icEl('image', 16), t2, cb); c.appendChild(r2);
+      const anchor = backBody.querySelector('.bk-dl')?.closest('.hcard');
+      if (anchor) anchor.after(sec, c); else backBody.append(sec, c);
+    } catch (e) {}
     const mcp = backBody.querySelector('.bk-mcp');
     if (mcp) { mcp.innerHTML = ''; mcp.append(mkEl('div', 'bk-tt', '让 claude.ai 那边的 Claude 也翻这份记忆，需要一个一直开着的后端（python3 server/app.py，再用 Cloudflare Tunnel 之类让外网能访问）。现在这个页面是网页单独开的，记忆只在这台设备的浏览器里，外面连不进来。')); }
   };
@@ -9004,6 +9023,25 @@ const PREF_KEY = 'dwell.prefs';
 const PREFS = Object.assign({ split: true, meta: true, avatars: false, autoRead: false }, (() => { try { return JSON.parse(localStorage.getItem(PREF_KEY) || '{}'); } catch (e) { return {}; } })());
 const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(PREFS)); } catch (e) {} };
 const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch (e) { return d; } };
+/* 大东西（表情包、头像）不放 localStorage——那只有 5MB，几张图就满了。
+   放 IndexedDB（几百 MB 起），开页时先读进内存，读是同步的，写是异步的。 */
+const BIG = { cache: {}, ready: false, db: null };
+BIG.open = () => new Promise((res) => { try { const r = indexedDB.open('dwell-big', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } });
+BIG.load = async () => {
+  BIG.db = await BIG.open();
+  if (BIG.db) await new Promise((res) => { try { const tx = BIG.db.transaction('kv', 'readonly').objectStore('kv'); const q = tx.openCursor(); q.onsuccess = () => { const c = q.result; if (c) { BIG.cache[c.key] = c.value; c.continue(); } else res(); }; q.onerror = () => res(); } catch (e) { res(); } });
+  /* 老数据从 localStorage 搬过来，搬完就删，把那 5MB 让出来 */
+  for (const k of ['dwell.stickers', 'dwell.avatars']) {
+    if (BIG.cache[k] == null) { const v = lsGet(k, null); if (v != null) { BIG.cache[k] = v; BIG.persist(k); } }
+    try { if (localStorage.getItem(k) != null && BIG.db) localStorage.removeItem(k); } catch (e) {}
+  }
+  BIG.ready = true;
+  document.dispatchEvent(new Event('big-ready'));
+};
+BIG.persist = (k) => { if (!BIG.db) { try { localStorage.setItem(k, JSON.stringify(BIG.cache[k])); } catch (e) { note('（这台设备的存储满了）', 'err'); } return; } try { BIG.db.transaction('kv', 'readwrite').objectStore('kv').put(BIG.cache[k], k).onerror = () => note('（存不下了：浏览器给的空间用完了）', 'err'); } catch (e) {} };
+const bigGet = (k, d) => (BIG.cache[k] == null ? d : BIG.cache[k]);
+const bigSet = (k, v) => { BIG.cache[k] = v; BIG.persist(k); return true; };
+BIG.load();
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { note('（这台设备的存储满了）', 'err'); return false; } };
 const kvGet = (n) => getJSON('api/kv/' + n);
 const kvPost = (n, o) => postJSON('api/kv/' + n, o);
@@ -9126,7 +9164,7 @@ async function toSmallData(src, max) {
   });
 }
 async function saveSticker(src) {
-  try { const d = await toSmallData(src, 256); const L = lsGet(STK_KEY, []); L.unshift({ id: 's' + Date.now(), d }); if (lsSet(STK_KEY, L.slice(0, 120))) note('（存进表情包了）'); }
+  try { const d = await toSmallData(src, 256); const L = bigGet(STK_KEY, []); L.unshift({ id: 's' + Date.now(), d }); if (bigSet(STK_KEY, L.slice(0, 120))) note('（存进表情包了）'); }
   catch (e) { note('（这张图存不了：别的网站的图不让读）', 'err'); }
 }
 const stkFile = mkEl('input'); stkFile.type = 'file'; stkFile.accept = 'image/*'; stkFile.multiple = true; stkFile.hidden = true; document.body.appendChild(stkFile);
@@ -9137,13 +9175,13 @@ function openStickers() {
   const head = mkEl('div', 'stk-head'); head.append(mkEl('div', 'ask-t', '表情包'));
   const add = mkEl('button', 'ap-b sm', '＋ 添加'); add.onclick = () => stkFile.click(); head.appendChild(add);
   body.appendChild(head);
-  const L = lsGet(STK_KEY, []);
+  const L = bigGet(STK_KEY, []);
   const g = mkEl('div', 'stk-grid');
   if (!L.length) g.appendChild(mkEl('div', 'td-empty', '还没有表情。点「添加」从相册里挑，或者长按聊天里的图「存为表情」。'));
   L.forEach(s => {
     const b = mkEl('button', 'stk'); const im = mkEl('img'); im.src = s.d; b.appendChild(im);
     b.onclick = () => { wrap.classList.remove('open'); attachments = [{ kind: 'image', media_type: 'image/jpeg', data: s.d.split(',')[1], name: 'sticker.jpg' }]; renderStrip(); if (!box.value.trim()) box.value = ''; send(); };
-    let t; b.addEventListener('touchstart', () => { t = setTimeout(async () => { if (await askBox({ title: '删掉这个表情？', ok: '删掉', danger: true })) { lsSet(STK_KEY, lsGet(STK_KEY, []).filter(x => x.id !== s.id)); openStickers(); } }, 600); }, { passive: true });
+    let t; b.addEventListener('touchstart', () => { t = setTimeout(async () => { if (await askBox({ title: '删掉这个表情？', ok: '删掉', danger: true })) { bigSet(STK_KEY, bigGet(STK_KEY, []).filter(x => x.id !== s.id)); openStickers(); } }, 600); }, { passive: true });
     b.addEventListener('touchend', () => clearTimeout(t));
     g.appendChild(b);
   });
@@ -9246,19 +9284,20 @@ document.getElementById('dotsBtn').before(callBtn);
 
 /* ─────────────── 头像 ─────────────── */
 const AV_KEY = 'dwell.avatars';
-const avatarOf = (who) => (lsGet(AV_KEY, {}) || {})[who] || '';
+const avatarOf = (who) => (bigGet(AV_KEY, {}) || {})[who] || '';
 function applyAvatars() {
-  const a = lsGet(AV_KEY, {}) || {};
+  const a = bigGet(AV_KEY, {}) || {};
   const r = document.documentElement.style;
   r.setProperty('--av-him', a.him ? 'url(' + a.him + ')' : 'none');
   r.setProperty('--av-her', a.her ? 'url(' + a.her + ')' : 'none');
   log.classList.toggle('withav', !!PREFS.avatars && !!(a.him || a.her));
 }
 applyAvatars();
+document.addEventListener('big-ready', applyAvatars);
 const avFile = mkEl('input'); avFile.type = 'file'; avFile.accept = 'image/*'; avFile.hidden = true; document.body.appendChild(avFile);
 let avWho = 'him';
 avFile.onchange = async () => { const f = avFile.files[0]; if (!f) return; const u = URL.createObjectURL(f);
-  try { const d = await toSmallData(u, 200); const a = lsGet(AV_KEY, {}) || {}; a[avWho] = d; lsSet(AV_KEY, a); applyAvatars(); note('（头像换好了）'); if (sheets.we.classList.contains('open')) loadWe(); } catch (e) { note('（没换成）', 'err'); }
+  try { const d = await toSmallData(u, 200); const a = bigGet(AV_KEY, {}) || {}; a[avWho] = d; bigSet(AV_KEY, a); applyAvatars(); note('（头像换好了）'); if (sheets.we.classList.contains('open')) loadWe(); } catch (e) { note('（没换成）', 'err'); }
   URL.revokeObjectURL(u); avFile.value = ''; };
 const pickAvatar = (who) => { avWho = who; avFile.click(); };
 
@@ -9663,7 +9702,7 @@ document.getElementById('gaugeRow').onclick = () => { sheets.settings.classList.
   ['navToday', 'chat', 'navWe', 'navMem'].forEach(k => items[k] && main.appendChild(items[k]));
   nav.appendChild(main);
   const groups = [['一起', ['navListen', 'navWatch', 'navNook', 'navPlay', 'navSleep']], ['生活', ['navTodo', 'navCal', 'navFocus', 'navWish', 'navHealth', 'navNews']],
-    ['留下来的', ['navWall', 'navLetter', 'navMom']], ['工具', ['navRepo', 'navWork']]];
+    ['留下来的', ['navWall', 'navLetter', 'navNotes', 'navMom']], ['工具', ['navRepo', 'navWork']]];
   groups.forEach(([t, ks]) => { nav.appendChild(mkEl('div', 'dr-grp', t)); const g = mkEl('div', 'dr-grid'); ks.forEach(k => items[k] && g.appendChild(items[k])); nav.appendChild(g); });
   if (sect) { nav.appendChild(sect); recents.forEach(r => nav.appendChild(r)); }
   const head = mkEl('div', 'dr-head');
@@ -9672,12 +9711,12 @@ document.getElementById('gaugeRow').onclick = () => { sheets.settings.classList.
   head.append(avs, tx);
   head.onclick = () => document.getElementById('navWe').click();
   document.querySelector('#drawer .brand').after(head);
-  const paint = () => { const a = lsGet(AV_KEY, {}) || {};
+  const paint = () => { const a = bigGet(AV_KEY, {}) || {};
     [[a1, a.him, HOME.him], [a2, a.her, HOME.me]].forEach(([el, img, n]) => { el.style.backgroundImage = img ? 'url(' + img + ')' : ''; el.textContent = img ? '' : (n || '·').slice(0, 1); });
     nm.textContent = (HOME.him || '他') + ' & ' + (HOME.me || '我');
     const d = HOME.since ? Math.max(1, Math.round((new Date(todayYmd()) - new Date(HOME.since)) / 864e5) + 1) : 0;
     sb.textContent = d ? '在一起的第 ' + d + ' 天' : '点这里，去「我们」'; };
-  paint(); setTimeout(paint, 1200);
+  paint(); setTimeout(paint, 1200); document.addEventListener('big-ready', paint);
   const _od = openDrawer; openDrawer = function () { paint(); return _od.apply(this, arguments); };
 })();
 
