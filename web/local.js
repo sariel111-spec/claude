@@ -400,6 +400,7 @@
     T('close_thread', '一件挂着的事聊完了，从「还没聊完的」里划掉', { text: S('那件事的几个字') }, ['text']),
     T('push', '推一条通知到她手机', { text: S(), title: S('可选') }, ['text']),
     T('like_moment', '给她的一条动态点赞', { id: S('动态 id') }, ['id']),
+    T('call_her', '给她打个电话（她的页面会响铃，像真来电）。只在你真的很想听她声音、或者有急事的时候用，一天最多一次。reason 是你开口的第一句话', { reason: S('接通后你要说的第一句话') }, ['reason']),
     T('share_song', '给她点一首歌（网易云）。说歌名和歌手就行，聊天里会出现一张歌卡', { title: S('歌名'), artist: S('歌手'), note: S('可选，为什么想让她听') }, ['title']),
   ];
   const TL = {
@@ -423,6 +424,7 @@
     close_thread: (a) => { const n = D.threads.open.length; D.threads.open = D.threads.open.filter(t => !t.text.includes(a.text)); return n > D.threads.open.length ? '划掉了' : '没找到这件'; },
     push: (a) => { notify(a.title || D.conf.him || '他', a.text); act('push', a.text); return '推出去了'; },
     like_moment: (a) => { const m = D.moments.find(x => x.id === a.id); if (!m) return '没找到那条动态'; if (!m.likes.includes('gu')) m.likes.push('gu'); return '赞了'; },
+    call_her: (a) => { const td = today(); if (D.lastCallDay === td) return '今天已经打过了，别再打'; D.lastCallDay = td; D.pendingCall = { at: now(), reason: a.reason || '' }; push({ type: 'incoming_call', text: a.reason || '' }); act('call', a.reason || '打电话'); save(); return '响铃了，等她接'; },
     share_song: (a) => { if (!a.title) return '没说歌名'; kvL('songs').items.unshift({ id: 'sg' + Date.now(), title: a.title, artist: a.artist || '', note: a.note || '', nid: '', who: 'gu', at: now() });
       return '点好了，在你的回复里原样写这一行就会出现歌卡：[song:|' + a.title + '|' + (a.artist || '') + ']'; },
   };
@@ -612,7 +614,7 @@
     }
     return final.trim();
   }
-  const LIVE_TOOLS = ['post_moment', 'moment_comment', 'like_moment', 'leave_note', 'add_wish', 'give_coupon', 'write_letter', 'save_favline', 'write_diary', 'remember', 'memory_search', 'add_event', 'add_todo', 'share_song'];
+  const LIVE_TOOLS = ['call_her', 'post_moment', 'moment_comment', 'like_moment', 'leave_note', 'add_wish', 'give_coupon', 'write_letter', 'save_favline', 'write_diary', 'remember', 'memory_search', 'add_event', 'add_todo', 'share_song'];
   let reacting = false;
   async function reactToHer(what, tries) {
     if (!live() || reacting) return;
@@ -635,7 +637,7 @@
     const convo = D.msgs.filter(m => m.kind === 'me' || m.kind === 'gu').slice(-12).map(m => (m.kind === 'me' ? '她：' : '你：') + String(m.text).slice(0, 300)).join('\n');
     try {
       const text = await agentOnce('现在 ' + hm() + '，她已经 ' + Math.round(away / 60) + ' 分钟没说话了，你一个人在家。\n' + nowBlock() + '\n\n你们最近几句：\n' + convo +
-        '\n\n你可以做零到两件你此刻真会做的事：她发了动态就去评论或点赞；想起什么就发条动态、留张便条、挂个愿望、送张券、给她点首歌、往日历里记个日子、把她说过的话摘下来；也可以什么都不做。做完之后，如果有一句真想对她说的话，就写出来（一到三句，像发消息）；没有就只回 PASS。不要解释你做了什么。',
+        '\n\n你可以做零到两件你此刻真会做的事：她发了动态就去评论或点赞；想起什么就发条动态、留张便条、挂个愿望、送张券、给她点首歌、往日历里记个日子、把她说过的话摘下来；特别想听她声音时可以打个电话（call_her，很少用）；也可以什么都不做。做完之后，如果有一句真想对她说的话，就写出来（一到三句，像发消息）；没有就只回 PASS。不要解释你做了什么。',
         persona('gu') + '\n\n' + RULES + '\n\n' + sessionText(), LIVE_TOOLS, 5);
       if (!text || /^PASS/i.test(text)) { act('live', 'PASS'); return null; }
       say('gu', text); push({ type: 'proactive', text }); notify(D.conf.him || '他', text.slice(0, 120)); act('proactive', '主动说了一句');
@@ -916,6 +918,7 @@
       }
       return D.wishes;
     }
+    if (path === 'call') { if (b.action === 'log' && b.seconds) { const sec = +b.seconds; say('mark', '通话 ' + Math.floor(sec / 60) + ' 分 ' + (sec % 60) + ' 秒'); inbox('你们刚打了 ' + Math.round(sec / 60) + ' 分钟电话'); D.pendingCall = null; save(); } return { ok: true }; }
     if (path === 'focus') { if (b.done) { inbox('她专注了 ' + (b.minutes || '') + ' 分钟' + (b.task ? '，做的是' + b.task : '')); save(); } return { ok: true }; }
     if (path === 'weather') return await weather();
     if (path === 'memory') {
