@@ -2250,6 +2250,18 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .pip-in { display: flex; gap: 6px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(0,0,0,.06); }
   .pip-in input { flex: 1; border: 0; border-radius: 999px; padding: 9px 13px; background: rgba(0,0,0,.06); font-size: 14px; outline: none; }
   .pip-in button { border: 0; border-radius: 999px; padding: 0 14px; background: #2b2a27; color: #fff; }
+
+  /* ═══ 第九轮：仓库来源条 · 工作间接入 ═══ */
+  .repo-src { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 10px; }
+  .repo-src .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .wk-setup { background: var(--panel); border-radius: 18px; padding: 14px 14px 8px; display: grid; gap: 4px; margin-bottom: 12px; }
+  .wk-st { font-size: 12px; letter-spacing: .08em; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
+  .wk-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .wk-step:first-of-type { border-top: 0; }
+  .wk-step b { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--card); font-size: 12.5px; font-weight: 600; }
+  .wk-step .tx { flex: 1; font-size: 14.5px; line-height: 1.4; }
+  .wk-step .tx small { display: block; color: var(--dim); font-size: 12.5px; margin-top: 3px; word-break: break-all; }
+  .wk-cp { flex: none; font-size: 12px; color: var(--accent); padding: 4px 8px; border-radius: 999px; background: var(--card); }
 </style>
 </head>
 <body>
@@ -5516,6 +5528,7 @@ function repoTime(ts) {
 }
 
 const REPO_PAGE = 60;
+let repoRootName = 'Yu';
 
 async function repoLoadLog(more) {
   const m = document.getElementById('repoMain');
@@ -5523,14 +5536,16 @@ async function repoLoadLog(more) {
   try {
     d = await (await fetch('api/repo/log?n=' + REPO_PAGE + '&skip=' + (more ? repoSkip : 0),
       { cache: 'no-store' })).json();
-    if (!d.ok) throw 0;
+    if (!d.ok) throw d;
   } catch (e) {
     if (!more) {
-      m.innerHTML = '<div class="repo-none">读不到仓库。可能是家里那台在重启，等一下再开</div>';
-      repoSub('这会儿连不上');
+      const why = (e && (e.err || e.error || e.why)) || '';
+      m.innerHTML = '<div class="repo-none">' + (e && e.nocfg ? '还没说看哪个仓库——点上面「换仓库」填一个 GitHub 仓库，或者连上家里的后端' : why ? escapeHtml(why) : '读不到仓库。可能是家里那台在重启，等一下再开') + '</div>';
+      repoSub(e && e.nocfg ? '还没设置' : '这会儿连不上');
     }
     return;
   }
+  if (d.gh) repoRootName = d.gh.split('/')[1] || repoRootName;
   if (!more) { repoRows = []; repoSkip = 0; }
   repoRows = repoRows.concat(d.items || []);
   repoSkip = repoRows.length;
@@ -5623,7 +5638,8 @@ async function repoLoadTree(rel) {
     repoSub('打不开'); return;
   }
   const parts = repoDir ? repoDir.split('/').filter(Boolean) : [];
-  let crumb = '<span class="cb" data-p="">Yu</span>';
+  if (d.root) repoRootName = d.root;
+  let crumb = '<span class="cb" data-p="">' + escapeHtml(repoRootName) + '</span>';
   parts.forEach((p, i) => {
     crumb += '<span class="cs">/</span><span class="cb" data-p="'
       + escapeHtml(parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(p) + '</span>';
@@ -5636,7 +5652,7 @@ async function repoLoadTree(rel) {
         + '<span class="rn">' + escapeHtml(it.n) + '</span>'
         + (it.d ? '' : '<span class="rz">' + repoSize(it.z) + '</span>') + '</div>').join('')
       + '</div>' : '<div class="repo-none">这个文件夹是空的</div>');
-  repoSub((repoDir || 'Yu') + ' · ' + d.items.length + ' 项');
+  repoSub((repoDir || repoRootName) + ' · ' + d.items.length + ' 项');
   fillIcons(m);
   m.querySelectorAll('.cb').forEach(x => { x.onclick = () => repoLoadTree(x.dataset.p); });
   m.querySelectorAll('.ri').forEach(x => {
@@ -5663,7 +5679,7 @@ async function repoOpenFile(path) {
   } catch (e) { d = { ok: false, err: '读不动' }; }
   const up = path.split('/').slice(0, -1).join('/');
   repoSub(path + (d.ok && d.size ? ' · ' + repoSize(d.size) : ''));
-  let html = '<div class="repo-crumb"><span class="cb" id="repoUp">← ' + escapeHtml(up || 'Yu')
+  let html = '<div class="repo-crumb"><span class="cb" id="repoUp">← ' + escapeHtml(up || repoRootName)
     + '</span></div>';
   if (!d.ok) html += '<div class="repo-none">' + escapeHtml(d.err || '读不到') + '</div>';
   else html += '<div class="repo-file"><pre>' + escapeHtml(d.text) + '</pre></div>'
@@ -9097,7 +9113,7 @@ if (IS_LOCAL) {
     const mcp = backBody.querySelector('.bk-mcp');
     if (mcp) { mcp.innerHTML = ''; mcp.append(mkEl('div', 'bk-tt', '让 claude.ai 那边的 Claude 也翻这份记忆，需要一个一直开着的后端（python3 server/app.py，再用 Cloudflare Tunnel 之类让外网能访问）。现在这个页面是网页单独开的，记忆只在这台设备的浏览器里，外面连不进来。')); }
   };
-  const _lw = loadWork;
+  const _lw = loadWork; window.__loadWorkReal = _lw;
   loadWork = async function () {
     workBody.innerHTML = '';
     const head = mkEl('div', 'sh-head');
@@ -9946,7 +9962,7 @@ document.getElementById('navSleep').onclick = () => openPage('sleep', loadSleep)
    ═══════════════════════════════════════════════════════════════ */
 
 /* ───────────── 声音设置（存在 kv 'voice'，本机或后端都一样） ───────────── */
-const VOICE_DEF = { provider: 'browser', key: '', base: '', voice: '', voiceName: '', model: 'eleven_multilingual_v2', stability: 0.5, similarity: 0.8, speed: 1.0, stt: 'auto', barge: true, captions: true, ring: true, oaVoice: 'alloy', oaModel: 'tts-1', oaStt: 'whisper-1' };
+const VOICE_DEF = { provider: 'browser', key: '', base: '', voice: '', voiceName: '', model: 'eleven_v4', stability: 0.5, similarity: 0.8, speed: 1.0, stt: 'auto', barge: true, captions: true, ring: true, oaVoice: 'alloy', oaModel: 'tts-1', oaStt: 'whisper-1' };
 let VOICE = Object.assign({}, VOICE_DEF);
 let voiceLoaded = false;
 async function loadVoice() {
@@ -9959,13 +9975,15 @@ const ttsReady = () => (VOICE.provider === 'eleven' && VOICE.key && VOICE.voice)
 const sttMode = () => { if (VOICE.stt !== 'auto') return VOICE.stt; if (VOICE.provider === 'eleven' && VOICE.key) return 'eleven'; if (VOICE.provider === 'openai' && VOICE.key && VOICE.base) return 'openai'; return 'browser'; };
 const oaBase = () => String(VOICE.base || '').replace(/\/+$/, '').replace(/\/v1$/, '');
 
+/* v3 / v4 这一代的 stability 只认 0 / 0.5 / 1（创意 / 自然 / 稳重），也不认 speed；老模型照旧 */
+const elevenSettings = () => { const m = String(VOICE.model || ''); const nu = /_v[34]/.test(m); const st = +VOICE.stability; if (nu) return { stability: st < 0.25 ? 0 : st < 0.75 ? 0.5 : 1, similarity_boost: +VOICE.similarity, use_speaker_boost: true }; return { stability: st, similarity_boost: +VOICE.similarity, style: 0, use_speaker_boost: true, speed: Math.min(1.2, Math.max(0.7, +VOICE.speed || 1)) }; };
 /* ───────────── 合成：拿到一段音频（Blob） ───────────── */
 async function ttsBlob(text) {
   const t = String(text || '').trim(); if (!t) return null;
   if (VOICE.provider === 'eleven') {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(VOICE.voice) + '?output_format=mp3_44100_128', {
       method: 'POST', headers: { 'xi-api-key': VOICE.key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: t, model_id: VOICE.model || 'eleven_multilingual_v2', voice_settings: { stability: +VOICE.stability, similarity_boost: +VOICE.similarity, style: 0, use_speaker_boost: true, speed: Math.min(1.2, Math.max(0.7, +VOICE.speed || 1)) } }) });
+      body: JSON.stringify({ text: t, model_id: VOICE.model || 'eleven_v4', voice_settings: elevenSettings() }) });
     if (!r.ok) throw new Error('ElevenLabs ' + r.status + (r.status === 401 ? '：key 不对' : r.status === 402 ? '：额度用完了' : r.status === 422 ? '：声线或模型不对' : ''));
     return await r.blob();
   }
@@ -10300,8 +10318,9 @@ async function openVoice() {
   const slider = (label, key, min, max, step, fmt) => { const w = mkEl('label', 'ap-f'); const lb = mkEl('span', 'lb', label + ' · ' + (fmt ? fmt(VOICE[key]) : VOICE[key])); w.appendChild(lb); const i = mkEl('input', 'vo-range'); i.type = 'range'; i.min = min; i.max = max; i.step = step; i.value = VOICE[key]; i.oninput = () => { VOICE[key] = +i.value; lb.textContent = label + ' · ' + (fmt ? fmt(VOICE[key]) : VOICE[key]); }; i.onchange = saveVoice; w.appendChild(i); card.appendChild(w); };
   const msg = mkEl('div', 'ap-msg'); const say = (t, k) => { msg.textContent = t; msg.className = 'ap-msg on ' + (k || ''); };
   if (VOICE.provider === 'eleven') {
-    card.appendChild(mkEl('div', 'ap-hint', '去 elevenlabs.io → 右上角头像 → API Keys 建一个 key。免费档每月一万字符，够打几通电话；想要他有"自己的"声音，在 Voices 里克隆一条，这里就能选到。'));
-    field('API key', 'key', 'sk_…', 'password');
+    card.appendChild(mkEl('div', 'ap-hint', '去 elevenlabs.io → 右上角头像 → API Keys 建一个 key，填进来会自动拉取你账号里的声线和模型。想要他有"自己的"声音，在 Voices 里克隆一条，这里就能选到。v4 / v4 Turbo 会按语气读，还认 [whispering] [laughs] 这类标签。'));
+    const keyIn = field('API key', 'key', 'sk_…', 'password');
+    keyIn.addEventListener('change', () => { if (VOICE.key) setTimeout(() => pull.click(), 50); });
     const vw = mkEl('label', 'ap-f'); vw.appendChild(mkEl('span', 'lb', '声线'));
     const vrow = mkEl('div', 'vo-row'); const sel = mkEl('select', 'ap-in');
     const fillSel = () => { sel.innerHTML = ''; const o0 = mkEl('option', '', elevenVoices ? '选一条…' : '先拉取声线'); o0.value = ''; sel.appendChild(o0); (elevenVoices || []).forEach(v => { const o = mkEl('option', '', v.name + (v.labels && (v.labels.gender || v.labels.accent) ? ' · ' + [v.labels.gender, v.labels.accent, v.labels.age].filter(Boolean).join(' / ') : '') + (v.category === 'cloned' ? ' · 克隆' : '')); o.value = v.voice_id; if (v.voice_id === VOICE.voice) o.selected = true; sel.appendChild(o); }); if (VOICE.voice && !(elevenVoices || []).some(v => v.voice_id === VOICE.voice)) { const o = mkEl('option', '', (VOICE.voiceName || VOICE.voice)); o.value = VOICE.voice; o.selected = true; sel.appendChild(o); } };
@@ -10313,8 +10332,8 @@ async function openVoice() {
     prev.onclick = () => { const v = (elevenVoices || []).find(x => x.voice_id === sel.value); if (v && v.preview_url) { const a = new Audio(v.preview_url); a.play().catch(() => {}); } else if (VOICE.voice) speak('喂，是我。今天过得怎么样？'); else say('先选一条', 'bad'); };
     vrow.append(sel, pull, prev); vw.appendChild(vrow); card.appendChild(vw);
     const mw = mkEl('label', 'ap-f'); mw.appendChild(mkEl('span', 'lb', '模型')); const msel = mkEl('select', 'ap-in');
-    const DEF_MODELS = [['eleven_multilingual_v2', 'Multilingual v2 · 最稳，中文好'], ['eleven_flash_v2_5', 'Flash v2.5 · 最快，适合通话'], ['eleven_turbo_v2_5', 'Turbo v2.5 · 快且省'], ['eleven_v3', 'v3 · 最有感情（慢一点）']];
-    const fillModels = () => { msel.innerHTML = ''; const list = elevenModels ? elevenModels.map(m => [m.model_id, m.name]) : DEF_MODELS; list.forEach(([id, name]) => { const o = mkEl('option', '', name); o.value = id; if (id === VOICE.model) o.selected = true; msel.appendChild(o); }); };
+    const DEF_MODELS = [['eleven_v4', 'Eleven v4 · 最新，最有感情，中文自然'], ['eleven_v4_turbo', 'Eleven v4 Turbo · v4 的快版，通话首选'], ['eleven_v3', 'v3 · 上一代，有感情'], ['eleven_flash_v2_5', 'Flash v2.5 · 老模型里最快'], ['eleven_multilingual_v2', 'Multilingual v2 · 老模型，很稳']];
+    const fillModels = () => { msel.innerHTML = ''; const nice = Object.fromEntries(DEF_MODELS); const list = elevenModels ? elevenModels.map(m => [m.model_id, nice[m.model_id] || m.name]).sort((a, b) => (/_v4/.test(b[0]) - /_v4/.test(a[0]))) : DEF_MODELS; if (VOICE.model && !list.some(x => x[0] === VOICE.model)) list.unshift([VOICE.model, VOICE.model]); list.forEach(([id, name]) => { const o = mkEl('option', '', name); o.value = id; if (id === VOICE.model) o.selected = true; msel.appendChild(o); }); };
     fillModels(); msel.onchange = () => { VOICE.model = msel.value; saveVoice(); }; mw.appendChild(msel); card.appendChild(mw);
     slider('稳定度（低了更有起伏）', 'stability', 0, 1, 0.05, v => Math.round(v * 100) + '%');
     slider('像本人（克隆声线用）', 'similarity', 0, 1, 0.05, v => Math.round(v * 100) + '%');
@@ -10551,6 +10570,92 @@ loadWatch = async function () {
   wtBody.appendChild(grid);
   wtBody.appendChild(mkEl('div', 'board-sub', '他看不到画面，只知道你们在看什么、看到了哪儿；你边看边说，他边听边接。全屏里也能发弹幕。'));
 };
+
+
+/* ═══════════════════════════════════════════════════════════════
+   第九轮：仓库直连 GitHub · 工作间连家里的后端
+   网页单独开着（GitHub Pages）时，这两页以前只能说"要后端"。现在：
+   · 仓库：填一个 GitHub 仓库（公开的不用 token，私有的填一个），时间线 / 改动 / 文件都能看
+   · 工作间：填家里后端的地址（Cloudflare Tunnel 之类），手机上就能让电脑上的 Claude Code 干活
+   ═══════════════════════════════════════════════════════════════ */
+if (IS_LOCAL) {
+  /* ── 仓库：顶上一条设置条 ── */
+  const _repoRender9 = repoRender;
+  repoRender = function () {
+    _repoRender9();
+    const b = document.getElementById('repoBody'); if (!b) return;
+    const bar = mkEl('div', 'repo-src'); bar.id = 'repoSrc';
+    const paint = async () => {
+      bar.innerHTML = '';
+      let g = {}, r = {};
+      try { [g, r] = await Promise.all([getJSON('api/ghrepo'), getJSON('api/remote')]); } catch (e) {}
+      const chip = (ic, t, on, fn) => { const c = mkEl('button', 'chip' + (on ? ' on' : '')); c.append(icEl(ic, 13), t); c.onclick = fn; bar.appendChild(c); };
+      if (r && r.url) chip('terminal', '家里的后端 · ' + r.url.replace(/^https?:\/\//, '').slice(0, 24), true, () => openRemoteSetup());
+      chip('box', g && g.owner ? g.owner + '/' + g.repo + (g.branch ? ' · ' + g.branch : '') : '换仓库（GitHub）', !!(g && g.owner) && !(r && r.url), () => openGhSetup());
+      if (!(r && r.url)) chip('terminal', '连家里的后端', false, () => openRemoteSetup());
+    };
+    paint();
+    b.querySelector('.repo-tabs')?.before(bar);
+  };
+  async function openGhSetup() {
+    let g = {}; try { g = await getJSON('api/ghrepo'); } catch (e) {}
+    const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+    body.innerHTML = '';
+    body.appendChild(mkEl('div', 'ask-t', '看哪个仓库'));
+    body.appendChild(mkEl('div', 'ask-x', '直接从 GitHub 读：公开仓库什么都不用填；私有的、或者想看得更勤，填一个 token（github.com → Settings → Developer settings → Fine-grained token，只给这个仓库的 Contents 读权限）。'));
+    const r1 = mkEl('input', 'ap-in ask-in'); r1.placeholder = 'owner/repo 或仓库链接'; r1.value = g.owner ? g.owner + '/' + g.repo : 'sariel111-spec/claude';
+    const r2 = mkEl('input', 'ap-in ask-in'); r2.placeholder = '分支（可不填，默认主分支）'; r2.value = g.branch || '';
+    const r3 = mkEl('input', 'ap-in ask-in'); r3.type = 'password'; r3.placeholder = g.hasToken ? 'token 已存，留空不改' : 'token（可不填）';
+    body.append(r1, r2, r3);
+    const row = mkEl('div', 'ap-btns'); const no = mkEl('button', 'ap-b', '算了'); const ok = mkEl('button', 'ap-b go', '就看这个');
+    no.onclick = () => wrap.classList.remove('open');
+    ok.onclick = async () => { const res = await postJSON('api/ghrepo', { repo: r1.value, branch: r2.value, token: r3.value || (g.hasToken ? undefined : '') }).catch(() => ({})); if (!res.ok) { note('（' + (res.error || '没存上') + '）', 'err'); return; } wrap.classList.remove('open'); repoRootName = res.repo; repoRender(); };
+    row.append(no, ok); body.appendChild(row);
+    wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open');
+    wrap.classList.add('open'); setTimeout(() => r1.focus(), 60);
+  }
+  /* ── 家里的后端：地址 + 密码 ── */
+  async function openRemoteSetup(after) {
+    let r = {}; try { r = await getJSON('api/remote'); } catch (e) {}
+    const wrap = document.getElementById('askSheet'), body = document.getElementById('askBody');
+    body.innerHTML = '';
+    body.appendChild(mkEl('div', 'ask-t', '连上家里的后端'));
+    body.appendChild(mkEl('div', 'ask-x', '在电脑上跑 python3 server/app.py，再用 Cloudflare Tunnel（cloudflared tunnel --url http://localhost:8765）之类把它放到外网，把那个 https 地址填这里。工作间、仓库这两页就会走它；聊天和记忆还是在这台设备上。'));
+    const u = mkEl('input', 'ap-in ask-in'); u.placeholder = 'https://xxx.trycloudflare.com'; u.value = r.url || '';
+    const pw = mkEl('input', 'ap-in ask-in'); pw.type = 'password'; pw.placeholder = '后端密码（启动时设了 HOME_PASSWORD 才要填）'; pw.value = r.password || '';
+    const msg = mkEl('div', 'ap-msg');
+    body.append(u, pw, msg);
+    const row = mkEl('div', 'ap-btns');
+    const clr = mkEl('button', 'ap-b', '断开'); clr.onclick = async () => { await postJSON('api/remote', { item: {} }).catch(() => {}); wrap.classList.remove('open'); note('（断开了，回到网页单独开的样子）'); after ? after(false) : repoRender(); };
+    const test = mkEl('button', 'ap-b', '试一下'); test.onclick = async () => { msg.className = 'ap-msg on wait'; msg.textContent = '敲门…'; const t = await postJSON('api/remote', { action: 'test', url: u.value.trim(), password: pw.value }).catch(e => ({ ok: false, error: e.message })); msg.className = 'ap-msg on ' + (t.ok ? 'ok' : 'bad'); msg.textContent = t.ok ? '通了' + (t.cli && t.cli.found ? '，Claude Code 也在' : '，但那台电脑上没找到 claude 命令（工作间要先装）') : (t.error || '没通') + (/CORS|Failed to fetch|连不上/.test(t.error || '') ? '——地址对吗？是 https 吗？后端是不是老版本（新版才允许网页跨域访问）' : ''); };
+    const ok = mkEl('button', 'ap-b go', '就连它'); ok.onclick = async () => { if (!u.value.trim()) { msg.className = 'ap-msg on bad'; msg.textContent = '先填地址'; return; } await postJSON('api/remote', { item: { url: u.value.trim(), password: pw.value } }).catch(() => {}); wrap.classList.remove('open'); note('（连上了）'); after ? after(true) : repoRender(); };
+    row.append(clr, test, ok); body.appendChild(row);
+    wrap.querySelector('.shade').onclick = () => wrap.classList.remove('open');
+    wrap.classList.add('open'); setTimeout(() => u.focus(), 60);
+  }
+  window.openRemoteSetup = openRemoteSetup;
+  /* ── 工作间：连上了就用真页面，没连就讲清楚怎么连 ── */
+  loadWork = async function () {
+    let r = {}; try { r = await getJSON('api/remote'); } catch (e) {}
+    if (r && r.url && window.__loadWorkReal) {
+      await window.__loadWorkReal();
+      const head = workBody.querySelector('.sh-head .sub'); if (head) head.textContent = '经由 ' + r.url.replace(/^https?:\/\//, '') + ' · 电脑上的 Claude Code';
+      const sw = mkEl('button', 'chip'); sw.append(icEl('sliders', 13), '换后端 / 断开'); sw.style.marginTop = '8px'; sw.onclick = () => openRemoteSetup(() => loadWork());
+      workBody.appendChild(sw);
+      return;
+    }
+    workBody.innerHTML = '';
+    const head = mkEl('div', 'sh-head'); head.append(mkEl('h1', '', '工作间'), mkEl('div', 'sub', '在手机上让电脑上的 Claude Code 干活')); workBody.appendChild(head);
+    const card = mkEl('div', 'wk-setup');
+    card.appendChild(mkEl('div', 'wk-st', '三步接上'));
+    const steps = [['装好 Claude Code', 'npm i -g @anthropic-ai/claude-code，然后在终端里跑一次 claude 登录'], ['跑后端', '在这个仓库的文件夹里：python3 server/app.py（它会说在哪个端口）'], ['放到外网', 'cloudflared tunnel --url http://localhost:8765，会给一个 https 地址，填到下面']];
+    steps.forEach(([t, d], i) => { const r2 = mkEl('div', 'wk-step'); r2.append(mkEl('b', '', String(i + 1)), mkEl('span', 'tx', t)); const sm = mkEl('small', '', d); r2.querySelector('.tx').appendChild(sm); const cp = mkEl('button', 'wk-cp', '复制'); const cmd = d.match(/(npm i[^，]*|python3 [^（]*|cloudflared [^，]*)/); if (cmd) { cp.onclick = () => { navigator.clipboard?.writeText(cmd[1].trim()).then(() => note('（复制好了）')).catch(() => {}); }; r2.appendChild(cp); } card.appendChild(r2); });
+    workBody.appendChild(card);
+    const go = mkEl('button', 'ap-b go fc-go'); go.append(icEl('terminal', 16), document.createTextNode(' 填后端地址')); go.onclick = () => openRemoteSetup(() => loadWork());
+    workBody.appendChild(go);
+    workBody.appendChild(mkEl('div', 'board-sub', '连上之后：这页能发任务、看它一步步改文件、接上电脑上以前的会话；仓库页也会改读电脑上的 git。聊天、记忆还是存在这台设备上，不会搬过去。'));
+  };
+}
 
 box.focus();
 </script>
