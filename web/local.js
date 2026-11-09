@@ -11,6 +11,7 @@
   if (!(location.protocol === 'file:' || /\.github\.io$/.test(location.hostname) || /[?&](demo|local)(=|&|$)/.test(location.search))) return;
   window.__LOCAL__ = true;
   const KEY = 'dwell.home.v1';
+  const real = window.fetch.bind(window);
   const CN = () => new Date(Date.now() + (TZM + new Date().getTimezoneOffset()) * 60000);
   const pad = (n) => String(n).padStart(2, '0');
   const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
@@ -233,7 +234,7 @@
   const idbOpen = () => new Promise((res) => { try { const r = indexedDB.open('dwell-home', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } });
   const idbGet = (db, k) => new Promise((res) => { try { const q = db.transaction('kv', 'readonly').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); } catch (e) { res(undefined); } });
   const idbPut = (db, k, v) => new Promise((res, rej) => { try { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); } catch (e) { rej(e); } });
-  const freshSeed = (d) => { const s = seed(); s.api = d.api || s.api; s.conf = d.conf || s.conf; return s; };   // 演示数据每次打开都是新鲜的一天
+  const freshSeed = (d) => { const s = seed(); s.api = d.api || s.api; s.conf = d.conf || s.conf; if (d.persona) s.persona = d.persona; s.kv = Object.assign({}, s.kv, d.kv && d.kv.voice ? { voice: d.kv.voice } : {}); return s; };   // 演示数据每次打开都是新鲜的一天；人设、名字、声音留着
   let lsD = null;
   try { lsD = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { lsD = null; }
   if (lsD && lsD.v !== 1) lsD = null;
@@ -245,13 +246,17 @@
       const v = await idbGet(DB, 'home');
       if (v && v.v === 1) D = v.demo ? freshSeed(v) : v;
       else if (lsD) { try { await idbPut(DB, 'home', lsD); } catch (e) {} }
+      if (D.demo) { const keep = await idbGet(DB, 'keep'); if (keep) { if (keep.persona) D.persona = keep.persona; if (keep.conf) D.conf = Object.assign({}, D.conf, keep.conf); if (keep.voice) { D.kv = D.kv || {}; D.kv.voice = keep.voice; } } }
       if (lsD) { try { localStorage.removeItem(KEY); } catch (e) {} }   // 搬完就把 5MB 让出来
     }
     D.kv = D.kv || {};
   })();
   let saveT = null, saveWarned = 0;
   const persist = () => {
-    if (D.demo) return Promise.resolve();   // 演示里的改动只活在这一页
+    if (D.demo) {   // 演示里的聊天、清单只活在这一页；但人设、名字、声音这些"你填的"要留住
+      if (!DB) return Promise.resolve();
+      return idbPut(DB, 'keep', { persona: D.persona || null, conf: D.conf || null, voice: (D.kv && D.kv.voice) || null }).catch(() => {});
+    }
     if (!DB) { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { warnFull(); } return Promise.resolve(); }
     return idbPut(DB, 'home', D).catch(() => warnFull());
   };
@@ -470,10 +475,13 @@
       out = { content: [], stop_reason: null, usage: {} };
       const blocks = {};
       const rd = r.body.getReader(), dec = new TextDecoder();
-      let buf = '';
+      let buf = '', finished = false;
+      /* 有些中转站发完 message_stop 之后不关连接，或者中途就不吭声了——不能干等 */
+      const readOne = () => new Promise((res, rej) => { let t = setTimeout(() => res({ idle: true }), out.stop_reason || finished ? 4000 : (Object.keys(blocks).length ? 20000 : 60000)); rd.read().then(v => { clearTimeout(t); res(v); }, e => { clearTimeout(t); rej(e); }); });
       for (;;) {
-        const { value, done } = await rd.read();
+        const { value, done, idle } = await readOne();
         if (done) break;
+        if (idle) { if (out.stop_reason || finished || Object.keys(blocks).length) { try { rd.cancel(); } catch (x) {} break; } const err = new Error('对面一直没回话（60 秒）'); err.code = 'stream'; try { rd.cancel(); } catch (x) {} throw err; }
         buf += dec.decode(value, { stream: true });
         let k;
         while ((k = buf.indexOf('\n\n')) >= 0) {
@@ -489,8 +497,10 @@
             else if (d.type === 'thinking_delta') { b.thinking = (b.thinking || '') + d.thinking; onThink && onThink(d.thinking); }
             else if (d.type === 'input_json_delta') b._json += d.partial_json || '';
           } else if (e.type === 'message_delta') { if (e.delta && e.delta.stop_reason) out.stop_reason = e.delta.stop_reason; Object.assign(out.usage, e.usage || {}); }
+          else if (e.type === 'message_stop') { finished = true; }
           else if (e.type === 'error') { const err = new Error((e.error && e.error.message) || '流断了'); err.code = 'stream'; throw err; }
         }
+        if (finished) { try { rd.cancel(); } catch (x) {} break; }
       }
       out.content = Object.keys(blocks).sort((a, b) => a - b).map(i => { const b = blocks[i];
         if (b.type === 'tool_use') { let inp = {}; try { inp = b._json ? JSON.parse(b._json) : (b.input || {}); } catch (x) {} return { type: 'tool_use', id: b.id, name: b.name, input: inp }; }
@@ -757,6 +767,47 @@
   const SUBTEXT = '官端订阅走的是电脑上的 Claude Code，网页自己连不了。想用订阅：在电脑上运行 python3 server/app.py，从那个地址打开。这里请选 官方 API / OpenRouter / 中转站。';
   const modelsCache = () => D.api.list || [];
 
+  const remoteConf = () => { const r = (kvL('remote').items || [])[0]; return r && r.url ? r : null; };
+  async function remoteFetch(path, method, body, conf) {
+    const r = conf || remoteConf(); if (!r || !r.url) throw new Error('没填地址');
+    const base = String(r.url).replace(/\/+$/, '');
+    const headers = { 'Content-Type': 'application/json' }; if (r.password) headers['Authorization'] = 'Basic ' + btoa(':' + r.password);
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), path.startsWith('work/poll') ? 40000 : 15000);
+    try { const res = await real(base + '/api/' + path, { method: method || 'GET', headers, body: body ? JSON.stringify(body) : undefined, signal: ctl.signal, cache: 'no-store' }); if (res.status === 401) throw new Error('密码不对'); if (!res.ok) throw new Error('后端 ' + res.status); return res; }
+    catch (e) { throw new Error(e.name === 'AbortError' ? '超时了' : (e.message || '连不上')); }
+    finally { clearTimeout(t); }
+  }
+  /* 仓库页直连 GitHub：没有后端也能看自己的提交、文件 */
+  const ghCache = {};
+  async function gh(url, g) {
+    if (ghCache[url] && Date.now() - ghCache[url].t < 60000) return ghCache[url].v;
+    const headers = { 'Accept': 'application/vnd.github+json' }; if (g.token) headers['Authorization'] = 'Bearer ' + g.token;
+    const r = await real('https://api.github.com' + url, { headers });
+    if (r.status === 403 && (r.headers.get('x-ratelimit-remaining') === '0')) throw new Error('GitHub 限流了（没填 token 每小时只能看 60 次）');
+    if (r.status === 404) throw new Error('找不到：仓库名不对，或者是私有的（填个 token）');
+    if (!r.ok) throw new Error('GitHub ' + r.status);
+    const v = await r.json(); ghCache[url] = { t: Date.now(), v }; return v;
+  }
+  async function ghRepo(sub, q) {
+    const g = (kvL('ghrepo').items || [])[0];
+    if (!g || !g.owner) return { ok: false, items: [], local: true, nocfg: true, why: '还没说看哪个仓库' };
+    const R = '/repos/' + g.owner + '/' + g.repo; const br = g.branch ? '&sha=' + encodeURIComponent(g.branch) : '';
+    try {
+      if (sub === 'log') {
+        const n = Math.min(+q.get('n') || 60, 100), skip = +q.get('skip') || 0; const page = Math.floor(skip / n) + 1;
+        const list = await gh(R + '/commits?per_page=' + n + '&page=' + page + br, g);
+        const items = list.map(c => ({ h: c.sha, t: Math.floor(new Date((c.commit.author || c.commit.committer || {}).date || 0).getTime() / 1000), s: String(c.commit.message || '').split('\n')[0], f: [] }));
+        /* 文件改动要一条一条拿；没 token 省着点，只拿前 6 条 */
+        const detailN = g.token ? Math.min(items.length, 20) : Math.min(items.length, 6);
+        await Promise.all(items.slice(0, detailN).map(async it => { try { const d = await gh(R + '/commits/' + it.h, g); it.f = (d.files || []).map(f => ({ p: f.filename, s: f.status === 'added' ? 'A' : f.status === 'removed' ? 'D' : f.status === 'renamed' ? 'R' : 'M' })); } catch (e) {} }));
+        return { ok: true, items, total: skip + items.length + (items.length >= n ? 1 : 0), gh: g.owner + '/' + g.repo };
+      }
+      if (sub === 'show') { const d = await gh(R + '/commits/' + encodeURIComponent(q.get('h') || ''), g); const diff = (d.files || []).map(f => 'diff --git a/' + f.filename + ' b/' + f.filename + '\n--- a/' + f.filename + '\n+++ b/' + f.filename + '\n' + (f.patch || '（二进制或太大，没有逐行差异）')).join('\n'); return { ok: true, diff, s: String(d.commit.message || '') }; }
+      if (sub === 'tree') { const p = (q.get('p') || '').replace(/^\/+|\/+$/g, ''); const list = await gh(R + '/contents/' + p.split('/').map(encodeURIComponent).join('/') + (g.branch ? '?ref=' + encodeURIComponent(g.branch) : ''), g); const arr = Array.isArray(list) ? list : [list]; return { ok: true, items: arr.map(x => ({ n: x.name, d: x.type === 'dir', z: x.size || 0 })).sort((a, b) => (b.d - a.d) || a.n.localeCompare(b.n)), root: g.repo }; }
+      if (sub === 'file') { const p = (q.get('p') || '').replace(/^\/+/, ''); const f = await gh(R + '/contents/' + p.split('/').map(encodeURIComponent).join('/') + (g.branch ? '?ref=' + encodeURIComponent(g.branch) : ''), g); if (!f.content) return { ok: false, err: '这个文件太大，GitHub 不直接给内容' }; let text; try { text = new TextDecoder().decode(Uint8Array.from(atob(f.content.replace(/\n/g, '')), c => c.charCodeAt(0))); } catch (e) { return { ok: false, err: '读不出来（可能是二进制）' }; } const cut = text.length > 60000; return { ok: true, text: cut ? text.slice(0, 60000) : text, size: f.size, cut }; }
+      return { ok: false };
+    } catch (e) { return { ok: false, items: [], err: e.message, error: e.message }; }
+  }
   async function route(path, q, method, b) {
     if (path === 'messages') { const lim = +q.get('limit') || 400; return { msgs: D.msgs.slice(-lim), upto: evNext, more: false }; }
     if (path === 'send') {
@@ -891,7 +942,20 @@
         return D.annos[key] || [];
       }
     }
-    if (path.startsWith('repo/')) return { ok: false, items: [], local: true, why: '仓库页要后端读电脑上的 git 仓库，网页单独开的时候看不到。' };
+    /* ── 家里的后端（可选）：工作间 / 仓库 这两页可以转给它 ── */
+    if (path === 'remote') {
+      if (method === 'POST') { if (b.action === 'test') { try { const r = await remoteFetch('status', 'GET', null, b); const j = await r.json(); return { ok: true, alive: !!j.alive, cli: j.cli || null, mode: j.mode }; } catch (e) { return { ok: false, error: e.message }; } } kvL('remote').items = [Object.assign({ id: 'remote' }, b.item || {})]; save(); return { ok: true }; }
+      return (kvL('remote').items[0]) || {};
+    }
+    if (path.startsWith('work/') && remoteConf()) { try { const r = await remoteFetch(path + (q.toString() ? '?' + q.toString() : ''), method, method === 'POST' ? b : null); return await r.json(); } catch (e) { return { ok: false, error: '家里的后端连不上：' + e.message, items: [], events: [], next: 0 }; } }
+    if (path.startsWith('repo/')) {
+      if (remoteConf()) { try { const r = await remoteFetch(path + (q.toString() ? '?' + q.toString() : ''), method, null); return await r.json(); } catch (e) { return { ok: false, items: [], error: '家里的后端连不上：' + e.message }; } }
+      return ghRepo(path.slice(5), q);
+    }
+    if (path === 'ghrepo') {
+      if (method === 'POST') { const m = String(b.repo || '').trim().match(/(?:github\.com\/)?([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[\/#?].*)?$/); if (!m) return { ok: false, error: '没认出来，填 owner/repo 或者仓库链接' }; kvL('ghrepo').items = [{ id: 'gh', owner: m[1], repo: m[2], branch: (b.branch || '').trim(), token: (b.token || '').trim() }]; save(); return { ok: true, owner: m[1], repo: m[2] }; }
+      const g = kvL('ghrepo').items[0] || {}; return { ok: !!g.owner, owner: g.owner || '', repo: g.repo || '', branch: g.branch || '', hasToken: !!g.token };
+    }
     if (path === 'music') return { ok: true, id: q.get('id'), name: '网易云音乐', artist: '点开去听', album: '', pic: '', sec: 0 };
     if (path === 'moments') {
       if (method === 'POST') {
@@ -996,7 +1060,7 @@
       if (!token) return { ok: false, error: '令牌是空的' };
       const wasDemo = D.demo;
       const api = { route, base: cleanBase(b.base), token, models: { model_opus: b.model_opus, model_sonnet: b.model_sonnet || b.model_opus, model_haiku: b.model_haiku || b.model_opus }, effort: D.api.effort || 'medium', list: D.api.list };
-      if (wasDemo) { D = fresh({ api, conf: D.conf.me === '欣欣' ? null : D.conf }); D.conf.me = D.conf.me || '我'; } else D.api = api;
+      if (wasDemo) { const keepVoice = D.kv && D.kv.voice; const conf = Object.assign({}, D.conf); if (conf.me === '欣欣') { conf.me = '我'; conf.him = conf.him === '顾屿' ? '他' : conf.him; conf.since = today(); } D = fresh({ api, conf, persona: D.persona && (D.persona.gu || D.persona.gong) ? D.persona : null }); D.kv = D.kv || {}; if (keepVoice) D.kv.voice = keepVoice; } else D.api = api;
       saveNow();
       if (wasDemo) setTimeout(() => location.reload(), 400);
       return { ok: true, mode: 'api', route, base: api.base, reset: wasDemo };
@@ -1096,7 +1160,6 @@
   }
 
   /* ───────── 拦下 fetch ───────── */
-  const real = window.fetch.bind(window);
   window.fetch = function (input, init) {
     const raw = String(typeof input === 'string' ? input : (input && input.url) || '');
     const i = raw.indexOf('api/');
