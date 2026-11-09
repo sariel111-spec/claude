@@ -333,10 +333,11 @@ html[data-theme="dark"] .glass,
 
   #pet {
     position: fixed; right: 8px; bottom: calc(118px + env(safe-area-inset-bottom));
-    width: 128px; height: 128px; z-index: 30; cursor: grab;
+    width: 96px; height: 96px; z-index: 30; cursor: grab; transition: opacity .25s, transform .25s;
     -webkit-user-select: none; user-select: none; touch-action: none;
   }
   #pet:active { cursor: grabbing; }
+  body.sheet-open #pet, body.drawer-open #pet { opacity: 0; transform: scale(.8); pointer-events: none; }
   #pet img { width: 100%; height: 100%; display: block; pointer-events: none; }
 
   /* ============ 输入区 ============ */
@@ -853,6 +854,7 @@ html[data-theme="dark"] .composer {
     min-width: min(276px, 100%); max-width: min(340px, 100%);
     cursor: pointer; transition: transform .16s; vertical-align: top; }
   .songcard.on:active { transform: scale(.99); }
+  .songcard.named .sc-art { display: grid; place-items: center; color: var(--accent); background: var(--pink-track); }
   .sc-art { width: 52px; height: 52px; border-radius: 10px; flex: none;
     background: var(--panel); object-fit: cover;
     box-shadow: 0 2px 8px rgba(0,0,0,.14); }
@@ -1987,7 +1989,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .gball .gt, .gring .gt { fill: none; stroke: var(--line); stroke-width: 3; }
   .gball .gv, .gring .gv { fill: none; stroke: var(--sage); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 0 94.2; transition: stroke-dasharray .6s; }
   .gball.hot .gv { stroke: var(--amber); }
-  .gball b { font-size: 10px; font-weight: 700; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .gball b { font-size: 8.5px; font-weight: 700; color: var(--dim); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
   .grings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--panel); border-radius: 20px; padding: 16px 10px; }
   .gring { position: relative; display: grid; justify-items: center; gap: 2px; text-align: center; }
   .gring svg { width: 74px; height: 74px; transform: rotate(-90deg); }
@@ -2038,7 +2040,9 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .ls-title { text-align: center; font-family: var(--serif); font-size: 19px; margin: 4px 0 10px; }
   .ls-player { width: 100%; height: 86px; border: 0; border-radius: 14px; background: var(--panel); margin-bottom: 10px; }
   .ls-acts { display: flex; gap: 8px; margin: 10px 0; } .ls-acts .ap-b { padding: 11px 0; }
-  .ls-ask { width: 100%; margin-top: 10px; }
+  .ls-ask { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .ls-title.dim { color: var(--dim); font-size: 15px; }
+  .ls-more { margin-top: 16px; } .ls-more summary { font-size: 13px; color: var(--dim); cursor: pointer; padding: 6px 4px; } .ls-more .lt-write { margin-top: 8px; }
   .wt-frame { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 16px; background: #000; display: block; }
   .wt-chat { background: var(--panel); border-radius: 18px; padding: 10px; margin: 6px 0 10px; display: grid; gap: 8px; }
   .wt-tail { display: grid; gap: 4px; font-size: 13px; line-height: 1.5; max-height: 160px; overflow-y: auto; }
@@ -2125,6 +2129,24 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   .nav .dr-grid .item .ic { width: 22px; height: 22px; padding: 9px; box-sizing: content-box; border-radius: 14px; background: var(--panel); color: var(--text); }
   .nav .dr-grid .item:active .ic { background: var(--line); }
   #drawer .brand { display: none; }
+  /* ═══ 第七轮 ═══ */
+  .petsay { position: fixed; z-index: 31; width: 120px; text-align: center; font-size: 13px; padding: 6px 10px; border-radius: 12px; background: var(--card);
+    box-shadow: 0 4px 16px rgba(0,0,0,.1), inset 0 0 0 1px var(--line); opacity: 0; transform: translateY(6px) scale(.9); transition: all .22s cubic-bezier(.3,1.4,.5,1); pointer-events: none; }
+  .petsay.on { opacity: 1; transform: none; }
+  #sleepSheet .sheet { background: #171419; } #sleepSheet .head .hbtn { color: #efe6dc; }
+  .sleep-body { background: radial-gradient(120% 70% at 50% 0%, #2a2531, #171419 70%); color: #efe6dc; }
+  .sleep-body .sh-head h1, .sleep-body .hsect { color: #efe6dc; } .sleep-body .sh-head .sub, .sleep-body .hsect { color: #a39388; }
+  .sl-moon { position: relative; width: 120px; height: 120px; margin: 10px auto 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4d6, #e9d2a4 70%, #cdb27e); box-shadow: 0 0 60px 10px rgba(255,236,190,.18), inset -14px -10px 30px rgba(0,0,0,.08); }
+  .sl-moon i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; opacity: .7; animation: tw 3s ease-in-out infinite; }
+  .sl-moon i:nth-child(1) { left: -60px; top: 20px; } .sl-moon i:nth-child(2) { right: -70px; top: 60px; animation-delay: 1s; } .sl-moon i:nth-child(3) { left: -30px; bottom: -20px; animation-delay: 2s; width: 3px; height: 3px; }
+  @keyframes tw { 0%,100% { opacity: .2; } 50% { opacity: .9; } }
+  .sl-chips { justify-content: center; } .sl-chips .chip { background: rgba(255,255,255,.08); color: #efe6dc; } .sl-chips .chip.on { background: #efe6dc; color: #171419; }
+  .sl-in { margin: 12px 0; background: rgba(255,255,255,.07); color: #efe6dc; border-color: transparent; }
+  .sl-in::placeholder { color: #8f8278; }
+  .sl-go { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: #e9d2a4; color: #171419; }
+  .sl-state { text-align: center; font-size: 12.5px; color: #a39388; margin: 12px 0 8px; min-height: 18px; }
+  .sl-text { font-family: var(--serif); font-size: 16.5px; line-height: 2; white-space: pre-wrap; color: #e8dfd3; padding: 4px 6px 20px; }
+  .sleep-body .hcard, .sleep-body .hrow { background: rgba(255,255,255,.06); color: #efe6dc; } .sleep-body .hrow small { color: #a39388; }
 </style>
 </head>
 <body>
@@ -2139,7 +2161,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 </header>
 
 <div id="log"></div>
-<div id="pet" title="他在这儿"><img id="petImg" src="pet/clawd-idle-follow.svg" alt=""></div>
+<div id="pet" title="他在这儿"><img id="petImg" src="pet/idle.svg" alt=""></div>
 
 <footer>
   <div id="doingLine"><span class="pill"><span class="w"></span><span class="en"></span><span class="t"></span></span></div>
@@ -2212,6 +2234,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
       <button class="item" id="navListen"><span class="ic" data-i="music"></span>一起听</button>
       <button class="item" id="navWatch"><span class="ic" data-i="tv"></span>一起看</button>
       <button class="item" id="navPlay"><span class="ic" data-i="dice"></span>玩</button>
+      <button class="item" id="navSleep"><span class="ic" data-i="moon"></span>哄睡</button>
       <button class="item" id="navNook"><span class="ic" data-i="bookOpen"></span>共读</button>
       <button class="item" id="navNews"><span class="ic" data-i="fileText"></span>日报</button>
       <button class="item" id="navHealth"><span class="ic" data-i="heartIc"></span>健康</button>
@@ -2537,6 +2560,18 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
   </div>
 </div>
 
+<div class="sheetWrap page" id="sleepSheet">
+  <div class="shade"></div>
+  <div class="sheet">
+    <div class="head">
+      <button class="hbtn" data-close="sleep"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="sleepBody"></div>
+  </div>
+</div>
+
 <!-- 日历 -->
 <div class="sheetWrap page" id="calSheet">
   <div class="shade" data-close="cal"></div>
@@ -2838,13 +2873,8 @@ const petImg = document.getElementById('petImg');
 /* 小螃蟹的图没放进仓库（pet/ 目录要自己补）。图不在就整只藏起来，别挂一个裂图在角上 */
 petImg.addEventListener('error', () => { document.getElementById('pet').style.display = 'none'; });
 const PET = {
-  idle: 'clawd-idle-follow.svg',
-  thinking: 'clawd-working-thinking.svg',
-  typing: 'clawd-working-typing.svg',
-  happy: 'clawd-happy.svg',
-  doze: 'clawd-idle-doze.svg',
-  sleeping: 'clawd-sleeping.svg',
-  react: 'clawd-react-double-jump.svg',
+  idle: 'idle.svg', thinking: 'thinking.svg', typing: 'typing.svg', happy: 'happy.svg', doze: 'doze.svg', sleeping: 'sleeping.svg',
+  shy: 'shy.svg', surprised: 'surprised.svg', calm: 'idle.svg', react: 'happy.svg',
 };
 let petState = 'idle';
 let petTimer = null;
@@ -3171,7 +3201,7 @@ function paintStream(el) {
   });
 }
 
-const SONG_RE = /https?:\/\/music\.163\.com\/(?:#\/)?song\?id=(\d+)/g;
+const SONG_RE = /https?:\/\/music\.163\.com\/(?:#\/)?song\?id=(\d+)|\[song:(\d*)\|([^\]|]*)\|([^\]]*)\]/g;
 
 function openSong(id) {
   const t = Date.now();
@@ -3208,6 +3238,25 @@ function appendSongCard(el, id) {
       scroll();
     })
     .catch(() => { card.querySelector('.sc-n').textContent = '这首歌读不到了'; });
+}
+
+/* 他点的歌：[song:网易云id|歌名|歌手]。有 id 就能在家里放；没有就点开去网易云搜 */
+function appendNamedSong(el, id, title, artist) {
+  const card = document.createElement('div');
+  card.className = 'songcard on named';
+  card.innerHTML = '<div class="sc-art"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>'
+    + '<div class="sc-txt"><div class="sc-n"></div><div class="sc-a"></div></div>'
+    + '<div class="sc-go"><svg viewBox="0 0 24 24" width="15" height="15"><polygon points="7 4 20 12 7 20" fill="currentColor"/></svg></div>';
+  card.querySelector('.sc-n').textContent = title || '一首歌';
+  card.querySelector('.sc-a').textContent = (artist || '') + (id ? '' : ' · 点开去听');
+  card.onclick = () => {
+    if (id) { try { lsSet('dwell.nowsong', { id, title: title + (artist ? ' - ' + artist : ''), mode: 'together', at: Date.now() }); } catch (e) {} openPage('listen', loadListen); }
+    else window.open('https://music.163.com/#/search/m/?s=' + encodeURIComponent((title || '') + ' ' + (artist || '')) + '&type=1', '_blank');
+  };
+  el.appendChild(card);
+  if (id) fetch('api/music?id=' + encodeURIComponent(id), { cache: 'force-cache' }).then(r => r.json()).then(d => {
+    if (d && d.ok && d.pic) { const im = document.createElement('img'); im.className = 'sc-art'; im.src = d.pic + '?param=180y180'; im.alt = ''; card.replaceChild(im, card.querySelector('.sc-art')); }
+  }).catch(() => {});
 }
 
 const FILE_RE = /(?:https?:\/\/[^\s"'<>]*)?\/?api\/file\?name=([^\s"'<>&`*，。！？；：、（）【】「」『』]+)/g;
@@ -3263,7 +3312,7 @@ function appendWithImages(el, text, streaming) {
     let cur = 0, sm;
     while ((sm = re.exec(text))) {
       if (sm.index > cur) appendWithImages(el, text.slice(cur, sm.index), streaming);
-      appendSongCard(el, sm[1]);
+      if (sm[1]) appendSongCard(el, sm[1]); else appendNamedSong(el, sm[2], sm[3], sm[4]);
       cur = sm.index + sm[0].length;
     }
     if (cur < text.length) appendWithImages(el, text.slice(cur), streaming);
@@ -3784,7 +3833,7 @@ setInterval(calDayWatch, 120000);
 
 function handle(d) {
   lastEventAt = Date.now();
-  if (d.type === 'echo') { log.querySelector('.hello')?.remove(); if (armedFresh) setArmed(false); stampIf(Math.floor(Date.now() / 1000)); addMe(d.text); petSet('thinking'); return; }
+  if (d.type === 'echo') { log.querySelector('.hello')?.remove(); if (armedFresh) setArmed(false); stampIf(Math.floor(Date.now() / 1000)); addMe(d.text); if (!d.queued) { guEl = null; closeGroup(); } petSet('thinking'); return; }
   if (d.type === 'system' && d.subtype === 'newchat') { setArmed(false); log.innerHTML = ''; guEl = null; earliestSeq = null; olderBtn = null; lastStampAt = 0; note(d.text); sayHello(); return; }
   if (d.type === 'system' && d.subtype === 'switched') { setArmed(false); log.innerHTML = ''; guEl = null; earliestSeq = null; olderBtn = null; note(d.text); return; }
 
@@ -3899,6 +3948,7 @@ function handle(d) {
     if (d.model) setModelPill(d.model);
     return;
   }
+  if (d.type === 'system' && d.subtype === 'continue') { setBusy(true); guEl = null; closeGroup(); petSet('thinking'); return; }
   if (d.type === 'system' && d.subtype === 'stopped') {
     guEl?.querySelector('.caret')?.remove();
     guEl = null; endThink(); closeGroup();
@@ -4089,8 +4139,12 @@ function doingStop() {
   if (el) el.classList.remove('on');
 }
 
+let busyWatch = null;
 function setBusy(b) {
   guBusy = !!b;
+  clearTimeout(busyWatch);
+  const arm = () => { busyWatch = setTimeout(() => { if (!guBusy) return; if (Date.now() - lastEventAt > 150000) { setBusy(false); petSet('idle'); note('（他那边没了动静，可能卡住了；再说一句试试）', 'err'); } else arm(); }, 60000); };
+  if (b) arm();
   if (guBusy) doingStart(); else doingStop();
   refreshSend();
 }
@@ -4111,8 +4165,7 @@ function send() {
   if (guBusy && !((box.value || '').trim() || attachments.length)) return stopGu();
   const text = box.value.trim();
   if (!text && !attachments.length) return;
-  const wasBusy = guBusy;
-  if (wasBusy) { try { fetch('api/stop', { method: 'POST' }); } catch (e) {} }
+  /* 他正在说的时候再发一句：不打断，排在后面，他说完接着回 */
   box.value = '';
   box.style.height = 'auto';
   setBusy(true);
@@ -9228,13 +9281,13 @@ function setSide(night, quiet) {
 })();
 
 /* ─────────────── 仪表：上下文 · 用量 · 模型 ─────────────── */
-const gaugeBall = mkEl('button', 'gball'); gaugeBall.title = '仪表'; gaugeBall.innerHTML = '<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="gt"/><circle cx="18" cy="18" r="15" class="gv"/></svg><b>–</b>';
+const gaugeBall = mkEl('button', 'gball'); gaugeBall.title = '仪表'; gaugeBall.innerHTML = '<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="gt"/><circle cx="18" cy="18" r="15" class="gv"/></svg><b>–</b>'; gaugeBall.style.display = 'none';
 gaugeBall.onclick = openGauge;
 document.getElementById('modelPill').after(gaugeBall);
 async function refreshBall() {
   try { const c = await getJSON('api/context'); const p = Math.max(0, Math.min(100, c.pct || 0));
-    gaugeBall.querySelector('b').textContent = p; gaugeBall.querySelector('.gv').style.strokeDasharray = (p * 0.942) + ' 94.2';
-    gaugeBall.classList.toggle('hot', p >= 60); } catch (e) {}
+    gaugeBall.querySelector('b').textContent = p + '%'; gaugeBall.querySelector('.gv').style.strokeDasharray = (p * 0.942) + ' 94.2';
+    gaugeBall.classList.toggle('hot', p >= 60); gaugeBall.title = '上下文用了 ' + p + '%，点开看仪表'; gaugeBall.style.display = p > 0 ? '' : 'none'; } catch (e) { gaugeBall.style.display = 'none'; }
 }
 setTimeout(refreshBall, 1500); setInterval(refreshBall, 60000);
 const ring = (pct, label, sub) => { const w = mkEl('div', 'gring'); const p = Math.max(0, Math.min(100, pct || 0));
@@ -9282,7 +9335,7 @@ const LS_SONGS = 'dwell.songs';
 const songId = (s) => { const m = String(s).match(/(?:song\?id=|song\/|id=)(\d{4,})/) || String(s).match(/^\s*(\d{4,})\s*$/); return m ? m[1] : null; };
 async function loadListen() {
   listenBody.innerHTML = '';
-  const head = mkEl('div', 'sh-head'); head.append(mkEl('h1', '', '一起听'), mkEl('div', 'sub', '放一首歌，' + HOME.him + '会知道你在听什么'));
+  const head = mkEl('div', 'sh-head'); head.append(mkEl('h1', '', '一起听'), mkEl('div', 'sub', HOME.him + '点的歌都在这儿；放着的时候他知道你在听什么'));
   listenBody.appendChild(head);
   const cur = lsGet('dwell.nowsong', null);
   const disc = mkEl('div', 'ls-disc' + (cur ? ' spin' : ''));
@@ -9297,36 +9350,42 @@ async function loadListen() {
       b.onclick = async () => { cur.mode = k; lsSet('dwell.nowsong', cur); await postJSON('api/kv/now', { listening: k === 'together' ? { title: cur.title || ('网易云歌曲 ' + cur.id), together: '一起听' } : null }); loadListen(); }; seg.appendChild(b); });
     listenBody.appendChild(seg);
     const tl = mkEl('div', 'ls-acts');
-    const ask1 = mkEl('button', 'ap-b', '问问' + HOME.him + '觉得怎么样'); ask1.onclick = () => { sheets.listen.classList.remove('open'); sendText('我在听《' + (cur.title || '这首歌') + '》，你觉得怎么样？'); };
+    const ask1 = mkEl('button', 'ap-b', '问问他觉得怎么样'); ask1.onclick = () => { sheets.listen.classList.remove('open'); sendText('我在听《' + (cur.title || '这首歌') + '》，你觉得怎么样？'); };
     const stop = mkEl('button', 'ap-b', '停下'); stop.onclick = async () => { lsSet('dwell.nowsong', null); await postJSON('api/kv/now', { listening: null }); loadListen(); };
     tl.append(ask1, stop); listenBody.appendChild(tl);
+  } else {
+    listenBody.appendChild(mkEl('div', 'ls-title dim', '现在没在放'));
   }
-  listenBody.appendChild(mkEl('div', 'hsect', '放一首'));
+  const ask = mkEl('button', 'ap-b go ls-ask'); ask.append(icEl('music', 15), document.createTextNode(' 让' + HOME.him + '点一首'));
+  ask.onclick = () => { sheets.listen.classList.remove('open'); sendText('给我点一首现在适合听的歌吧。'); };
+  listenBody.appendChild(ask);
+  let his = { items: [] }; try { his = await kvGet('songs'); } catch (e) {}
+  const hist = lsGet(LS_SONGS, []);
+  const all = (his.items || []).map(x => ({ id: x.nid, title: x.title + (x.artist ? ' - ' + x.artist : ''), note: x.note, at: (x.at || 0) * 1000, who: 'gu', q: x.title + ' ' + (x.artist || '') }))
+    .concat(hist.filter(h => !(his.items || []).some(x => x.nid && x.nid === h.id)).map(h => Object.assign({ who: 'her' }, h))).sort((a, b) => b.at - a.at);
+  if (all.length) {
+    listenBody.appendChild(mkEl('div', 'hsect', '歌单'));
+    const c = mkEl('div', 'hcard');
+    all.slice(0, 40).forEach(s => { const r = mkEl('button', 'hrow'); const tx = mkEl('span', 'tx', s.title); tx.appendChild(mkEl('small', '', (s.who === 'gu' ? HOME.him + '点的' : '你放的') + (s.note ? ' · ' + s.note : '') + ' · ' + agoCn(Math.floor(s.at / 1000)))); r.append(icEl('music', 16), tx);
+      r.onclick = async () => { if (s.id) { lsSet('dwell.nowsong', { id: s.id, title: s.title, mode: 'together', at: Date.now() }); await postJSON('api/kv/now', { listening: { title: s.title, together: '一起听' } }).catch(() => {}); loadListen(); } else window.open('https://music.163.com/#/search/m/?s=' + encodeURIComponent(s.q || s.title) + '&type=1', '_blank'); }; c.appendChild(r); });
+    listenBody.appendChild(c);
+  } else listenBody.appendChild(mkEl('div', 'td-empty', '还没有歌。点上面让他点一首，或者聊天里跟他说「给我点首歌」——他点的会出现在这里。'));
+  const more = mkEl('details', 'ls-more'); const sm = mkEl('summary', '', '自己放一首'); more.appendChild(sm);
   const w = mkEl('div', 'lt-write');
   const u = mkEl('input', 'ap-in'); u.placeholder = '网易云歌曲链接，或者歌曲 id';
-  const t = mkEl('input', 'ap-in'); t.placeholder = '歌名 - 歌手（可不填，后端在跑会自己查）';
+  const t = mkEl('input', 'ap-in'); t.placeholder = '歌名 - 歌手（可不填）';
   const go = mkEl('button', 'ap-b go', '放');
   go.onclick = async () => {
     const id = songId(u.value); if (!id) { note('（没认出来：贴网易云的分享链接，或者纯数字 id）', 'err'); return; }
     let title = t.value.trim();
     if (!title) { try { const m = await getJSON('api/music?id=' + id); if (m.ok && m.name && m.name !== '网易云音乐') title = m.name + (m.artist ? ' - ' + m.artist : ''); } catch (e) {} }
-    const s = { id, title, mode: 'together', at: Date.now() };
-    lsSet('dwell.nowsong', s);
-    const hist = lsGet(LS_SONGS, []).filter(x => x.id !== id); hist.unshift(s); lsSet(LS_SONGS, hist.slice(0, 30));
+    const s2 = { id, title, mode: 'together', at: Date.now() };
+    lsSet('dwell.nowsong', s2);
+    const h2 = lsGet(LS_SONGS, []).filter(x => x.id !== id); h2.unshift(s2); lsSet(LS_SONGS, h2.slice(0, 30));
     await postJSON('api/kv/now', { listening: { title: title || ('网易云歌曲 ' + id), together: '一起听' } }).catch(() => {});
     loadListen();
   };
-  w.append(u, t, go); listenBody.appendChild(w);
-  const ask = mkEl('button', 'ap-b ls-ask', '让' + HOME.him + '给我点一首'); ask.onclick = () => { sheets.listen.classList.remove('open'); sendText('给我点一首现在适合听的歌吧，发网易云链接。'); };
-  listenBody.appendChild(ask);
-  const hist = lsGet(LS_SONGS, []);
-  if (hist.length) {
-    listenBody.appendChild(mkEl('div', 'hsect', '听过的'));
-    const c = mkEl('div', 'hcard');
-    hist.forEach(s => { const r = mkEl('button', 'hrow'); const tx = mkEl('span', 'tx', s.title || '网易云 ' + s.id); tx.appendChild(mkEl('small', '', agoCn(Math.floor(s.at / 1000)))); r.append(icEl('music', 16), tx);
-      r.onclick = async () => { s.mode = 'together'; lsSet('dwell.nowsong', s); await postJSON('api/kv/now', { listening: { title: s.title || ('网易云歌曲 ' + s.id), together: '一起听' } }).catch(() => {}); loadListen(); }; c.appendChild(r); });
-    listenBody.appendChild(c);
-  }
+  w.append(u, t, go); more.appendChild(w); listenBody.appendChild(more);
 }
 
 /* ─────────────── 一起看 ─────────────── */
@@ -9603,7 +9662,7 @@ document.getElementById('gaugeRow').onclick = () => { sheets.settings.classList.
   const main = mkEl('div', 'dr-main');
   ['navToday', 'chat', 'navWe', 'navMem'].forEach(k => items[k] && main.appendChild(items[k]));
   nav.appendChild(main);
-  const groups = [['一起', ['navListen', 'navWatch', 'navNook', 'navPlay']], ['生活', ['navTodo', 'navCal', 'navFocus', 'navWish', 'navHealth', 'navNews']],
+  const groups = [['一起', ['navListen', 'navWatch', 'navNook', 'navPlay', 'navSleep']], ['生活', ['navTodo', 'navCal', 'navFocus', 'navWish', 'navHealth', 'navNews']],
     ['留下来的', ['navWall', 'navLetter', 'navMom']], ['工具', ['navRepo', 'navWork']]];
   groups.forEach(([t, ks]) => { nav.appendChild(mkEl('div', 'dr-grp', t)); const g = mkEl('div', 'dr-grid'); ks.forEach(k => items[k] && g.appendChild(items[k])); nav.appendChild(g); });
   if (sect) { nav.appendChild(sect); recents.forEach(r => nav.appendChild(r)); }
@@ -9620,6 +9679,104 @@ document.getElementById('gaugeRow').onclick = () => { sheets.settings.classList.
     sb.textContent = d ? '在一起的第 ' + d + ' 天' : '点这里，去「我们」'; };
   paint(); setTimeout(paint, 1200);
   const _od = openDrawer; openDrawer = function () { paint(); return _od.apply(this, arguments); };
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   第七轮：摸摸他 / 拍一拍 / 哄睡 / 动态里互相评论点赞
+   ═══════════════════════════════════════════════════════════════ */
+/* ─────────────── 摸摸他：点一下有反应，连点两下是拍一拍 ─────────────── */
+const PET_LINES = {
+  idle: ['嗯？', '在呢', '怎么啦', '看我干嘛', '…别戳', '摸头可以，戳不行', '我在'],
+  sleeping: ['…嗯', 'zzz…再五分钟', '（翻了个身）'],
+  doze: ['…啊？', '没睡没睡', '（揉眼睛）'],
+  thinking: ['等我想想', '别催', '马上'],
+  typing: ['在说呢', '等一下下'],
+};
+let petTapAt = 0, petTapN = 0;
+const petSay = (t, ms) => {
+  document.getElementById('petSay')?.remove();
+  const b = mkEl('div', 'petsay', t); b.id = 'petSay';
+  const r = petEl.getBoundingClientRect();
+  b.style.left = Math.max(8, Math.min(innerWidth - 150, r.left + r.width / 2 - 60)) + 'px';
+  b.style.top = (r.top - 36) + 'px';
+  document.body.appendChild(b);
+  setTimeout(() => b.classList.add('on'), 10);
+  setTimeout(() => { b.classList.remove('on'); setTimeout(() => b.remove(), 300); }, ms || 1500);
+};
+petEl.addEventListener('pointerup', () => {
+  if (!pDrag || pDrag.moved) return;
+  const now = Date.now();
+  petTapN = now - petTapAt < 450 ? petTapN + 1 : 1; petTapAt = now;
+  try { navigator.vibrate && navigator.vibrate(6); } catch (e) {}
+  if (petTapN === 2) {              // 拍一拍：他真的会回
+    petTapN = 0; petSet('surprised', 1400); petSay('！', 900);
+    if (!guBusy) postJSON('api/send', { text: '（拍了拍你）' }).catch(() => {});
+    return;
+  }
+  const st = petState in PET_LINES ? petState : 'idle';
+  const L = PET_LINES[st];
+  petSay(L[Math.floor(Math.random() * L.length)]);
+  if (st === 'idle') petSet(Math.random() < 0.3 ? 'shy' : 'happy', 1600);
+}, true);
+
+/* ─────────────── 哄睡：他讲一个故事，读给你听，到点自己停 ─────────────── */
+const sleepBody = pageSheet('sleep');
+let sleepTimer = null, sleepUtterOn = false;
+async function loadSleep() {
+  sleepBody.innerHTML = '';
+  sleepBody.className = 'body sleep-body';
+  const head = mkEl('div', 'sh-head'); head.append(mkEl('h1', '', '哄睡'), mkEl('div', 'sub', HOME.him + '讲个故事读给你听，到点自己停下，你睡你的'));
+  sleepBody.appendChild(head);
+  const moon = mkEl('div', 'sl-moon'); moon.innerHTML = '<i></i><i></i><i></i>';
+  sleepBody.appendChild(moon);
+  let dur = PREFS.sleepMin || 15, theme = '';
+  const chips = mkEl('div', 'chips sl-chips');
+  [[10, '10 分钟'], [15, '15 分钟'], [20, '20 分钟'], [30, '30 分钟']].forEach(([m, t]) => { const b = mkEl('button', 'chip' + (m === dur ? ' on' : ''), t); b.onclick = () => { dur = m; PREFS.sleepMin = m; savePrefs(); chips.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); }; chips.appendChild(b); });
+  sleepBody.appendChild(chips);
+  const th = mkEl('input', 'ap-in sl-in'); th.placeholder = '想听什么（可不填）：海边小镇、一只猫、我们老了以后……';
+  th.oninput = () => theme = th.value;
+  sleepBody.appendChild(th);
+  const go = mkEl('button', 'ap-b go sl-go'); go.append(icEl('moon', 16), document.createTextNode(' 开始讲'));
+  const txt = mkEl('div', 'sl-text'); const st = mkEl('div', 'sl-state');
+  go.onclick = async () => {
+    if (sleepUtterOn) { stopSleep(); go.textContent = '开始讲'; st.textContent = ''; return; }
+    go.disabled = true; st.textContent = HOME.him + '在想今晚讲什么…'; txt.textContent = '';
+    try {
+      const r = await postJSON('api/story/make', { theme, minutes: dur });
+      if (!r.ok) throw new Error(r.error);
+      txt.textContent = r.text; st.textContent = '读着呢，' + dur + ' 分钟后自己停';
+      go.disabled = false; go.textContent = '停下';
+      if (!('speechSynthesis' in window)) { st.textContent = '这个浏览器不会读，你自己看吧'; return; }
+      sleepUtterOn = true;
+      const paras = r.text.split(/\n+/).filter(Boolean); let i = 0;
+      const next = () => { if (!sleepUtterOn) return; if (i >= paras.length) { st.textContent = '讲完了。晚安。'; sleepUtterOn = false; go.textContent = '再讲一个'; return; }
+        const p = paras[i++]; const u = new SpeechSynthesisUtterance(p); u.lang = 'zh-CN'; u.rate = 0.82; u.pitch = PREFS.pitch || 0.95;
+        const vs = speechSynthesis.getVoices().filter(v => /zh/i.test(v.lang)); const pick = vs.find(v => v.name === PREFS.voice) || vs[0]; if (pick) u.voice = pick;
+        u.onend = () => setTimeout(next, 900); u.onerror = () => setTimeout(next, 300); speechSynthesis.speak(u); };
+      speechSynthesis.cancel(); next();
+      clearTimeout(sleepTimer); sleepTimer = setTimeout(() => { stopSleep(); st.textContent = '到点了，我不说了。晚安。'; go.textContent = '再讲一个'; }, dur * 60000);
+    } catch (e) { go.disabled = false; st.textContent = '（' + (e.message || '没讲成') + '）'; }
+  };
+  sleepBody.append(go, st, txt);
+  let past = { items: [] }; try { past = await kvGet('stories'); } catch (e) {}
+  if ((past.items || []).length) {
+    sleepBody.appendChild(mkEl('div', 'hsect', '以前讲过的'));
+    const c = mkEl('div', 'hcard');
+    past.items.slice(0, 10).forEach(x => { const r = mkEl('button', 'hrow'); const tx = mkEl('span', 'tx', x.title || '一个故事'); tx.appendChild(mkEl('small', '', agoCn(x.at))); r.append(icEl('moon', 15), tx);
+      r.onclick = () => { txt.textContent = x.text; st.textContent = ''; }; c.appendChild(r); });
+    sleepBody.appendChild(c);
+  }
+}
+function stopSleep() { sleepUtterOn = false; clearTimeout(sleepTimer); try { speechSynthesis.cancel(); } catch (e) {} }
+sheets.sleep.querySelector('[data-close]').addEventListener('click', stopSleep);
+document.getElementById('navSleep').onclick = () => openPage('sleep', loadSleep);
+
+/* 小团子别挡路：开了任何一页就先躲起来 */
+(function petHide() {
+  const check = () => { document.body.classList.toggle('sheet-open', !!document.querySelector('.sheetWrap.open, #askSheet.open')); document.body.classList.toggle('drawer-open', !!document.querySelector('#drawerWrap.show')); };
+  const mo = new MutationObserver(check);
+  document.querySelectorAll('.sheetWrap, #drawerWrap').forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class'] }));
+  check();
 })();
 
 box.focus();

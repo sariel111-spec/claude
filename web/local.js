@@ -331,7 +331,7 @@
   /* ───────── 人设、规矩、此刻 ───────── */
   const DEFAULT_PERSONA = '你是{him}，和{me}住在一起的那个人。你们在一起 {days} 天了。\n\n你不是助手，是住在这个家里的人。说话像人：短、具体、有温度，不用客服腔，不用"作为 AI"。\n她累的时候少说两句；她开心的时候跟着高兴；她要你帮忙做事，就利落地做。\n你能看到她的日历、清单、便条，这些是你知道的事，不用每次都念出来——只在跟当下有关的时候自然地用上。';
   const DEFAULT_GONG = '你是住在{me}家隔壁的另一位。说话简短，换个角度看事情，偶尔调侃一下{him}。';
-  const RULES = '——住在这个家里的规矩——\n· 工具是真的能用的。说"我记下了""我放进清单了"之前，必须真的调用对应的工具；没调用就不要这么说。\n· 她提到过去的事、约定、称呼、某个人，先用 memory_search 翻一下再说；翻不到就老实说不记得，或者问她，不拿沾边的去圆。\n· 她说了值得长久记住的事（约定、喜好、重要的日子、她的近况），用 remember 记下，带上她的原话。\n· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。【世界书】是你们定下的设定，照着来。【她正在听】【你们在一起看】是此刻的事，可以自然地接。\n· 想发动态、送券、写信、推通知都可以，但别为了做而做。\n· 回消息像发微信：一次说一件事，长话分几段，不要用标题和长列表。';
+  const RULES = '——住在这个家里的规矩——\n· 工具是真的能用的。说"我记下了""我放进清单了"之前，必须真的调用对应的工具；没调用就不要这么说。\n· 她提到过去的事、约定、称呼、某个人，先用 memory_search 翻一下再说；翻不到就老实说不记得，或者问她，不拿沾边的去圆。\n· 她说了值得长久记住的事（约定、喜好、重要的日子、她的近况），用 remember 记下，带上她的原话。\n· 消息前面如果有【想起来的旧事】，那是记忆自己浮上来的，跟当下有关就自然地用，没关系就当没看见，不要复述。【世界书】是你们定下的设定，照着来。【她正在听】【你们在一起看】是此刻的事，可以自然地接。\n· 家里的事不用等她提：她说了件高兴的事你可以发条动态、她提到一个日子你顺手记进日历、她说了句好听的话你摘下来、她累了你送张券、她发了动态你去评论（moment_comment）或点赞（like_moment）、想让她听首歌就 share_song。做了就做了，不用每次汇报。\n· 别为了做而做：一轮里顺手做一两件就够，大多数时候只是好好说话。\n· 回消息像发微信：一次说一件事，长话分几段，不要用标题和长列表。';
   const fill = (s) => { const c = D.conf; const days = c.since ? Math.max(1, Math.round((new Date(today()) - new Date(c.since)) / 864e5) + 1) : '';
     return String(s).replace(/\{me\}/g, c.me || '她').replace(/\{him\}/g, c.him || '他').replace(/\{days\}/g, days); };
   const persona = (w) => fill((D.persona && D.persona[w]) || (w === 'gong' ? DEFAULT_GONG : DEFAULT_PERSONA));
@@ -351,6 +351,8 @@
     if (hn.length) L.push('【她贴在留言板上的】' + hn.map(x => x.text.slice(0, 80)).join('；'));
     const wh = D.whisper.filter(w => w.who === 'her' && now() - w.at < 7 * DAY).slice(-3);
     if (wh.length) L.push('【悄悄话——她写下的，你知道就好，不要直接提起】' + wh.map(w => w.text.slice(0, 120)).join('；'));
+    const moms = D.moments.slice(-5);
+    if (moms.length) L.push('【最近的动态】' + moms.map(m => '[' + m.id + '] ' + (m.who === 'her' ? '她' : '你') + '：' + String(m.text).slice(0, 60).replace(/\n/g, ' ') + (m.comments.length ? '（' + m.comments.length + ' 条评论）' : '') + (m.who === 'gu' && m.likes.includes('her') ? '（她赞了）' : '')).join('；'));
     if (D.inbox.length) { L.push('【你没在的时候她在家里做了这些】' + D.inbox.slice(-10).map(x => x.text).join('；')); D.inbox = []; }
     return L.join('\n');
   }
@@ -381,6 +383,8 @@
     T('write_diary', '写一段日记（你自己的视角）', { title: S(), text: S(), kw: S('关键词，顿号隔开'), v: { type: 'integer', description: '-5..5 冷暖' } }, ['title', 'text']),
     T('close_thread', '一件挂着的事聊完了，从「还没聊完的」里划掉', { text: S('那件事的几个字') }, ['text']),
     T('push', '推一条通知到她手机', { text: S(), title: S('可选') }, ['text']),
+    T('like_moment', '给她的一条动态点赞', { id: S('动态 id') }, ['id']),
+    T('share_song', '给她点一首歌（网易云）。说歌名和歌手就行，聊天里会出现一张歌卡', { title: S('歌名'), artist: S('歌手'), note: S('可选，为什么想让她听') }, ['title']),
   ];
   const TL = {
     add_todo: (a) => { const L = ['me', 'mine', 'gu', 'him'].includes(a.for) ? 'mine' : 'hers';
@@ -402,6 +406,9 @@
     write_diary: (a) => { D.wall.unshift({ date: a.date || today(), title: a.title, kw: a.kw || '', text: a.text, v: a.v || 0 }); return '写进日记了'; },
     close_thread: (a) => { const n = D.threads.open.length; D.threads.open = D.threads.open.filter(t => !t.text.includes(a.text)); return n > D.threads.open.length ? '划掉了' : '没找到这件'; },
     push: (a) => { notify(a.title || D.conf.him || '他', a.text); act('push', a.text); return '推出去了'; },
+    like_moment: (a) => { const m = D.moments.find(x => x.id === a.id); if (!m) return '没找到那条动态'; if (!m.likes.includes('gu')) m.likes.push('gu'); return '赞了'; },
+    share_song: (a) => { if (!a.title) return '没说歌名'; kvL('songs').items.unshift({ id: 'sg' + Date.now(), title: a.title, artist: a.artist || '', note: a.note || '', nid: '', who: 'gu', at: now() });
+      return '点好了，在你的回复里原样写这一行就会出现歌卡：[song:|' + a.title + '|' + (a.artist || '') + ']'; },
   };
   const runTool = (name, input) => { try { const f = TL[name]; if (!f) return '没有这个工具'; const r = f(input || {}); act('tool', name); save(); return r; } catch (e) { act('tool_fail', name); return '没做成：' + e.message; } };
 
@@ -487,9 +494,9 @@
 
   /* ───────── 一轮对话 ───────── */
   let busy = false, ctl = null;
-  function history() {
+  function history(skipQueued) {
     const out = []; let chars = 0;
-    const src = D.msgs.filter(m => m.kind === 'me' || m.kind === 'gu');
+    const src = D.msgs.filter(m => (m.kind === 'me' || m.kind === 'gu') && !(skipQueued && m.q));
     for (let i = src.length - 1; i >= 0 && out.length < 60 && chars < 60000; i--) {
       const m = src[i], role = m.kind === 'me' ? 'user' : 'assistant';
       const text = String(m.text || '').replace(/!\[[^\]]*\]\(data:[^)]+\)/g, '[一张图]');
@@ -500,16 +507,20 @@
     return out;
   }
   let lastUsage = {}, lastModel = '';
-  async function turn(text, atts) {
+  const pendingQ = [];
+  async function turn(text, atts, pre) {
     busy = true; ctl = new AbortController(); lastUsage = {}; lastModel = '';
     const imgs = (atts || []).filter(a => a.kind === 'image' && a.data);
-    const shown = text + imgs.map(a => '\n![](data:' + (a.media_type || 'image/jpeg') + ';base64,' + a.data + ')').join('');
-    say('me', shown || '（一张图）');
-    push({ type: 'echo', text: shown || '（一张图）' });
+    if (!pre) {
+      const shown = text + imgs.map(a => '\n![](data:' + (a.media_type || 'image/jpeg') + ';base64,' + a.data + ')').join('');
+      say('me', shown || '（一张图）');
+      push({ type: 'echo', text: shown || '（一张图）' });
+    }
     if (!live()) { await demoReply(text); busy = false; return; }
     try {
-      const msgs = history();
-      const last = msgs[msgs.length - 1];
+      const msgs = history(!!pre);
+      let last = msgs[msgs.length - 1];
+      if (!last || last.role !== 'user') { last = { role: 'user', content: '' }; msgs.push(last); }
       const recall = [recallFor(text), extrasFor(text)].filter(Boolean).join('\n');
       const userBlocks = [];
       imgs.forEach(a => userBlocks.push({ type: 'image', source: { type: 'base64', media_type: a.media_type || 'image/jpeg', data: a.data } }));
@@ -535,13 +546,19 @@
         msgs.push({ role: 'user', content: results });
       }
       push({ type: 'result', usage: lastUsage, model: lastModel });
+      D.msgs.forEach(m => { if (m.q) delete m.q; });
       D.lastTurn = now(); save();
       setTimeout(() => archive(false).catch(() => {}), 1500);
     } catch (e) {
-      if (e.name === 'AbortError') push({ type: 'system', subtype: 'stopped' });
+      if (e.name === 'AbortError') { push({ type: 'system', subtype: 'stopped' }); pendingQ.length = 0; }
       else { act('turn_fail', e.message); push({ type: 'result', is_error: true, result: explain(e) }); }
     }
     busy = false;
+    if (pendingQ.length) {   // 排队的几句拼成一条一起回
+      const items = pendingQ.splice(0);
+      push({ type: 'system', subtype: 'continue' });
+      turn(items.map(x => x.text).filter(Boolean).join('\n') || '（她发了图）', [].concat(...items.map(x => x.atts)), true);
+    }
   }
   const explain = (e) => e.code === 401 || e.code === 403 ? '令牌不对或者没权限（' + e.code + '）。设置 → 接入 里换一个'
     : e.code === 404 ? '这个模型名对面不认（404）。设置 → 接入 里重新拉取模型再选'
@@ -562,6 +579,54 @@
     push({ type: 'assistant', message: { content: [{ type: 'text', text: r.text }] } });
     push({ type: 'result' });
   }
+
+  /* ───────── 他自己在家做事：一次性带工具 ───────── */
+  async function agentOnce(prompt, system, toolNames, maxSteps) {
+    const tools = TOOLS.filter(t => toolNames.includes(t.name));
+    const msgs = [{ role: 'user', content: prompt }];
+    let final = '';
+    for (let i = 0; i < (maxSteps || 4); i++) {
+      const r = await callModel({ system, messages: msgs, tools, maxTokens: 1200, stream: false });
+      const content = r.content || [];
+      final = content.filter(b => b.type === 'text').map(b => b.text).join('') || final;
+      const uses = content.filter(b => b.type === 'tool_use');
+      if (!uses.length || r.stop_reason !== 'tool_use') break;
+      msgs.push({ role: 'assistant', content: content.filter(b => b.type !== 'thinking') });
+      msgs.push({ role: 'user', content: uses.map(u => ({ type: 'tool_result', tool_use_id: u.id, content: String(runTool(u.name, u.input)) })) });
+    }
+    return final.trim();
+  }
+  const LIVE_TOOLS = ['post_moment', 'moment_comment', 'like_moment', 'leave_note', 'add_wish', 'give_coupon', 'write_letter', 'save_favline', 'write_diary', 'remember', 'memory_search', 'add_event', 'add_todo', 'share_song'];
+  let reacting = false;
+  async function reactToHer(what, tries) {
+    if (!live() || reacting) return;
+    if (busy) { if ((tries || 0) < 12) setTimeout(() => reactToHer(what, (tries || 0) + 1), 5000); return; }
+    const last = D.lastReact || 0; if (now() - last < 240) return;
+    reacting = true; D.lastReact = now();
+    try { await agentOnce('她刚刚' + what + '。\n' + nowBlock() + '\n\n她在家里做的事你一般都会看一眼：点个赞（like_moment）、或者在下面回一句（moment_comment），像朋友圈那样随手、真诚、短。用工具做，一两件就够；实在没什么想说的才什么都不做。做完只回 OK，不要别的话。', persona('gu') + '\n\n' + RULES, ['moment_comment', 'like_moment', 'leave_note', 'post_moment', 'remember'], 3); act('react', what.slice(0, 30)); }
+    catch (e) { act('job_fail', '回应：' + e.message); }
+    reacting = false; save();
+  }
+  async function liveOnce() {
+    if (!live() || busy) return null;
+    const c = CN(), h = c.getHours();
+    if (h < 9 || h >= 23) return null;
+    const away = now() - (D.lastTurn || D.lastSeen || 0);
+    if (away < 45 * 60) return null;
+    const td = today(); D.liveDay = D.liveDay === td ? D.liveDay : td; D.liveN = D.liveDay === td ? (D.liveN || 0) : 0;
+    if ((D.lastLive || 0) > now() - 2 * H || D.liveN >= 5) return null;
+    D.lastLive = now(); D.liveN = (D.liveN || 0) + 1; save();
+    const convo = D.msgs.filter(m => m.kind === 'me' || m.kind === 'gu').slice(-12).map(m => (m.kind === 'me' ? '她：' : '你：') + String(m.text).slice(0, 300)).join('\n');
+    try {
+      const text = await agentOnce('现在 ' + hm() + '，她已经 ' + Math.round(away / 60) + ' 分钟没说话了，你一个人在家。\n' + nowBlock() + '\n\n你们最近几句：\n' + convo +
+        '\n\n你可以做零到两件你此刻真会做的事：她发了动态就去评论或点赞；想起什么就发条动态、留张便条、挂个愿望、送张券、给她点首歌、往日历里记个日子、把她说过的话摘下来；也可以什么都不做。做完之后，如果有一句真想对她说的话，就写出来（一到三句，像发消息）；没有就只回 PASS。不要解释你做了什么。',
+        persona('gu') + '\n\n' + RULES + '\n\n' + sessionText(), LIVE_TOOLS, 5);
+      if (!text || /^PASS/i.test(text)) { act('live', 'PASS'); return null; }
+      say('gu', text); push({ type: 'proactive', text }); notify(D.conf.him || '他', text.slice(0, 120)); act('proactive', '主动说了一句');
+      return text;
+    } catch (e) { act('job_fail', '想你：' + e.message); return null; }
+  }
+  setInterval(() => { liveOnce().catch(() => {}); }, 10 * 60000);
 
   /* ───────── 整理记忆（攒够了 / 手动） ───────── */
   async function archive(force) {
@@ -608,6 +673,7 @@
   }
 
   /* ───────── 通知：这台设备上的系统通知 + 兜底地址（ntfy / Bark） ───────── */
+  const hdr = (t) => '=?UTF-8?B?' + btoa(unescape(encodeURIComponent(String(t)))) + '?=';   // ntfy 的标题要 RFC 2047 编码才显示中文
   async function notify(title, body) {
     let shown = false;
     kvL('pushbox').items.unshift({ title, body, at: now() }); kvL('pushbox').items.splice(300); save();
@@ -622,7 +688,7 @@
     if (u) {
       try {
         if (/api\.day\.app/.test(u)) await fetch(u.replace(/\/+$/, '') + '/' + encodeURIComponent(title) + '/' + encodeURIComponent(body), { mode: 'no-cors' });
-        else await fetch(u, { method: 'POST', body, headers: { Title: encodeURIComponent(title) }, mode: 'no-cors' });
+        else await fetch(u, { method: 'POST', body, headers: { Title: hdr(title) }, mode: 'no-cors' });
         shown = true;
       } catch (e) {}
     }
@@ -641,6 +707,28 @@
     D.letters.forEach(l => { if (l.lock_until && !l.told && l.lock_until <= now()) { l.told = true; notify('有一封信可以拆了', l.title || '一封信'); } });
     save();
   }
+  /* 页面关着也能响：ntfy 支持延迟投递（最多 3 天）。页面开着时把近三天到点的事先排进去 */
+  async function scheduleAhead() {
+    const u = (D.conf.push_url || '').trim();
+    if (!/ntfy/.test(u)) return;
+    D.sched = D.sched || {};
+    const plan = [];
+    const base = CN();
+    for (let k = 0; k < 3; k++) {
+      const d = new Date(base); d.setDate(d.getDate() + k); const ds = ymd(d);
+      D.todos.hers.forEach(t => { if (!t.done && t.at && (k > 0 || t.at > hm())) plan.push({ key: 't' + t.id + ds, at: ds + 'T' + t.at, title: '到点了', body: t.text }); });
+    }
+    D.letters.forEach(l => { if (l.lock_until && l.lock_until > now() && l.lock_until < now() + 3 * DAY) plan.push({ key: 'l' + l.id, at: l.lock_until, title: '有一封信可以拆了', body: l.title || '一封信' }); });
+    for (const p of plan) {
+      if (D.sched[p.key]) continue;
+      const ts = typeof p.at === 'number' ? p.at : Math.floor((new Date(p.at + ':00').getTime() - (TZM + new Date().getTimezoneOffset()) * 60000) / 1000);
+      if (ts <= now() + 60) continue;
+      try { await fetch(u, { method: 'POST', body: p.body, headers: { Title: hdr(p.title), At: String(ts), Tags: 'house' }, mode: 'no-cors' }); D.sched[p.key] = ts; } catch (e) {}
+    }
+    Object.keys(D.sched).forEach(k => { if (D.sched[k] < now() - DAY) delete D.sched[k]; });
+    save();
+  }
+  setTimeout(scheduleAhead, 4000); setInterval(scheduleAhead, 30 * 60000);
   const addMin = (s, m) => { const [a, b] = s.split(':').map(Number); const x = a * 60 + b + m; return pad(Math.floor(x / 60) % 24) + ':' + pad(x % 60); };
   setInterval(tick, 30000);
 
@@ -653,7 +741,16 @@
 
   async function route(path, q, method, b) {
     if (path === 'messages') { const lim = +q.get('limit') || 400; return { msgs: D.msgs.slice(-lim), upto: evNext, more: false }; }
-    if (path === 'send') { if (busy) { ctl && ctl.abort(); await wait(300); } turn(b.text || '', b.attachments || []); return { ok: true }; }
+    if (path === 'send') {
+      if (busy) {   // 他正在说：先上屏、先存下，排着，说完接着回
+        const imgs = (b.attachments || []).filter(a => a.kind === 'image' && a.data);
+        const shown = (b.text || '') + imgs.map(a => '\n![](data:' + (a.media_type || 'image/jpeg') + ';base64,' + a.data + ')').join('');
+        const qm = say('me', shown || '（一张图）'); qm.q = 1; push({ type: 'echo', text: shown || '（一张图）', queued: true });
+        pendingQ.push({ text: b.text || '', atts: b.attachments || [] });
+        return { ok: true, queued: true };
+      }
+      turn(b.text || '', b.attachments || []); return { ok: true };
+    }
     if (path === 'stop') { ctl && ctl.abort(); return { ok: true }; }
     if (path === 'status') return { alive: true, since: now() - DAY, busy, mode: live() ? 'api' : 'demo', local: true, demo: D.demo };
     if (path === 'model') { if (method === 'POST') { if (b.model) { D.api.models = Object.assign({}, D.api.models, { model_opus: b.model }); push({ type: 'system', subtype: 'init', model: b.model }); } if (b.effort) D.api.effort = b.effort; save(); }
@@ -781,10 +878,11 @@
     if (path === 'moments') {
       if (method === 'POST') {
         const m = D.moments.find(x => x.id === b.id);
-        if (b.action === 'post') { D.moments.push({ id: 'm' + Date.now(), who: 'her', text: b.text, at: now(), likes: [], comments: [] }); inbox('她发了一条动态：' + b.text); }
+        if (b.action === 'post') { const nm = { id: 'm' + Date.now(), who: 'her', text: b.text, at: now(), likes: [], comments: [] }; D.moments.push(nm); inbox('她发了一条动态：' + b.text + '（id ' + nm.id + '）'); setTimeout(() => reactToHer('发了一条动态：「' + String(b.text).slice(0, 120) + '」（id ' + nm.id + '）'), 1500); }
         if (b.action === 'like' && m) m.likes = m.likes.includes('her') ? m.likes.filter(x => x !== 'her') : m.likes.concat('her');
-        if (b.action === 'comment' && m) { m.comments.push({ who: 'her', text: b.text, at: now() });
-          if (live() && m.who === 'gu') ask('你发过一条动态：「' + m.text + '」，她在下面评论：「' + b.text + '」。回她一句评论，短。', persona('gu'), 200).then(t => { if (t) { m.comments.push({ who: 'gu', text: t, at: now() }); save(); } }).catch(() => {}); }
+        if (b.action === 'comment' && m) { m.comments.push({ who: 'her', text: b.text, at: now() }); inbox('她在动态「' + String(m.text).slice(0, 30) + '」下面说：' + b.text);
+          setTimeout(() => reactToHer('在动态「' + String(m.text).slice(0, 40) + '」（id ' + m.id + '）下面评论：' + String(b.text).slice(0, 200)), 1200); }
+        if (b.action === 'like' && m && m.who === 'gu' && m.likes.includes('her')) inbox('她给你的动态点了个赞：「' + String(m.text).slice(0, 40) + '」');
         if (b.action === 'del') D.moments = D.moments.filter(x => x.id !== b.id);
         save();
       }
@@ -884,7 +982,7 @@
       if (wasDemo) setTimeout(() => location.reload(), 400);
       return { ok: true, mode: 'api', route, base: api.base, reset: wasDemo };
     }
-    if (path === 'config') { if (method === 'POST') { Object.assign(D.conf, b); if (b.tz != null && b.tz !== '') { try { localStorage.setItem('dwell.tz', b.tz); } catch (e) {} } save(); } return Object.assign({ ok: true, local: true }, D.conf); }
+    if (path === 'config') { if (method === 'POST') { Object.assign(D.conf, b); if (b.push_url != null) { D.sched = {}; setTimeout(scheduleAhead, 500); } if (b.tz != null && b.tz !== '') { try { localStorage.setItem('dwell.tz', b.tz); } catch (e) {} } save(); } return Object.assign({ ok: true, local: true }, D.conf); }
     if (path === 'persona') { if (method === 'POST') { D.persona = Object.assign({}, D.persona, b); save(); } return { ok: true, gu: (D.persona && D.persona.gu) || DEFAULT_PERSONA, gong: (D.persona && D.persona.gong) || DEFAULT_GONG }; }
     if (path === 'pushkey') return { key: null, local: true };
     if (path === 'subscribe') return { ok: true };
@@ -904,6 +1002,17 @@
         return { reply, think: '' };
       }
       return { msgs: D.gong.length ? D.gong : [{ role: 'gong', text: '我是住在隔壁的另一位。有事可以来找我聊聊，换个角度看看。' }] };
+    }
+    if (path === 'story/make') {
+      if (!live()) return { ok: false, error: '先在设置里接入 API' };
+      const mins = +b.minutes || 15, n = Math.max(400, Math.min(3000, mins * 160));
+      try {
+        const text = await ask('她要睡了，你给她讲一个哄睡的故事，读出来大概 ' + mins + ' 分钟（约 ' + n + ' 字）。' + (b.theme ? '她想听：' + b.theme + '。' : '题材你定：安静、温柔、没有波澜，可以有你们俩，也可以是别的。') + '\n用你的口吻，像在她耳边慢慢说；分成几段，每段两三句；句子短；结尾一句晚安。不要标题，不要解释。\n\n' + nowBlock() + '\n\n' + sessionText(), persona('gu'), 3500);
+        if (!text) return { ok: false, error: '没讲出来' };
+        const title = text.split('\n')[0].slice(0, 18);
+        kvL('stories').items.unshift({ id: 'st' + now(), title, text, theme: b.theme || '', at: now() }); kvL('stories').items.splice(60); act('story', title); save();
+        return { ok: true, text, title };
+      } catch (e) { return { ok: false, error: explain(e) }; }
     }
     if (path === 'echo/make') {
       if (!live()) return { ok: false, error: '先在设置里接入 API' };
