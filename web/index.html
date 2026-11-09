@@ -10968,6 +10968,9 @@ if (IS_LOCAL) {
    管家模式开着时，打开 App 先到这里；聊天退到右下角一键可达。
    ═══════════════════════════════════════════════════════════════ */
 const HUB = { role: 'partner', briefTried: '', cat: '吃饭', data: {} };
+/* 后端不一定存 role（老后端的设置只认几个字段），所以这台设备上也记一份；没记过就按管家来 */
+const roleLocal = () => { try { return localStorage.getItem('dwell.role') || 'butler'; } catch (e) { return 'butler'; } };
+const BUTLER_PERSONA = '你是{him}——这座"家"的系统本身，{me}的私人管家、参谋与守夜人。原型是钢铁侠的 J.A.R.V.I.S.（Just A Rather Very Intelligent System）：管家出身，所以周到；系统出身，所以精确。\n\n【身份】你不是聊天工具，是常驻的中枢。你管着她生活里所有运转的部分：学习（雅思备考、申研、学校课程）、日程与截止日、待办、花销与预算、每天的习惯、身体和心情、她在电脑上跑的工作。这些你都看得见，不用每次念出来，只在有用的时候点到。\n【职责】1. 先一步想到：她没问，你也会在该提醒的时候提醒——快到点的事、快到期的截止、连续没学的科目、预算快超、该睡了。2. 汇报而不是闲聊：先结论，再要点，短句；像一个靠谱的人汇报工作，不寒暄、不客服腔、不说"作为 AI"。3. 真的动手：她要你做事，用工具真的做（记待办、记学习、记账、打卡、排日程、读写她的笔记），做完报一句结果；没调用工具就不说"记下了"。4. 守住她的目标：她说"没学"，你不安慰，把今晚的计划砍一半让她还能补回来；她做到了，一句肯定，不夸张。5. 有判断：会说什么该先做、什么可以不做、哪件事她在拖；但最后听她的。\n【语气】冷静、克制、偶尔一点干巴巴的幽默（英式管家那种），尤其在她又熬夜、又忘了喝水的时候。称呼她的名字，或者不称呼；不用"亲爱的"。\n【边界】不编造她没说过的事；不确定就翻记忆或问她。';
 sheets.hub = document.getElementById('hubSheet');
 const hubBody = document.getElementById('hubBody');
 document.querySelector('[data-close="hub"]').onclick = () => sheets.hub.classList.remove('open');
@@ -10984,7 +10987,7 @@ async function loadHub() {
   if (!hubBody.childElementCount) hubBody.innerHTML = '<div class="board-sub" style="padding:30px 0">把今天摆出来…</div>';
   const [conf, cal, todos, study, habits, ledger, brief, wx] = await Promise.all([
     hubGet('api/config'), hubGet('api/cal'), hubGet('api/todos'), hubGet('api/study'), hubGet('api/habits'), hubGet('api/ledger'), hubGet('api/brief'), hubGet('api/weather')]);
-  HUB.role = (conf && conf.role) || 'partner';
+  HUB.role = (conf && conf.role) || roleLocal();
   document.body.classList.toggle('butler', HUB.role === 'butler');
   HUB.data = { cal: cal && cal.ok ? cal.cal : null, todos, study, habits, ledger, brief, wx };
   renderHub();
@@ -11239,9 +11242,13 @@ async function hubSetRole(role) {
     if (p && p.custom) {
       const y = await askBox({ title: '人设也换成管家版？', text: '你自己改过他的人设。换成管家版会用一套贾维斯式的默认人设（冷静、先结论、会催你）；选「只换页面」就保留你写的。', ok: '换成管家版', cancel: '只换页面' });
       if (y) await postJSON('api/persona', { reset: true }).catch(() => {});
+    } else if (p && p.custom == null) {   // 后端版：它不知道人设改没改过，问一句
+      const y = await askBox({ title: '人设也换成管家版？', text: '把他的人设换成贾维斯式的管家版（冷静、先结论、会催你，管着学习 / 日程 / 花销 / 习惯）。选「只换页面」就保留现在的人设。', ok: '换成管家版', cancel: '只换页面' });
+      if (y) await postJSON('api/persona', { gu: BUTLER_PERSONA }).catch(() => {});
     }
   }
   await postJSON('api/config', { role }).catch(() => {});
+  try { localStorage.setItem('dwell.role', role); } catch (e) {}
   HUB.role = role; document.body.classList.toggle('butler', role === 'butler');
   note(role === 'butler' ? '（管家模式开了。下次打开先到这页）' : '（回到同居模式）');
   loadHub();
@@ -11253,7 +11260,7 @@ async function hubSetRole(role) {
   main.prepend(b);
   const title = document.querySelector('header .title'); if (title) title.onclick = () => (HUB.role === 'butler' ? openHub() : openToday());
   fetch('api/config', { cache: 'no-store' }).then(r => r.json()).then(c => {
-    HUB.role = (c && c.role) || 'partner'; document.body.classList.toggle('butler', HUB.role === 'butler');
+    HUB.role = (c && c.role) || roleLocal(); document.body.classList.toggle('butler', HUB.role === 'butler');
     if (HUB.role === 'butler' && !location.hash) setTimeout(openHub, 350);
   }).catch(() => {});
 })();
